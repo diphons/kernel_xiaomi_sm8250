@@ -70,6 +70,7 @@
 #define IDLE_TIMEOUT_MS_DEFAULT		100
 
 static DEFINE_MUTEX(msm_release_lock);
+
 atomic_t resume_pending;
 wait_queue_head_t resume_wait_q;
 
