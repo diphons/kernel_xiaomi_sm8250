@@ -173,6 +173,11 @@ struct inodes_stat_t {
 #define MOVE_MOUNT__MASK		0x00000077
 
 /*
+ * fsopen() flags.
+ */
+#define FSOPEN_CLOEXEC		0x00000001
+
+/*
  * Structure for FS_IOC_FSGETXATTR[A] and FS_IOC_FSSETXATTR.
  */
 struct fsxattr {
