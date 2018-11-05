@@ -85,6 +85,7 @@ extern void __mnt_drop_write_file(struct file *);
 int path_umount(struct path *path, int flags);
 #endif
 
+extern void dissolve_on_fput(struct vfsmount *);
 /*
  * fs_struct.c
  */
