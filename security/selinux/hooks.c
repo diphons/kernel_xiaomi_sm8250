@@ -2949,13 +2949,13 @@ out_bad_option:
 	goto out_free_opts;
 }
 
-static int selinux_sb_kern_mount(struct super_block *sb, int flags, void *data)
+static int selinux_sb_kern_mount(struct super_block *sb, int flags,
+				 struct security_mnt_opts *opts)
 {
 	const struct cred *cred = current_cred();
 	struct common_audit_data ad;
-	int rc;
+	int rc = selinux_set_mnt_opts(sb, opts, 0, NULL);
 
-	rc = superblock_doinit(sb, data);
 	if (rc)
 		return rc;
 
