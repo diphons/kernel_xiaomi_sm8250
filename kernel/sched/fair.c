@@ -8327,7 +8327,7 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 	int want_affine = 0;
 	int sync = (wake_flags & WF_SYNC) && !(current->flags & PF_EXITING);
 
-	if (static_branch_unlikely(&sched_energy_present)) {
+	if (sched_energy_enabled()) {
 		rcu_read_lock();
 #ifdef CONFIG_PACKAGE_RUNTIME_INFO
 		wake_render(p);
@@ -8344,7 +8344,7 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 	if (sd_flag & SD_BALANCE_WAKE) {
 		record_wakee(p);
 
-		if (static_branch_unlikely(&sched_energy_present)) {
+		if (sched_energy_enabled()) {
 			if (uclamp_latency_sensitive(p) && !sched_feat(EAS_PREFER_IDLE) && !sync)
 				goto sd_loop;
 
@@ -9053,7 +9053,7 @@ int can_migrate_task(struct task_struct *p, struct lb_env *env)
 	/* Record that we found atleast one task that could run on dst_cpu */
 	env->flags &= ~LBF_ALL_PINNED;
 
-	if (static_branch_unlikely(&sched_energy_present)) {
+	if (sched_energy_enabled()) {
 		struct root_domain *rd = env->dst_rq->rd;
 
 		if ((rcu_dereference(rd->pd) && !sd_overutilized(env->sd)) &&
@@ -10635,7 +10635,7 @@ static struct sched_group *find_busiest_group(struct lb_env *env)
 	 */
 	update_sd_lb_stats(env, &sds);
 
-	if (static_branch_unlikely(&sched_energy_present)) {
+	if (sched_energy_enabled()) {
 		struct root_domain *rd = env->dst_rq->rd;
 
 		if (rcu_dereference(rd->pd) && !sd_overutilized(env->sd)) {
