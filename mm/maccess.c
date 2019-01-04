@@ -212,7 +212,7 @@ long probe_user_read(void *dst, const void __user *src, size_t size)
 	long ret = -EFAULT;
 	mm_segment_t old_fs = force_uaccess_begin();
 
-	if (access_ok(VERIFY_WRITE, src, size)) {
+	if (access_ok(src, size)) {
 		pagefault_disable();
 		ret = __copy_from_user_inatomic(dst, src, size);
 		pagefault_enable();
@@ -239,7 +239,7 @@ long probe_user_write(void __user *dst, const void *src, size_t size)
 	long ret = -EFAULT;
 	mm_segment_t old_fs = force_uaccess_begin();
 
-	if (access_ok(VERIFY_WRITE, dst, size)) {
+	if (access_ok(dst, size)) {
 		pagefault_disable();
 		ret = __copy_to_user_inatomic(dst, src, size);
 		pagefault_enable();

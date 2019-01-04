@@ -2635,7 +2635,7 @@ static int fastrpc_init_process(struct fastrpc_file *fl,
 		inbuf.filelen = init->filelen;
 		fl->pd = 1;
 
-		VERIFY(err, access_ok(0, (void __user *)init->file,
+		VERIFY(err, access_ok((void __user *)init->file,
 			init->filelen));
 		if (err)
 			goto bail;

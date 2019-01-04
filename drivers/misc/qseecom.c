@@ -1535,8 +1535,7 @@ static int qseecom_register_listener(struct qseecom_dev_handle *data,
 		pr_err("copy_from_user failed\n");
 		return ret;
 	}
-	if (!access_ok(VERIFY_WRITE, (void __user *)rcvd_lstnr.virt_sb_base,
-			rcvd_lstnr.sb_size))
+	if (!access_ok((void __user *)rcvd_lstnr.virt_sb_base, rcvd_lstnr.sb_size))
 		return -EFAULT;
 
 	ptr_svc = __qseecom_find_svc(data->listener.id);
@@ -2035,8 +2034,7 @@ static int qseecom_set_client_mem_param(struct qseecom_dev_handle *data,
 			req.ifd_data_fd, req.sb_len);
 		return -EFAULT;
 	}
-	if (!access_ok(VERIFY_WRITE, (void __user *)req.virt_sb_base,
-			req.sb_len))
+	if (!access_ok((void __user *)req.virt_sb_base, req.sb_len))
 		return -EFAULT;
 
 	ret = qseecom_vaddr_map(req.ifd_data_fd, &data->client.sb_phys,

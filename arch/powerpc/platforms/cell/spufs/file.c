@@ -609,7 +609,7 @@ static ssize_t spufs_mbox_read(struct file *file, char __user *buf,
 	if (len < 4)
 		return -EINVAL;
 
-	if (!access_ok(VERIFY_WRITE, buf, len))
+	if (!access_ok(buf, len))
 		return -EFAULT;
 
 	udata = (void __user *)buf;
@@ -717,7 +717,7 @@ static ssize_t spufs_ibox_read(struct file *file, char __user *buf,
 	if (len < 4)
 		return -EINVAL;
 
-	if (!access_ok(VERIFY_WRITE, buf, len))
+	if (!access_ok(buf, len))
 		return -EFAULT;
 
 	udata = (void __user *)buf;
@@ -856,7 +856,7 @@ static ssize_t spufs_wbox_write(struct file *file, const char __user *buf,
 		return -EINVAL;
 
 	udata = (void __user *)buf;
-	if (!access_ok(VERIFY_READ, buf, len))
+	if (!access_ok(buf, len))
 		return -EFAULT;
 
 	if (__get_user(wbox_data, udata))
@@ -1995,7 +1995,7 @@ static ssize_t spufs_mbox_info_read(struct file *file, char __user *buf,
 	u32 stat, data;
 	int ret;
 
-	if (!access_ok(VERIFY_WRITE, buf, len))
+	if (!access_ok(buf, len))
 		return -EFAULT;
 
 	ret = spu_acquire_saved(ctx);
@@ -2041,7 +2041,7 @@ static ssize_t spufs_ibox_info_read(struct file *file, char __user *buf,
 	u32 stat, data;
 	int ret;
 
-	if (!access_ok(VERIFY_WRITE, buf, len))
+	if (!access_ok(buf, len))
 		return -EFAULT;
 
 	ret = spu_acquire_saved(ctx);
@@ -2095,7 +2095,7 @@ static ssize_t spufs_wbox_info_read(struct file *file, char __user *buf,
 	u32 data[ARRAY_SIZE(ctx->csa.spu_mailbox_data)];
 	int ret, count;
 
-	if (!access_ok(VERIFY_WRITE, buf, len))
+	if (!access_ok(buf, len))
 		return -EFAULT;
 
 	ret = spu_acquire_saved(ctx);
@@ -2156,7 +2156,7 @@ static ssize_t spufs_dma_info_read(struct file *file, char __user *buf,
 	struct spu_dma_info info;
 	int ret;
 
-	if (!access_ok(VERIFY_WRITE, buf, len))
+	if (!access_ok(buf, len))
 		return -EFAULT;
 
 	ret = spu_acquire_saved(ctx);
@@ -2206,7 +2206,7 @@ static ssize_t __spufs_proxydma_info_read(struct spu_context *ctx,
 	if (len < ret)
 		return -EINVAL;
 
-	if (!access_ok(VERIFY_WRITE, buf, len))
+	if (!access_ok(buf, len))
 		return -EFAULT;
 
 	spufs_get_proxydma_info(ctx, &info);

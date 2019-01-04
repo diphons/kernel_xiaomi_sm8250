@@ -38,7 +38,7 @@
 	unsigned long __ao_end = __ao_a + __ao_b - !!__ao_b;	\
 	(get_fs().seg & (__ao_a | __ao_b | __ao_end)) == 0; })
 
-#define access_ok(type, addr, size)			\
+#define access_ok(addr, size)				\
 ({							\
 	__chk_user_ptr(addr);				\
 	__access_ok(((unsigned long)(addr)), (size));	\
