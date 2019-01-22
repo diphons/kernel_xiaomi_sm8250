@@ -757,7 +757,6 @@ struct opp_device *_add_opp_dev(const struct device *dev,
 				struct opp_table *opp_table)
 {
 	struct opp_device *opp_dev;
-	int ret;
 
 	opp_dev = kzalloc(sizeof(*opp_dev), GFP_KERNEL);
 	if (!opp_dev)
@@ -768,10 +767,7 @@ struct opp_device *_add_opp_dev(const struct device *dev,
 	list_add(&opp_dev->node, &opp_table->dev_list);
 
 	/* Create debugfs entries for the opp_table */
-	ret = opp_debug_register(opp_dev, opp_table);
-	if (ret)
-		dev_err(dev, "%s: Failed to register opp debugfs (%d)\n",
-			__func__, ret);
+	opp_debug_register(opp_dev, opp_table);
 
 	return opp_dev;
 }
@@ -1123,10 +1119,7 @@ int _opp_add(struct device *dev, struct dev_pm_opp *new_opp,
 	/* Get a reference to the OPP table */
 	_get_opp_table_kref(opp_table);
 
-	ret = opp_debug_create_one(new_opp, opp_table);
-	if (ret)
-		dev_err(dev, "%s: Failed to register opp to debugfs (%d)\n",
-			__func__, ret);
+	opp_debug_create_one(new_opp, opp_table);
 
 	if (!_opp_supported_by_regulators(new_opp, opp_table)) {
 		new_opp->available = false;
