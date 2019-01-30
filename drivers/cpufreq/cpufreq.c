@@ -19,6 +19,7 @@
 
 #include <linux/cpu.h>
 #include <linux/cpufreq.h>
+#include <linux/cpu_cooling.h>
 #include <linux/cpufreq_times.h>
 #include <linux/delay.h>
 #include <linux/device.h>
@@ -1354,6 +1355,10 @@ static int cpufreq_online(unsigned int cpu)
 	if (cpufreq_driver->ready)
 		cpufreq_driver->ready(policy);
 
+	if (IS_ENABLED(CONFIG_CPU_THERMAL) &&
+	    cpufreq_driver->flags & CPUFREQ_IS_COOLING_DEV)
+		policy->cdev = of_cpufreq_cooling_register(policy);
+
 	pr_debug("initialization complete\n");
 
 	return 0;
@@ -1439,6 +1444,12 @@ static int cpufreq_offline(unsigned int cpu)
 		}
 
 		goto unlock;
+	}
+
+	if (IS_ENABLED(CONFIG_CPU_THERMAL) &&
+	    cpufreq_driver->flags & CPUFREQ_IS_COOLING_DEV) {
+		cpufreq_cooling_unregister(policy->cdev);
+		policy->cdev = NULL;
 	}
 
 	if (cpufreq_driver->stop_cpu)
