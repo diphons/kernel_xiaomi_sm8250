@@ -302,6 +302,21 @@ out_put_clk:
 	return ret;
 }
 
+static int cpufreq_online(struct cpufreq_policy *policy)
+{
+	/* We did light-weight tear down earlier, nothing to do here */
+	return 0;
+}
+
+static int cpufreq_offline(struct cpufreq_policy *policy)
+{
+	/*
+	 * Preserve policy->driver_data and don't free resources on light-weight
+	 * tear down.
+	 */
+	return 0;
+}
+
 static int cpufreq_exit(struct cpufreq_policy *policy)
 {
 	struct private_data *priv = policy->driver_data;
@@ -334,6 +349,8 @@ static struct cpufreq_driver dt_cpufreq_driver = {
 	.init = cpufreq_init,
 	.exit = cpufreq_exit,
 	.ready = cpufreq_ready,
+	.online = cpufreq_online,
+	.offline = cpufreq_offline,
 	.name = "cpufreq-dt",
 	.attr = cpufreq_dt_attr,
 	.suspend = cpufreq_generic_suspend,
