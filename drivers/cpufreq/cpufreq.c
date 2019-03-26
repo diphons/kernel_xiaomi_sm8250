@@ -42,11 +42,6 @@
 
 static LIST_HEAD(cpufreq_policy_list);
 
-static inline bool policy_is_inactive(struct cpufreq_policy *policy)
-{
-	return cpumask_empty(policy->cpus);
-}
-
 /* Macros to iterate over CPU policies */
 #define for_each_suitable_policy(__policy, __active)			 \
 	list_for_each_entry(__policy, &cpufreq_policy_list, policy_list) \
@@ -275,7 +270,7 @@ EXPORT_SYMBOL_GPL(cpufreq_cpu_put);
  * cpufreq_cpu_release - Unlock a policy and decrement its usage counter.
  * @policy: cpufreq policy returned by cpufreq_cpu_acquire().
  */
-static void cpufreq_cpu_release(struct cpufreq_policy *policy)
+void cpufreq_cpu_release(struct cpufreq_policy *policy)
 {
 	if (WARN_ON(!policy))
 		return;
@@ -299,7 +294,7 @@ static void cpufreq_cpu_release(struct cpufreq_policy *policy)
  * cpufreq_cpu_release() in order to release its rwsem and balance its usage
  * counter properly.
  */
-static struct cpufreq_policy *cpufreq_cpu_acquire(unsigned int cpu)
+struct cpufreq_policy *cpufreq_cpu_acquire(unsigned int cpu)
 {
 	struct cpufreq_policy *policy = cpufreq_cpu_get(cpu);
 
@@ -729,9 +724,6 @@ static ssize_t show_scaling_cur_freq(struct cpufreq_policy *policy, char *buf)
 		ret = sprintf(buf, "%u\n", policy->cur);
 	return ret;
 }
-
-static int cpufreq_set_policy(struct cpufreq_policy *policy,
-				struct cpufreq_policy *new_policy);
 
 /**
  * cpufreq_per_cpu_attr_write() / store_##file_name() - sysfs write access
@@ -2396,8 +2388,8 @@ EXPORT_SYMBOL(cpufreq_get_policy);
  *
  * The cpuinfo part of @policy is not updated by this function.
  */
-static int cpufreq_set_policy(struct cpufreq_policy *policy,
-			      struct cpufreq_policy *new_policy)
+int cpufreq_set_policy(struct cpufreq_policy *policy,
+		       struct cpufreq_policy *new_policy)
 {
 	struct cpufreq_governor *old_gov;
 	struct device *cpu_dev = get_cpu_device(policy->cpu);
