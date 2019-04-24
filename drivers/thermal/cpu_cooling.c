@@ -635,7 +635,6 @@ static int cpufreq_power2state(struct thermal_cooling_device *cdev,
 	struct cpufreq_policy *policy = cpufreq_cdev->policy;
 
 	cur_freq = cpufreq_quick_get(policy->cpu);
-	power = power > 0 ? power : 0;
 	last_load = cpufreq_cdev->last_load ?: 1;
 	normalised_power = (power * 100) / last_load;
 	target_freq = cpu_power_to_freq(cpufreq_cdev, normalised_power);
