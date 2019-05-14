@@ -23,7 +23,7 @@
 #include <linux/seq_file.h>
 #include <linux/idr.h>
 
-DEFINE_IDA(eventfd_ida);
+static DEFINE_IDA(eventfd_ida);
 
 DEFINE_PER_CPU(int, eventfd_wake_count);
 
