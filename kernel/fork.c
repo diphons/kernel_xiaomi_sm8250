@@ -103,6 +103,7 @@
 #ifdef CONFIG_D8G_SERVICE
 #include <misc/d8g_helper.h>
 #endif
+#include <linux/simple_lmk.h>
 
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -1081,6 +1082,7 @@ static inline void __mmput(struct mm_struct *mm)
 	}
 	if (mm->binfmt)
 		module_put(mm->binfmt->module);
+	simple_lmk_mm_freed(mm);
 	mmdrop(mm);
 }
 
