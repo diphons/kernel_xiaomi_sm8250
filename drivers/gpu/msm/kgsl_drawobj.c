@@ -35,6 +35,10 @@
 static struct kmem_cache *memobjs_cache;
 static struct kmem_cache *sparseobjs_cache;
 
+static struct kmem_cache *sparse_cache;
+static struct kmem_cache *sync_cache;
+static struct kmem_cache *cmd_cache;
+
 static void free_fence_names(struct kgsl_drawobj_sync *syncobj)
 {
 	unsigned int i;
@@ -59,15 +63,15 @@ void kgsl_drawobj_destroy_object(struct kref *kref)
 	case SYNCOBJ_TYPE:
 		syncobj = SYNCOBJ(drawobj);
 		free_fence_names(syncobj);
-		kfree(syncobj->synclist);
-		kfree(syncobj);
+		kmem_cache_free(sync_cache, syncobj->synclist);
+		kmem_cache_free(sync_cache, syncobj);
 		break;
 	case CMDOBJ_TYPE:
 	case MARKEROBJ_TYPE:
-		kfree(CMDOBJ(drawobj));
+		kmem_cache_free(cmd_cache, CMDOBJ(drawobj));
 		break;
 	case SPARSEOBJ_TYPE:
-		kfree(SPARSEOBJ(drawobj));
+		kmem_cache_free(sparse_cache, SPARSEOBJ(drawobj));
 		break;
 	}
 }
@@ -1147,14 +1151,23 @@ void kgsl_drawobjs_cache_exit(void)
 {
 	kmem_cache_destroy(memobjs_cache);
 	kmem_cache_destroy(sparseobjs_cache);
+
+	kmem_cache_destroy(sparse_cache);
+	kmem_cache_destroy(sync_cache);
+	kmem_cache_destroy(cmd_cache);
 }
 
 int kgsl_drawobjs_cache_init(void)
 {
-	memobjs_cache = KMEM_CACHE(kgsl_memobj_node, 0);
-	sparseobjs_cache = KMEM_CACHE(kgsl_sparseobj_node, 0);
+	memobjs_cache = KMEM_CACHE(kgsl_memobj_node, SLAB_HWCACHE_ALIGN);
+	sparseobjs_cache = KMEM_CACHE(kgsl_sparseobj_node, SLAB_HWCACHE_ALIGN);
 
-	if (!memobjs_cache || !sparseobjs_cache)
+	sparse_cache = KMEM_CACHE(kgsl_drawobj_sparse, SLAB_HWCACHE_ALIGN);
+	sync_cache = KMEM_CACHE(kgsl_drawobj_sync, SLAB_HWCACHE_ALIGN);
+	cmd_cache = KMEM_CACHE(kgsl_drawobj_cmd, SLAB_HWCACHE_ALIGN);
+
+	if (!memobjs_cache || !sparseobjs_cache ||
+		!sparse_cache || !sync_cache || !cmd_cache)
 		return -ENOMEM;
 
 	return 0;
