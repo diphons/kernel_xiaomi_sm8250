@@ -210,7 +210,8 @@ static loff_t proc_reg_llseek(struct file *file, loff_t offset, int whence)
 	struct proc_dir_entry *pde = PDE(file_inode(file));
 	loff_t rv = -EINVAL;
 	if (use_pde(pde)) {
-		loff_t (*llseek)(struct file *, loff_t, int);
+		typeof_member(struct file_operations, llseek) llseek;
+
 		llseek = pde->proc_fops->llseek;
 		if (!llseek)
 			llseek = default_llseek;
@@ -222,10 +223,11 @@ static loff_t proc_reg_llseek(struct file *file, loff_t offset, int whence)
 
 static ssize_t proc_reg_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
 {
-	ssize_t (*read)(struct file *, char __user *, size_t, loff_t *);
 	struct proc_dir_entry *pde = PDE(file_inode(file));
 	ssize_t rv = -EIO;
 	if (use_pde(pde)) {
+		typeof_member(struct file_operations, read) read;
+
 		read = pde->proc_fops->read;
 		if (read)
 			rv = read(file, buf, count, ppos);
@@ -236,10 +238,11 @@ static ssize_t proc_reg_read(struct file *file, char __user *buf, size_t count, 
 
 static ssize_t proc_reg_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos)
 {
-	ssize_t (*write)(struct file *, const char __user *, size_t, loff_t *);
 	struct proc_dir_entry *pde = PDE(file_inode(file));
 	ssize_t rv = -EIO;
 	if (use_pde(pde)) {
+		typeof_member(struct file_operations, write) write;
+
 		write = pde->proc_fops->write;
 		if (write)
 			rv = write(file, buf, count, ppos);
@@ -252,8 +255,9 @@ static __poll_t proc_reg_poll(struct file *file, struct poll_table_struct *pts)
 {
 	struct proc_dir_entry *pde = PDE(file_inode(file));
 	__poll_t rv = DEFAULT_POLLMASK;
-	__poll_t (*poll)(struct file *, struct poll_table_struct *);
 	if (use_pde(pde)) {
+		typeof_member(struct file_operations, poll) poll;
+
 		poll = pde->proc_fops->poll;
 		if (poll)
 			rv = poll(file, pts);
@@ -266,8 +270,9 @@ static long proc_reg_unlocked_ioctl(struct file *file, unsigned int cmd, unsigne
 {
 	struct proc_dir_entry *pde = PDE(file_inode(file));
 	long rv = -ENOTTY;
-	long (*ioctl)(struct file *, unsigned int, unsigned long);
 	if (use_pde(pde)) {
+		typeof_member(struct file_operations, unlocked_ioctl) ioctl;
+
 		ioctl = pde->proc_fops->unlocked_ioctl;
 		if (ioctl)
 			rv = ioctl(file, cmd, arg);
@@ -281,8 +286,9 @@ static long proc_reg_compat_ioctl(struct file *file, unsigned int cmd, unsigned 
 {
 	struct proc_dir_entry *pde = PDE(file_inode(file));
 	long rv = -ENOTTY;
-	long (*compat_ioctl)(struct file *, unsigned int, unsigned long);
 	if (use_pde(pde)) {
+		typeof_member(struct file_operations, compat_ioctl) compat_ioctl;
+
 		compat_ioctl = pde->proc_fops->compat_ioctl;
 		if (compat_ioctl)
 			rv = compat_ioctl(file, cmd, arg);
@@ -296,8 +302,9 @@ static int proc_reg_mmap(struct file *file, struct vm_area_struct *vma)
 {
 	struct proc_dir_entry *pde = PDE(file_inode(file));
 	int rv = -EIO;
-	int (*mmap)(struct file *, struct vm_area_struct *);
 	if (use_pde(pde)) {
+		typeof_member(struct file_operations, mmap) mmap;
+
 		mmap = pde->proc_fops->mmap;
 		if (mmap)
 			rv = mmap(file, vma);
@@ -315,7 +322,7 @@ proc_reg_get_unmapped_area(struct file *file, unsigned long orig_addr,
 	unsigned long rv = -EIO;
 
 	if (use_pde(pde)) {
-		typeof(proc_reg_get_unmapped_area) *get_area;
+		typeof_member(struct file_operations, get_unmapped_area) get_area;
 
 		get_area = pde->proc_fops->get_unmapped_area;
 #ifdef CONFIG_MMU
@@ -336,8 +343,8 @@ static int proc_reg_open(struct inode *inode, struct file *file)
 {
 	struct proc_dir_entry *pde = PDE(inode);
 	int rv = 0;
-	int (*open)(struct inode *, struct file *);
-	int (*release)(struct inode *, struct file *);
+	typeof_member(struct file_operations, open) open;
+	typeof_member(struct file_operations, release) release;
 	struct pde_opener *pdeo;
 
 	/*
