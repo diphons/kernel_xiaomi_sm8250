@@ -355,8 +355,6 @@ static int mqueue_get_tree(struct fs_context *fc)
 {
 	struct mqueue_fs_context *ctx = fc->fs_private;
 
-	put_user_ns(fc->user_ns);
-	fc->user_ns = get_user_ns(ctx->ipc_ns->user_ns);
 	fc->s_fs_info = ctx->ipc_ns;
 	return vfs_get_super(fc, vfs_get_keyed_super, mqueue_fill_super);
 }
@@ -365,8 +363,7 @@ static void mqueue_fs_context_free(struct fs_context *fc)
 {
 	struct mqueue_fs_context *ctx = fc->fs_private;
 
-	if (ctx->ipc_ns)
-		put_ipc_ns(ctx->ipc_ns);
+	put_ipc_ns(ctx->ipc_ns);
 	kfree(ctx);
 }
 
@@ -379,6 +376,8 @@ static int mqueue_init_fs_context(struct fs_context *fc)
 		return -ENOMEM;
 
 	ctx->ipc_ns = get_ipc_ns(current->nsproxy->ipc_ns);
+	put_user_ns(fc->user_ns);
+	fc->user_ns = get_user_ns(ctx->ipc_ns->user_ns);
 	fc->fs_private = ctx;
 	fc->ops = &mqueue_fs_context_ops;
 	return 0;
@@ -397,6 +396,8 @@ static struct vfsmount *mq_create_mount(struct ipc_namespace *ns)
 	ctx = fc->fs_private;
 	put_ipc_ns(ctx->ipc_ns);
 	ctx->ipc_ns = get_ipc_ns(ns);
+	put_user_ns(fc->user_ns);
+	fc->user_ns = get_user_ns(ctx->ipc_ns->user_ns);
 
 	mnt = fc_mount(fc);
 	put_fs_context(fc);

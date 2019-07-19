@@ -28,11 +28,13 @@
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/percpu.h>
+#include <linux/pseudo_fs.h>
 #include <linux/preempt.h>
 #include <linux/workqueue.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/zpool.h>
+#include <linux/magic.h>
 
 /*****************
  * Structures

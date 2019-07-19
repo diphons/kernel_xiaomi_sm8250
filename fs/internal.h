@@ -18,6 +18,7 @@ struct path;
 struct mount;
 struct shrink_control;
 struct fs_context;
+struct user_namespace;
 
 /*
  * block_dev.c
@@ -115,6 +116,7 @@ extern struct file *alloc_empty_file_noaccount(int, const struct cred *);
 extern int reconfigure_super(struct fs_context *);
 extern bool trylock_super(struct super_block *sb);
 extern struct super_block *user_get_super(dev_t);
+extern bool mount_capable(struct fs_context *);
 
 /*
  * open.c
@@ -161,6 +163,7 @@ extern struct dentry *__d_alloc(struct super_block *, const struct qstr *);
 extern int d_set_mounted(struct dentry *dentry);
 extern long prune_dcache_sb(struct super_block *sb, struct shrink_control *sc);
 extern struct dentry *d_alloc_cursor(struct dentry *);
+extern char *simple_dname(struct dentry *, char *, int);
 
 /*
  * read_write.c
