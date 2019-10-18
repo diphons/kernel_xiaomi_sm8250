@@ -460,12 +460,12 @@ TRACE_EVENT(sched_load_balance_nohz_kick,
 TRACE_EVENT(sched_load_balance_sg_stats,
 
 	TP_PROTO(unsigned long sg_cpus, int group_type, unsigned int idle_cpus,
-		unsigned int sum_nr_running, unsigned long group_load,
+		unsigned int sum_h_nr_running, unsigned long group_load,
 		unsigned long group_capacity, unsigned long group_util,
 		int group_no_capacity, unsigned long load_per_task,
 		unsigned long misfit_load, unsigned long busiest),
 
-	TP_ARGS(sg_cpus, group_type, idle_cpus, sum_nr_running, group_load,
+	TP_ARGS(sg_cpus, group_type, idle_cpus, sum_h_nr_running, group_load,
 		group_capacity, group_util, group_no_capacity, load_per_task,
 		misfit_load, busiest),
 
@@ -473,7 +473,7 @@ TRACE_EVENT(sched_load_balance_sg_stats,
 		__field(unsigned long,		group_mask)
 		__field(int,			group_type)
 		__field(unsigned int,		group_idle_cpus)
-		__field(unsigned int,		sum_nr_running)
+		__field(unsigned int,		sum_h_nr_running)
 		__field(unsigned long,		group_load)
 		__field(unsigned long,		group_capacity)
 		__field(unsigned long,		group_util)
@@ -487,7 +487,7 @@ TRACE_EVENT(sched_load_balance_sg_stats,
 		__entry->group_mask			= sg_cpus;
 		__entry->group_type			= group_type;
 		__entry->group_idle_cpus		= idle_cpus;
-		__entry->sum_nr_running			= sum_nr_running;
+		__entry->sum_h_nr_running			= sum_h_nr_running;
 		__entry->group_load			= group_load;
 		__entry->group_capacity			= group_capacity;
 		__entry->group_util			= group_util;
@@ -499,7 +499,7 @@ TRACE_EVENT(sched_load_balance_sg_stats,
 
 	TP_printk("sched_group=%#lx type=%d idle_cpus=%u sum_nr_run=%u group_load=%lu capacity=%lu util=%lu no_capacity=%d lpt=%lu misfit_tload=%lu busiest_group=%#lx",
 		__entry->group_mask, __entry->group_type,
-		__entry->group_idle_cpus, __entry->sum_nr_running,
+		__entry->group_idle_cpus, __entry->sum_h_nr_running,
 		__entry->group_load, __entry->group_capacity,
 		__entry->group_util, __entry->group_no_capacity,
 		__entry->load_per_task, __entry->misfit_task_load,
