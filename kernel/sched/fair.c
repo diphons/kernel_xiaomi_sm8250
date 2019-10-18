@@ -4489,6 +4489,11 @@ static inline void adjust_cpus_for_packing(struct task_struct *p,
 	}
 }
 
+static inline int task_fits_capacity(struct task_struct *p, long capacity)
+{
+	return fits_capacity(task_util_est(p), capacity);
+}
+
 static inline void update_misfit_status(struct task_struct *p, struct rq *rq)
 {
 	if (!static_branch_unlikely(&sched_asym_cpucapacity))
@@ -8610,13 +8615,8 @@ redo:
 			break;
 
 		case migrate_misfit:
-			load = max_t(unsigned long, task_h_load(p), 1);
-
-			/*
-			 * Load of misfit task might decrease a bit since it has
-			 * been recorded. Be conservative in the condition.
-			 */
-			if (load/2 < env->imbalance)
+			/* This is not a misfit task */
+			if (task_fits_capacity(p, capacity_of(env->src_cpu)))
 				goto next;
 
 			env->imbalance = 0;
@@ -9586,7 +9586,7 @@ static inline void calculate_imbalance(struct lb_env *env, struct sd_lb_stats *s
 	if (busiest->group_type == group_misfit_task) {
 		/* Set imbalance to allow misfit tasks to be balanced. */
 		env->migration_type = migrate_misfit;
-		env->imbalance = busiest->group_misfit_task_load;
+		env->imbalance = 1;
 		return;
 	}
 
