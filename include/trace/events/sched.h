@@ -461,13 +461,10 @@ TRACE_EVENT(sched_load_balance_sg_stats,
 
 	TP_PROTO(unsigned long sg_cpus, int group_type, unsigned int idle_cpus,
 		unsigned int sum_h_nr_running, unsigned long group_load,
-		unsigned long group_capacity, unsigned long group_util,
-		int group_no_capacity, unsigned long misfit_load,
-		unsigned long busiest),
+		unsigned long misfit_load, unsigned long busiest),
 
 	TP_ARGS(sg_cpus, group_type, idle_cpus, sum_h_nr_running, group_load,
-		group_capacity, group_util, group_no_capacity,
-		misfit_load, busiest),
+		group_capacity, misfit_load, busiest),
 
 	TP_STRUCT__entry(
 		__field(unsigned long,		group_mask)
@@ -475,9 +472,6 @@ TRACE_EVENT(sched_load_balance_sg_stats,
 		__field(unsigned int,		group_idle_cpus)
 		__field(unsigned int,		sum_h_nr_running)
 		__field(unsigned long,		group_load)
-		__field(unsigned long,		group_capacity)
-		__field(unsigned long,		group_util)
-		__field(int,			group_no_capacity)
 		__field(unsigned long,		misfit_task_load)
 		__field(unsigned long,		busiest)
 	),
@@ -488,19 +482,15 @@ TRACE_EVENT(sched_load_balance_sg_stats,
 		__entry->group_idle_cpus		= idle_cpus;
 		__entry->sum_h_nr_running			= sum_h_nr_running;
 		__entry->group_load			= group_load;
-		__entry->group_capacity			= group_capacity;
-		__entry->group_util			= group_util;
-		__entry->group_no_capacity		= group_no_capacity;
 		__entry->misfit_task_load		= misfit_load;
 		__entry->busiest			= busiest;
 	),
 
-	TP_printk("sched_group=%#lx type=%d idle_cpus=%u sum_nr_run=%u group_load=%lu capacity=%lu util=%lu no_capacity=%d misfit_tload=%lu busiest_group=%#lx",
+	TP_printk("sched_group=%#lx type=%d idle_cpus=%u sum_nr_run=%u group_load=%lu misfit_tload=%lu busiest_group=%#lx",
 		__entry->group_mask, __entry->group_type,
 		__entry->group_idle_cpus, __entry->sum_h_nr_running,
-		__entry->group_load, __entry->group_capacity,
-		__entry->group_util, __entry->group_no_capacity,
-		__entry->misfit_task_load, __entry->busiest)
+		__entry->group_load, __entry->misfit_task_load,
+		__entry->busiest)
 );
 
 TRACE_EVENT(sched_load_balance_stats,
