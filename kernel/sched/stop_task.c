@@ -29,7 +29,7 @@ check_preempt_curr_stop(struct rq *rq, struct task_struct *p, int flags)
 	/* we're never preempted */
 }
 
-static void set_next_task_stop(struct rq *rq, struct task_struct *stop)
+static void set_next_task_stop(struct rq *rq, struct task_struct *stop, bool first)
 {
 	stop->se.exec_start = rq_clock_task(rq);
 }
@@ -47,7 +47,7 @@ static struct task_struct *pick_next_task_stop(struct rq *rq)
 	struct task_struct *p = pick_task_stop(rq);
 
 	if (p)
-		set_next_task_stop(rq, rq->stop);
+		set_next_task_stop(rq, rq->stop, true);
 
 	return p;
 }
