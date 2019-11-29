@@ -8486,7 +8486,14 @@ redo:
 			    load < 16 && !env->sd->nr_balance_failed)
 				goto next;
 
-			if (load/2 > env->imbalance)
+			/*
+			 * Make sure that we don't migrate too much load.
+			 * Nevertheless, let relax the constraint if
+			 * scheduler fails to find a good waiting task to
+			 * migrate.
+			 */
+			if (load/2 > env->imbalance &&
+			    env->sd->nr_balance_failed <= env->sd->cache_nice_tries)
 				goto next;
 
 			env->imbalance -= load;
