@@ -5964,10 +5964,12 @@ static int sched_idle_rq(struct rq *rq)
 			rq->nr_running);
 }
 
+#ifdef CONFIG_SMP
 static int sched_idle_cpu(int cpu)
 {
 	return sched_idle_rq(cpu_rq(cpu));
 }
+#endif
 
 static void
 requeue_delayed_entity(struct sched_entity *se)
