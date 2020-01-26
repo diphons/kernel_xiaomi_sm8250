@@ -274,7 +274,7 @@ enum {
 
 void cma_ref_dev(struct cma_device *cma_dev)
 {
-	atomic_inc(&cma_dev->refcount);
+	refcount_inc(&cma_dev->refcount);
 }
 
 struct cma_device *cma_enum_devices_by_ibdev(cma_device_filter	filter,
@@ -770,7 +770,7 @@ found:
 
 static void cma_deref_id(struct rdma_id_private *id_priv)
 {
-	if (atomic_dec_and_test(&id_priv->refcount))
+	if (refcount_dec_and_test(&id_priv->refcount))
 		complete(&id_priv->comp);
 }
 
@@ -800,7 +800,7 @@ struct rdma_cm_id *__rdma_create_id(struct net *net,
 	spin_lock_init(&id_priv->lock);
 	mutex_init(&id_priv->qp_mutex);
 	init_completion(&id_priv->comp);
-	atomic_set(&id_priv->refcount, 1);
+	refcount_set(&id_priv->refcount, 1);
 	mutex_init(&id_priv->handler_mutex);
 	INIT_LIST_HEAD(&id_priv->listen_list);
 	INIT_LIST_HEAD(&id_priv->mc_list);
