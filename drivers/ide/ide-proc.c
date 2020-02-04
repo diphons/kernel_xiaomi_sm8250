@@ -380,13 +380,12 @@ parse_error:
 	return -EINVAL;
 }
 
-static const struct file_operations ide_settings_proc_fops = {
-	.owner		= THIS_MODULE,
-	.open		= ide_settings_proc_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-	.write		= ide_settings_proc_write,
+static const struct proc_ops ide_settings_proc_ops = {
+	.proc_open	= ide_settings_proc_open,
+	.proc_read	= seq_read,
+	.proc_lseek	= seq_lseek,
+	.proc_release	= single_release,
+	.proc_write	= ide_settings_proc_write,
 };
 
 int ide_capacity_proc_show(struct seq_file *m, void *v)
@@ -545,7 +544,7 @@ void ide_proc_port_register_devices(ide_hwif_t *hwif)
 		if (drive->proc) {
 			ide_add_proc_entries(drive->proc, generic_drive_entries, drive);
 			proc_create_data("settings", S_IFREG|S_IRUSR|S_IWUSR,
-					drive->proc, &ide_settings_proc_fops,
+					drive->proc, &ide_settings_proc_ops,
 					drive);
 		}
 		sprintf(name, "ide%d/%s", (drive->name[2]-'a')/2, drive->name);
@@ -619,12 +618,11 @@ static int ide_drivers_open(struct inode *inode, struct file *file)
 	return single_open(file, &ide_drivers_show, NULL);
 }
 
-static const struct file_operations ide_drivers_operations = {
-	.owner		= THIS_MODULE,
-	.open		= ide_drivers_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
+static const struct proc_ops ide_drivers_operations = {
+	.proc_open		= ide_drivers_open,
+	.proc_read		= seq_read,
+	.proc_lseek		= seq_lseek,
+	.proc_release	= single_release,
 };
 
 void proc_ide_create(void)
