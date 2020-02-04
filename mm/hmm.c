@@ -353,7 +353,7 @@ static int hmm_pfns_bad(unsigned long addr,
  */
 static int hmm_vma_walk_hole_(unsigned long addr, unsigned long end,
 			      bool fault, bool write_fault,
-			      struct mm_walk *walk)
+			      __always_unused int depth, struct mm_walk *walk)
 {
 	struct hmm_vma_walk *hmm_vma_walk = walk->private;
 	struct hmm_range *range = hmm_vma_walk->range;
@@ -444,7 +444,7 @@ static int hmm_vma_walk_hole(unsigned long addr, unsigned long end,
 	pfns = &range->pfns[i];
 	hmm_range_need_fault(hmm_vma_walk, pfns, npages,
 			     0, &fault, &write_fault);
-	return hmm_vma_walk_hole_(addr, end, fault, write_fault, walk);
+	return hmm_vma_walk_hole_(addr, end, fault, write_fault, -1, walk);
 }
 
 static inline uint64_t pmd_to_hmm_pfn_flags(struct hmm_range *range, pmd_t pmd)
@@ -474,7 +474,7 @@ static int hmm_vma_handle_pmd(struct mm_walk *walk,
 			     &fault, &write_fault);
 
 	if (pmd_protnone(pmd) || fault || write_fault)
-		return hmm_vma_walk_hole_(addr, end, fault, write_fault, walk);
+		return hmm_vma_walk_hole_(addr, end, fault, write_fault, -1, walk);
 
 	pfn = pmd_pfn(pmd) + pte_index(addr);
 	for (i = 0; addr < end; addr += PAGE_SIZE, i++, pfn++)
@@ -567,7 +567,7 @@ static int hmm_vma_handle_pte(struct mm_walk *walk, unsigned long addr,
 fault:
 	pte_unmap(ptep);
 	/* Fault any virtual address we were asked to fault */
-	return hmm_vma_walk_hole_(addr, end, fault, write_fault, walk);
+	return hmm_vma_walk_hole_(addr, end, fault, write_fault, -1, walk);
 }
 
 static int hmm_vma_walk_pmd(pmd_t *pmdp,
