@@ -63,10 +63,9 @@ ikconfig_read_current(struct file *file, char __user *buf,
 				       kernel_config_data_size);
 }
 
-static const struct file_operations ikconfig_file_ops = {
-	.owner = THIS_MODULE,
-	.read = ikconfig_read_current,
-	.llseek = default_llseek,
+static const struct proc_ops config_gz_proc_ops = {
+	.proc_read	= ikconfig_read_current,
+	.proc_lseek	= default_llseek,
 };
 
 static int __init ikconfig_init(void)
@@ -75,7 +74,7 @@ static int __init ikconfig_init(void)
 
 	/* create the current config file */
 	entry = proc_create("config.gz", S_IFREG | S_IRUGO, NULL,
-			    &ikconfig_file_ops);
+			    &config_gz_proc_ops);
 	if (!entry)
 		return -ENOMEM;
 
