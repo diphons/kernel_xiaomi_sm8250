@@ -108,7 +108,7 @@ static u32 __accumulate_pelt_segments(u64 periods, u32 d1, u32 d3)
  */
 static __always_inline u32
 accumulate_sum(u64 delta, struct sched_avg *sa,
-	       unsigned long load, unsigned long runnable, int running)
+	       unsigned long load, int running)
 {
 	u32 contrib = (u32)delta; /* p == 0 -> delta < 1024 */
 	u64 periods;
@@ -126,8 +126,6 @@ accumulate_sum(u64 delta, struct sched_avg *sa,
 			delta %= 1024;
 		else {
 			sa->load_sum = decay_load(sa->load_sum, periods);
-			sa->runnable_load_sum =
-				decay_load(sa->runnable_load_sum, periods);
 			sa->util_sum = decay_load((u64)(sa->util_sum), periods);
 
 			/*
@@ -156,11 +154,6 @@ accumulate_sum(u64 delta, struct sched_avg *sa,
 	if (load) {
 		sa->load_sum += load * contrib;
 		sa->load_sum = min_t(u64, sa->load_sum, divider * load);
-	}
-	if (runnable) {
-		sa->runnable_load_sum += runnable * contrib;
-		sa->runnable_load_sum = min_t(u64, sa->runnable_load_sum,
-						divider * runnable);
 	}
 	if (running) {
 		sa->util_sum += contrib << SCHED_CAPACITY_SHIFT;
@@ -200,7 +193,7 @@ accumulate_sum(u64 delta, struct sched_avg *sa,
  */
 static __always_inline int
 ___update_load_sum(u64 now, struct sched_avg *sa,
-		  unsigned long load, unsigned long runnable, int running)
+		  unsigned long load, int running)
 {
 	u64 delta;
 
@@ -236,7 +229,7 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 	 * Also see the comment in accumulate_sum().
 	 */
 	if (!load)
-		runnable = running = 0;
+		running = 0;
 
 	/*
 	 * Now we know we crossed measurement unit boundaries. The *_avg
@@ -245,14 +238,14 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 	 * Step 1: accumulate *_sum since last_update_time. If we haven't
 	 * crossed period boundaries, finish.
 	 */
-	if (!accumulate_sum(delta, sa, load, runnable, running))
+	if (!accumulate_sum(delta, sa, load, running))
 		return 0;
 
 	return 1;
 }
 
 static __always_inline void
-___update_load_avg(struct sched_avg *sa, unsigned long load, unsigned long runnable)
+___update_load_avg(struct sched_avg *sa, unsigned long load)
 {
 	u32 divider = get_pelt_divider(sa);
 
@@ -260,7 +253,6 @@ ___update_load_avg(struct sched_avg *sa, unsigned long load, unsigned long runna
 	 * Step 2: update *_avg.
 	 */
 	sa->load_avg = div_u64(load * sa->load_sum, divider);
-	sa->runnable_load_avg =	div_u64(runnable * sa->runnable_load_sum, divider);
 	WRITE_ONCE(sa->util_avg, sa->util_sum / divider);
 }
 
@@ -268,17 +260,13 @@ ___update_load_avg(struct sched_avg *sa, unsigned long load, unsigned long runna
  * sched_entity:
  *
  *   task:
- *     se_runnable() == se_weight()
+ *     se_weight()   = se->load.weight
  *
  *   group: [ see update_cfs_group() ]
  *     se_weight()   = tg->weight * grq->load_avg / tg->load_avg
- *     se_runnable() = se_weight(se) * grq->runnable_load_avg / grq->load_avg
  *
- *   load_sum := runnable_sum
- *   load_avg = se_weight(se) * runnable_avg
- *
- *   runnable_load_sum := runnable_sum
- *   runnable_load_avg = se_runnable(se) * runnable_avg
+ *   load_sum := runnable
+ *   load_avg = se_weight(se) * load_sum
  *
  * XXX collapse load_sum and runnable_load_sum
  *
@@ -286,18 +274,13 @@ ___update_load_avg(struct sched_avg *sa, unsigned long load, unsigned long runna
  *
  *   load_sum = \Sum se_weight(se) * se->avg.load_sum
  *   load_avg = \Sum se->avg.load_avg
- *
- *   runnable_load_sum = \Sum se_runnable(se) * se->avg.runnable_load_sum
- *   runnable_load_avg = \Sum se->avg.runable_load_avg
  */
 
 int __update_load_avg_blocked_se(u64 now, struct sched_entity *se)
 {
-	if (___update_load_sum(now, &se->avg, 0, 0, 0)) {
-		___update_load_avg(&se->avg, se_weight(se), se_runnable(se));
-
-		trace_sched_load_se(se);
-
+	if (___update_load_sum(now, &se->avg, 0, 0)) {
+		___update_load_avg(&se->avg, se_weight(se));
+                trace_sched_load_se(se);
 		return 1;
 	}
 
@@ -306,10 +289,9 @@ int __update_load_avg_blocked_se(u64 now, struct sched_entity *se)
 
 int __update_load_avg_se(u64 now, struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
-	if (___update_load_sum(now, &se->avg, !!se->on_rq, !!se->on_rq,
-				cfs_rq->curr == se)) {
+	if (___update_load_sum(now, &se->avg, !!se->on_rq, cfs_rq->curr == se)) {
 
-		___update_load_avg(&se->avg, se_weight(se), se_runnable(se));
+		___update_load_avg(&se->avg, se_weight(se));
 		cfs_se_util_change(&se->avg);
 
 		trace_sched_load_se(se);
@@ -324,10 +306,9 @@ int __update_load_avg_cfs_rq(u64 now, struct cfs_rq *cfs_rq)
 {
 	if (___update_load_sum(now, &cfs_rq->avg,
 				scale_load_down(cfs_rq->load.weight),
-				scale_load_down(cfs_rq->runnable_weight),
 				cfs_rq->curr != NULL)) {
 
-		___update_load_avg(&cfs_rq->avg, 1, 1);
+                ___update_load_avg(&cfs_rq->avg, 1);
 
 		trace_sched_load_cfs_rq(cfs_rq);
 
@@ -342,9 +323,9 @@ int __update_load_avg_cfs_rq(u64 now, struct cfs_rq *cfs_rq)
  *
  *   util_sum = \Sum se->avg.util_sum but se->avg.util_sum is not tracked
  *   util_sum = cpu_scale * load_sum
- *   runnable_load_sum = load_sum
+ *   runnable_sum = util_sum
  *
- *   load_avg and runnable_load_avg are not supported and meaningless.
+ *   load_avg is not supported and meaningless.
  *
  */
 
@@ -352,10 +333,9 @@ int update_rt_rq_load_avg(u64 now, struct rq *rq, int running)
 {
 	if (___update_load_sum(now, &rq->avg_rt,
 				running,
-				running,
 				running)) {
 
-		___update_load_avg(&rq->avg_rt, 1, 1);
+                ___update_load_avg(&rq->avg_rt, 1);
 
 		trace_sched_load_rt_rq(rq);
 
@@ -370,7 +350,9 @@ int update_rt_rq_load_avg(u64 now, struct rq *rq, int running)
  *
  *   util_sum = \Sum se->avg.util_sum but se->avg.util_sum is not tracked
  *   util_sum = cpu_scale * load_sum
- *   runnable_load_sum = load_sum
+ *   runnable_sum = util_sum
+ *
+ *   load_avg is not supported and meaningless.
  *
  */
 
@@ -378,10 +360,9 @@ int update_dl_rq_load_avg(u64 now, struct rq *rq, int running)
 {
 	if (___update_load_sum(now, &rq->avg_dl,
 				running,
-				running,
 				running)) {
 
-		___update_load_avg(&rq->avg_dl, 1, 1);
+		___update_load_avg(&rq->avg_dl, 1);
 		return 1;
 	}
 
@@ -410,7 +391,7 @@ int update_thermal_load_avg(u64 now, struct rq *rq, u64 capacity)
 			       capacity,
 			       capacity,
 			       capacity)) {
-		___update_load_avg(&rq->avg_thermal, 1, 1);
+		___update_load_avg(&rq->avg_thermal, 1);
 		trace_pelt_thermal_tp(rq);
 		return 1;
 	}
@@ -425,7 +406,9 @@ int update_thermal_load_avg(u64 now, struct rq *rq, u64 capacity)
  *
  *   util_sum = \Sum se->avg.util_sum but se->avg.util_sum is not tracked
  *   util_sum = cpu_scale * load_sum
- *   runnable_load_sum = load_sum
+ *   runnable_sum = util_sum
+ *
+ *   load_avg is not supported and meaningless.
  *
  */
 
@@ -454,15 +437,13 @@ int update_irq_load_avg(struct rq *rq, u64 running)
 	 */
 	ret = ___update_load_sum(rq->clock - running, &rq->avg_irq,
 				0,
-				0,
 				0);
 	ret += ___update_load_sum(rq->clock, &rq->avg_irq,
-				1,
 				1,
 				1);
 
 	if (ret)
-		___update_load_avg(&rq->avg_irq, 1, 1);
+		___update_load_avg(&rq->avg_irq, 1);
 
 	return ret;
 }
