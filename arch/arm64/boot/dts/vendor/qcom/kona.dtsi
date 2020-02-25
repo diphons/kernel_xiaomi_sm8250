@@ -5248,3 +5248,7 @@
 		rtc6226,vio-supply-voltage = <1800000 1800000 >;
 	};
 };
+
+&msm_gpu {
+ 	tzone-names = "gpuss-0-usr";
+};
