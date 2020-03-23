@@ -2679,6 +2679,7 @@ enum schedutil_type {
 	ENERGY_UTIL,
 };
 
+extern struct cpumask min_cap_cpu_mask;
 #ifdef CONFIG_SMP
 static inline unsigned long cpu_util_cfs(struct rq *rq)
 {
