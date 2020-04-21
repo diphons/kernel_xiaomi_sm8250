@@ -1680,8 +1680,6 @@ static inline void unregister_sched_domain_sysctl(void)
 }
 #endif
 
-extern int newidle_balance(struct rq *this_rq, struct rq_flags *rf);
-
 static inline const struct cpumask *task_user_cpus(struct task_struct *p)
 {
 	if (!p->user_cpus_ptr)
@@ -1691,7 +1689,6 @@ static inline const struct cpumask *task_user_cpus(struct task_struct *p)
 #else
 
 static inline void sched_ttwu_pending(void) { }
-static inline int newidle_balance(struct rq *this_rq, struct rq_flags *rf) { return 0; }
 
 #endif /* CONFIG_SMP */
 
