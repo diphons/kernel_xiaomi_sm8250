@@ -5,7 +5,7 @@ TARGET=$1
 ARCH=$2
 SMP=$3
 PREEMPT=$4
-CC=$5
+CC_VERSION="$5"
 LD=$6
 
 vecho() { [ "${quiet}" = "silent_" ] || echo "$@" ; }
@@ -72,10 +72,8 @@ UTS_TRUNCATE="cut -b -$UTS_LEN"
 
   echo \#define LINUX_COMPILE_BY \"`echo $LINUX_COMPILE_BY | $UTS_TRUNCATE`\"
   echo \#define LINUX_COMPILE_HOST \"`echo $LINUX_COMPILE_HOST | $UTS_TRUNCATE`\"
-  
- if [ -z "$KBUILD_COMPILER_STRING" ]; then
-  CC_VERSION=$($CC -v 2>&1 | grep ' version ' | sed 's/[[:space:]]*$//')
- else
+
+ if [ ! -z "$KBUILD_COMPILER_STRING" ]; then
   CC_VERSION="$KBUILD_COMPILER_STRING"
  fi
  if [ -z "$KBUILD_LINKER_STRING" ]; then
