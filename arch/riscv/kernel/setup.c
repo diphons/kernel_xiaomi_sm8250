@@ -34,7 +34,6 @@
 
 #include <asm/setup.h>
 #include <asm/sections.h>
-#include <asm/pgtable.h>
 #include <asm/smp.h>
 #include <asm/sbi.h>
 #include <asm/tlbflush.h>

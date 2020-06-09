@@ -22,7 +22,6 @@
 #include <linux/io.h>
 #include <linux/pinctrl/machine.h>
 
-#include <asm/pgtable.h>
 #include <asm/system_misc.h>
 #include <asm/hardware/cache-l2x0.h>
 #include <asm/mach/map.h>

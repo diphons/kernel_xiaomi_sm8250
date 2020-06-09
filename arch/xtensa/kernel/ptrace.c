@@ -29,7 +29,6 @@
 #include <asm/coprocessor.h>
 #include <asm/elf.h>
 #include <asm/page.h>
-#include <asm/pgtable.h>
 #include <asm/ptrace.h>
 
 

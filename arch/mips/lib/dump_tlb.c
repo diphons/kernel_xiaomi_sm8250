@@ -11,7 +11,6 @@
 #include <asm/hazards.h>
 #include <asm/mipsregs.h>
 #include <asm/page.h>
-#include <asm/pgtable.h>
 #include <asm/tlbdebug.h>
 
 void dump_tlb_regs(void)

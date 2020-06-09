@@ -15,7 +15,6 @@
 #include "internal.h"
 #include <asm/dma.h>
 #include <asm/pgalloc.h>
-#include <asm/pgtable.h>
 
 /*
  * Permanent SPARSEMEM data:

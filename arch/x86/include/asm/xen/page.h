@@ -11,7 +11,6 @@
 
 #include <linux/uaccess.h>
 #include <asm/page.h>
-#include <asm/pgtable.h>
 
 #include <xen/interface/xen.h>
 #include <xen/interface/grant_table.h>

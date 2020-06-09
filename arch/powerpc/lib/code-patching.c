@@ -17,7 +17,6 @@
 #include <linux/uaccess.h>
 #include <linux/kprobes.h>
 
-#include <asm/pgtable.h>
 #include <asm/tlbflush.h>
 #include <asm/page.h>
 #include <asm/code-patching.h>

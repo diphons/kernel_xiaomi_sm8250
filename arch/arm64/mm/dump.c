@@ -25,7 +25,6 @@
 #include <asm/fixmap.h>
 #include <asm/kasan.h>
 #include <asm/memory.h>
-#include <asm/pgtable.h>
 #include <asm/pgtable-hwdef.h>
 #include <asm/ptdump.h>
 

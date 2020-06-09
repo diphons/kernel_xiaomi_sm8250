@@ -33,7 +33,6 @@
 #include <mach/hardware.h>
 #include <asm/irq.h>
 #include <asm/mach-types.h>
-#include <asm/pgtable.h>
 
 #include "acornfb.h"
 

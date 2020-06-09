@@ -20,7 +20,6 @@
 #include <asm/irq.h>
 #include <asm/setup.h>
 #include <asm/mach-types.h>
-#include <asm/pgtable.h>
 #include <asm/page.h>
 #include <asm/system_misc.h>
 

@@ -14,7 +14,6 @@
 #include <linux/memblock.h>
 #include <asm/cacheflush.h>
 #include <asm/pgalloc.h>
-#include <asm/pgtable.h>
 #include <asm/setup.h>
 #include <asm/tlbflush.h>
 #include <asm/sections.h>

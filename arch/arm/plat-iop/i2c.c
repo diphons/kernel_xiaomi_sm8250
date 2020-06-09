@@ -19,7 +19,6 @@
 #include <linux/tty.h>
 #include <linux/serial_core.h>
 #include <linux/io.h>
-#include <asm/pgtable.h>
 #include <asm/page.h>
 #include <asm/mach/map.h>
 #include <asm/setup.h>
