@@ -139,11 +139,11 @@ int qib_get_user_pages(unsigned long start_page, size_t num_pages,
 {
 	int ret;
 
-	down_write(&current->mm->mmap_sem);
+	mmap_read_lock(current->mm);
 
 	ret = __qib_get_user_pages(start_page, num_pages, p);
 
-	up_write(&current->mm->mmap_sem);
+	mmap_read_unlock(current->mm);
 
 	return ret;
 }

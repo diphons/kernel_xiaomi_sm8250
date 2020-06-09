@@ -1900,7 +1900,7 @@ static int prctl_set_mm_exe_file(struct mm_struct *mm, unsigned int fd)
 	if (exe_file) {
 		struct vm_area_struct *vma;
 
-		down_read(&mm->mmap_sem);
+		mmap_read_lock(mm);
 		for (vma = mm->mmap; vma; vma = vma->vm_next) {
 			if (!vma->vm_file)
 				continue;
@@ -1909,7 +1909,7 @@ static int prctl_set_mm_exe_file(struct mm_struct *mm, unsigned int fd)
 				goto exit_err;
 		}
 
-		up_read(&mm->mmap_sem);
+		mmap_read_unlock(mm);
 		fput(exe_file);
 	}
 
@@ -1923,7 +1923,7 @@ exit:
 	fdput(exe);
 	return err;
 exit_err:
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	fput(exe_file);
 	goto exit;
 }
@@ -2059,7 +2059,7 @@ static int prctl_set_mm_map(int opt, const void __user *addr, unsigned long data
 	 * arg_lock protects concurent updates but we still need mmap_sem for
 	 * read to exclude races with sys_brk.
 	 */
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 
 	/*
 	 * We don't validate if these members are pointing to
@@ -2098,7 +2098,7 @@ static int prctl_set_mm_map(int opt, const void __user *addr, unsigned long data
 	if (prctl_map.auxv_size)
 		memcpy(mm->saved_auxv, user_auxv, sizeof(user_auxv));
 
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	return 0;
 }
 #endif /* CONFIG_CHECKPOINT_RESTORE */
@@ -2165,7 +2165,7 @@ static int prctl_set_mm(int opt, unsigned long addr,
 
 	error = -EINVAL;
 
-	down_write(&mm->mmap_sem);
+	mmap_read_lock(mm);
 	vma = find_vma(mm, addr);
 
 	prctl_map.start_code	= mm->start_code;
@@ -2258,7 +2258,7 @@ static int prctl_set_mm(int opt, unsigned long addr,
 
 	error = 0;
 out:
-	up_write(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	return error;
 }
 
@@ -2428,7 +2428,7 @@ static int prctl_set_vma(unsigned long opt, unsigned long start,
 	if (end == start)
 		return 0;
 
-	down_write(&mm->mmap_sem);
+	mmap_write_lock(mm);
 
 	switch (opt) {
 	case PR_SET_VMA_ANON_NAME:
@@ -2438,7 +2438,7 @@ static int prctl_set_vma(unsigned long opt, unsigned long start,
 		error = -EINVAL;
 	}
 
-	up_write(&mm->mmap_sem);
+	mmap_write_unlock(mm);
 
 	return error;
 }

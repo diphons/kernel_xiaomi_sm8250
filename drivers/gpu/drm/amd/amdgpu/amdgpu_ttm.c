@@ -817,7 +817,7 @@ int amdgpu_ttm_tt_get_user_pages(struct ttm_tt *ttm, struct page **pages)
 	if (!(gtt->userflags & AMDGPU_GEM_USERPTR_READONLY))
 		flags |= FOLL_WRITE;
 
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 
 	if (gtt->userflags & AMDGPU_GEM_USERPTR_ANONONLY) {
 		/*
@@ -864,12 +864,12 @@ int amdgpu_ttm_tt_get_user_pages(struct ttm_tt *ttm, struct page **pages)
 
 	} while (pinned < ttm->num_pages);
 
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	return 0;
 
 release_pages:
 	release_pages(pages, pinned);
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	return r;
 }
 

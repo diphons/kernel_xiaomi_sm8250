@@ -172,14 +172,14 @@ struct ib_umem *ib_umem_get(struct ib_ucontext *context, unsigned long addr,
 
 	sg_list_start = umem->sg_head.sgl;
 
-	down_read(&current->mm->mmap_sem);
+	mmap_read_lock(current->mm);
 	while (npages) {
 		ret = get_user_pages_longterm(cur_base,
 				     min_t(unsigned long, npages,
 					   PAGE_SIZE / sizeof (struct page *)),
 				     gup_flags, page_list, vma_list);
 		if (ret < 0) {
-			up_read(&current->mm->mmap_sem);
+			mmap_read_unlock(current->mm);
 			goto umem_release;
 		}
 
@@ -197,7 +197,7 @@ struct ib_umem *ib_umem_get(struct ib_ucontext *context, unsigned long addr,
 		/* preparing for next loop */
 		sg_list_start = sg;
 	}
-	up_read(&current->mm->mmap_sem);
+	mmap_read_unlock(current->mm);
 
 	umem->nmap = ib_dma_map_sg_attrs(context->device,
 				  umem->sg_head.sgl,
@@ -216,9 +216,9 @@ struct ib_umem *ib_umem_get(struct ib_ucontext *context, unsigned long addr,
 umem_release:
 	__ib_umem_release(context->device, umem, 0);
 vma:
-	down_write(&current->mm->mmap_sem);
+	mmap_read_lock(current->mm);
 	current->mm->pinned_vm -= ib_umem_num_pages(umem);
-	up_write(&current->mm->mmap_sem);
+	mmap_read_unlock(current->mm);
 out:
 	if (vma_list)
 		free_page((unsigned long) vma_list);

@@ -99,7 +99,7 @@ static void subpage_prot_clear(unsigned long addr, unsigned long len)
 	size_t nw;
 	unsigned long next, limit;
 
-	down_write(&mm->mmap_sem);
+	mmap_write_lock(mm);
 	limit = addr + len;
 	if (limit > spt->maxaddr)
 		limit = spt->maxaddr;
@@ -127,7 +127,7 @@ static void subpage_prot_clear(unsigned long addr, unsigned long len)
 		/* now flush any existing HPTEs for the range */
 		hpte_flush_range(mm, addr, nw);
 	}
-	up_write(&mm->mmap_sem);
+	mmap_write_unlock(mm);
 }
 
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
