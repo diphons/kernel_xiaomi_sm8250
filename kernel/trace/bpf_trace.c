@@ -144,8 +144,7 @@ bpf_probe_read_kernel_common(void *dst, u32 size, const void *unsafe_ptr,
 
 	if (unlikely(ret < 0))
 		goto out;
-	ret = compat ? probe_kernel_read(dst, unsafe_ptr, size) :
-	      probe_kernel_read_strict(dst, unsafe_ptr, size);
+	ret = probe_kernel_read(dst, unsafe_ptr, size);
 	if (unlikely(ret < 0))
 out:
 		memset(dst, 0, size);

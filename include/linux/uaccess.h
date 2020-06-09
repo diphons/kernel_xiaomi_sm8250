@@ -298,8 +298,7 @@ copy_struct_from_user(void *dst, size_t ksize, const void __user *src,
 	return 0;
 }
 
-bool probe_kernel_read_allowed(const void *unsafe_src, size_t size,
-		bool strict);
+bool probe_kernel_read_allowed(const void *unsafe_src, size_t size);
 
 /*
  * probe_kernel_read(): safely attempt to read from a location
@@ -311,7 +310,6 @@ bool probe_kernel_read_allowed(const void *unsafe_src, size_t size,
  * happens, handle that and return -EFAULT.
  */
 extern long probe_kernel_read(void *dst, const void *src, size_t size);
-extern long probe_kernel_read_strict(void *dst, const void *src, size_t size);
 extern long probe_user_read(void *dst, const void __user *src, size_t size);
 
 /*
