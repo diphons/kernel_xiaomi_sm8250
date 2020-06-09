@@ -20,6 +20,7 @@
 #define _ASM_RISCV_IO_H
 
 #include <linux/types.h>
+#include <linux/pgtable.h>
 
 extern void __iomem *ioremap(phys_addr_t offset, unsigned long size);
 

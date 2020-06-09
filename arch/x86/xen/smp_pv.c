@@ -25,7 +25,6 @@
 
 #include <asm/paravirt.h>
 #include <asm/desc.h>
-#include <asm/pgtable.h>
 #include <asm/cpu.h>
 #include <asm/fpu/internal.h>
 

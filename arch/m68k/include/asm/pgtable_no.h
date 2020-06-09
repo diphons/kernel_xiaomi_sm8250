@@ -59,8 +59,6 @@ extern void *empty_zero_page;
 #define	KMAP_START	0
 #define	KMAP_END	0xffffffff
 
-#include <asm-generic/pgtable.h>
-
 #define check_pgt_cache()	do { } while (0)
 
 #endif /* _M68KNOMMU_PGTABLE_H */

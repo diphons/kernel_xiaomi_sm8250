@@ -72,6 +72,7 @@
 
 #if IS_ENABLED(CONFIG_HMM)
 
+#include <linux/pgtable.h>
 #include <linux/device.h>
 #include <linux/migrate.h>
 #include <linux/memremap.h>

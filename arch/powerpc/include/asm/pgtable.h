@@ -48,9 +48,6 @@ extern void paging_init(void);
  */
 #define kern_addr_valid(addr)	(1)
 
-#include <asm-generic/pgtable.h>
-
-
 /*
  * This gets called at the end of handling a page fault, when
  * the kernel has put a new PTE into the page table for the process.
