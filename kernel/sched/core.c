@@ -1969,7 +1969,7 @@ static int __set_cpus_allowed_ptr(struct task_struct *p,
 		goto out;
 	}
 
-	if (cpumask_equal(p->cpus_ptr, new_mask))
+	if (cpumask_equal(&p->cpus_mask, new_mask))
 		goto out;
 	dest_cpu = cpumask_any_and(cpu_valid_mask, new_mask);
 	if (dest_cpu >= nr_cpu_ids) {
