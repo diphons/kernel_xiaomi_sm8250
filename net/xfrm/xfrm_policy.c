@@ -53,7 +53,7 @@ static struct xfrm_policy_afinfo const __rcu *xfrm_policy_afinfo[AF_INET6 + 1]
 						__read_mostly;
 
 static struct kmem_cache *xfrm_dst_cache __ro_after_init;
-static __read_mostly seqcount_t xfrm_policy_hash_generation;
+static __read_mostly seqcount_mutex_t xfrm_policy_hash_generation;
 
 static void xfrm_init_pmtu(struct xfrm_dst **bundle, int nr);
 static int stale_bundle(struct dst_entry *dst);
@@ -2949,7 +2949,7 @@ void __init xfrm_init(void)
 {
 	register_pernet_subsys(&xfrm_net_ops);
 	xfrm_dev_init();
-	seqcount_init(&xfrm_policy_hash_generation);
+	seqcount_mutex_init(&xfrm_policy_hash_generation, &hash_resize_mutex);
 	xfrm_input_init();
 
 	RCU_INIT_POINTER(xfrm_if_cb, NULL);
