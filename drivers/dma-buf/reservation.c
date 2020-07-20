@@ -103,7 +103,6 @@ reservation_object_add_shared_inplace(struct reservation_object *obj,
 
 	dma_fence_get(fence);
 
-	preempt_disable();
 	write_seqcount_begin(&obj->seq);
 
 	for (i = 0; i < fobj->shared_count; ++i) {
@@ -116,7 +115,6 @@ reservation_object_add_shared_inplace(struct reservation_object *obj,
 			/* memory barrier is added by write_seqcount_begin */
 			RCU_INIT_POINTER(fobj->shared[i], fence);
 			write_seqcount_end(&obj->seq);
-			preempt_enable();
 
 			dma_fence_put(old_fence);
 			return;
@@ -141,7 +139,6 @@ reservation_object_add_shared_inplace(struct reservation_object *obj,
 	}
 
 	write_seqcount_end(&obj->seq);
-	preempt_enable();
 
 	dma_fence_put(signaled);
 }
@@ -185,7 +182,6 @@ reservation_object_add_shared_replace(struct reservation_object *obj,
 	fobj->shared_count++;
 
 done:
-	preempt_disable();
 	write_seqcount_begin(&obj->seq);
 	/*
 	 * RCU_INIT_POINTER can be used here,
@@ -193,7 +189,6 @@ done:
 	 */
 	RCU_INIT_POINTER(obj->fence, fobj);
 	write_seqcount_end(&obj->seq);
-	preempt_enable();
 
 	if (!old)
 		return;
@@ -253,14 +248,12 @@ void reservation_object_add_excl_fence(struct reservation_object *obj,
 	if (fence)
 		dma_fence_get(fence);
 
-	preempt_disable();
 	write_seqcount_begin(&obj->seq);
 	/* write_seqcount_begin provides the necessary memory barrier */
 	RCU_INIT_POINTER(obj->fence_excl, fence);
 	if (old)
 		old->shared_count = 0;
 	write_seqcount_end(&obj->seq);
-	preempt_enable();
 
 	/* inplace update, no shared fences */
 	while (i--)
@@ -343,13 +336,11 @@ retry:
 	src_list = reservation_object_get_list(dst);
 	old = reservation_object_get_excl(dst);
 
-	preempt_disable();
 	write_seqcount_begin(&dst->seq);
 	/* write_seqcount_begin provides the necessary memory barrier */
 	RCU_INIT_POINTER(dst->fence_excl, new);
 	RCU_INIT_POINTER(dst->fence, dst_list);
 	write_seqcount_end(&dst->seq);
-	preempt_enable();
 
 	if (src_list)
 		kfree_rcu(src_list, rcu);
