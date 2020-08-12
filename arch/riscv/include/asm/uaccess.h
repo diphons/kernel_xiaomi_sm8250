@@ -49,10 +49,8 @@ static inline void set_fs(mm_segment_t fs)
 	current_thread_info()->addr_limit = fs;
 }
 
-#define segment_eq(a, b) ((a) == (b))
-
+#define uaccess_kernel() (get_fs().seg == KERNEL_DS.seg)
 #define user_addr_max()	(get_fs())
-
 
 #define VERIFY_READ	0
 #define VERIFY_WRITE	1

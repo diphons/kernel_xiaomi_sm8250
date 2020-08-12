@@ -31,8 +31,8 @@ static inline void set_fs(mm_segment_t fs)
 }
 #endif
 
-#ifndef segment_eq
-#define segment_eq(a, b) ((a).seg == (b).seg)
+#ifndef uaccess_kernel
+#define uaccess_kernel() (get_fs().seg == KERNEL_DS.seg)
 #endif
 
 #define access_ok(type, addr, size) __access_ok((unsigned long)(addr),(size))
