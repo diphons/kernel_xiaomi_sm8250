@@ -1146,6 +1146,10 @@ struct rq {
 	int			idle_state_idx;
 #endif
 
+#if defined(CONFIG_PREEMPT_RT) && defined(CONFIG_SMP)
+	unsigned int		nr_pinned;
+#endif
+
 #ifdef CONFIG_SCHED_CORE
 	/* per rq */
 	struct rq		*core;
