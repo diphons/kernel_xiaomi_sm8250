@@ -1000,8 +1000,6 @@ static void __device_release_driver(struct device *dev, struct device *parent)
 			}
 		}
 
-		pm_runtime_clean_up_links(dev);
-
 		driver_sysfs_remove(dev);
 
 		if (dev->bus)
