@@ -445,7 +445,7 @@ void rq_attach_root(struct rq *rq, struct root_domain *rd)
 	struct root_domain *old_rd = NULL;
 	unsigned long flags;
 
-	raw_spin_lock_irqsave(&rq->lock, flags);
+	raw_spin_rq_lock_irqsave(rq, flags);
 
 	if (rq->rd) {
 		old_rd = rq->rd;
@@ -479,7 +479,7 @@ void rq_attach_root(struct rq *rq, struct root_domain *rd)
 	if (rq->fair_server.dl_server)
 		__dl_server_attach_root(&rq->fair_server, rq);
 
-	raw_spin_unlock_irqrestore(&rq->lock, flags);
+	raw_spin_rq_unlock_irqrestore(rq, flags);
 
 	if (old_rd)
 		call_rcu_sched(&old_rd->rcu, free_rootdomain);
