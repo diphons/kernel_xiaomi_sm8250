@@ -1245,6 +1245,8 @@ static inline raw_spinlock_t *__rq_lockp(struct rq *rq)
 
 bool cfs_prio_less(struct task_struct *a, struct task_struct *b, bool fi);
 
+extern void queue_core_balance(struct rq *rq);
+
 #else /* !CONFIG_SCHED_CORE */
 
 static inline bool sched_core_enabled(struct rq *rq)
@@ -1265,6 +1267,10 @@ static inline raw_spinlock_t *rq_lockp(struct rq *rq)
 static inline raw_spinlock_t *__rq_lockp(struct rq *rq)
 {
 	return &rq->__lock;
+}
+
+static inline void queue_core_balance(struct rq *rq)
+{
 }
 
 #endif /* CONFIG_SCHED_CORE */
