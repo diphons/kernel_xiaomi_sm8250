@@ -845,16 +845,6 @@ config ARCH_HAS_PTE_SPECIAL
 
 endmenu
 
-config FORCE_ALLOC_FROM_DMA_ZONE
-	bool "Force certain memory allocators to always return ZONE_DMA32 memory"
-	depends on ZONE_DMA32
-	help
-	  Ensure certain memory allocators always return memory from ZONE_DMA32.
-	  This option helps ensure that clients who require ZONE_DMA32 memory are
-	  always using ZONE_DMA32 memory.
-
-	  If unsure, say "n".
-
 config EMERGENCY_MEMORY
 	bool "Enable emergency memory"
 	default y if BOARD_XIAOMI
@@ -862,4 +852,3 @@ config EMERGENCY_MEMORY
 	 This enables the migration type MIGRATE_EMERGENCY which reserves
 	 a small amount of memory for non-costly non-NOWARN page allocation
 	 failure.
-
