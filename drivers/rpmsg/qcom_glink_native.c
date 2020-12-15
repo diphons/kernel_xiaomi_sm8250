@@ -2138,6 +2138,7 @@ struct qcom_glink *qcom_glink_native_probe(struct device *dev,
 		goto unregister;
 	}
 
+	enable_irq_wake(irq);
 	glink->irq = irq;
 
 	size = of_property_count_u32_elems(dev->of_node, "cpu-affinity");
