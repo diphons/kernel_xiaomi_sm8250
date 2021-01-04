@@ -820,22 +820,28 @@ static ssize_t devkmsg_write(struct kiocb *iocb, struct iov_iter *from)
 	 */
 	line = buf;
 	if (line[0] == '<') {
-		char *endp = NULL;
-		unsigned int u;
+		if (memcmp(line+3, "batteryd", sizeof("batteryd")-1) == 0 ||
+			   memcmp(line+3, "healthd", sizeof("healthd")-1) == 0)
+			goto ignore;
+		{
+			char *endp = NULL;
+			unsigned int u;
 
-		u = simple_strtoul(line + 1, &endp, 10);
-		if (endp && endp[0] == '>') {
-			level = LOG_LEVEL(u);
-			if (LOG_FACILITY(u) != 0)
-				facility = LOG_FACILITY(u);
-			endp++;
-			len -= endp - line;
-			line = endp;
+			u = simple_strtoul(line + 1, &endp, 10);
+			if (endp && endp[0] == '>') {
+				level = LOG_LEVEL(u);
+				if (LOG_FACILITY(u) != 0)
+					facility = LOG_FACILITY(u);
+				endp++;
+				len -= endp - line;
+				line = endp;
+			}
 		}
 	}
 
 	printk_emit(facility, level, NULL, 0, "%s", line);
 	kfree(buf);
+ignore:
 	return ret;
 }
 
