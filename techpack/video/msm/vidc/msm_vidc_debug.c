@@ -272,7 +272,9 @@ struct dentry *msm_vidc_debugfs_init_core(struct msm_vidc_core *core,
 	dir = debugfs_create_dir(debugfs_name, parent);
 	if (IS_ERR_OR_NULL(dir)) {
 		dir = NULL;
+#ifdef CONFIG_DEBUG_FS
 		pr_debug("Failed to create debugfs for msm_vidc\n");
+#endif
 		goto failed_create_dir;
 	}
 	if (!debugfs_create_file("info", 0444, dir, core, &core_info_fops)) {
@@ -496,7 +498,9 @@ struct dentry *msm_vidc_debugfs_init_inst(struct msm_vidc_inst *inst,
 	dir = debugfs_create_dir(debugfs_name, parent);
 	if (IS_ERR_OR_NULL(dir)) {
 		dir = NULL;
+#ifdef CONFIG_DEBUG_FS
 		pr_debug("err: %d: Failed to create debugfs for msm_vidc\n", inst->sid );
+#endif
 		goto failed_create_dir;
 	}
 
