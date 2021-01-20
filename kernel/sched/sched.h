@@ -1035,6 +1035,7 @@ struct rq {
 	unsigned long		cpu_capacity_orig;
 
 	struct callback_head	*balance_callback;
+	unsigned char		balance_push;
 	unsigned char		balance_flags;
 
 	unsigned char		idle_balance;
