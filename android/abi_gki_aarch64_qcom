@@ -2786,3 +2786,4 @@
   vfs_statx
   vm_map_ram
   vm_unmap_ram
+  static_key_disable
