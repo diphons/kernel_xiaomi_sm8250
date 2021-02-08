@@ -940,6 +940,7 @@
   system_unbound_wq
   system_wq
   sys_tz
+  task_may_not_preempt
   __tasklet_hi_schedule
   tasklet_init
   tasklet_kill
@@ -2645,6 +2646,7 @@
 # required by watchdog_v2.ko
   cpu_pm_unregister_notifier
   __cpu_present_mask
+  cpupri_find_fitness
   disable_percpu_irq
   enable_percpu_irq
   free_percpu_irq
