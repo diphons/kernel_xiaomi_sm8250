@@ -1909,6 +1909,8 @@ extern void trigger_load_balance(struct rq *rq);
 
 extern void set_cpus_allowed_common(struct task_struct *p, const struct cpumask *new_mask);
 
+extern unsigned long __read_mostly max_load_balance_interval;
+
 bool __cpu_overutilized(int cpu, int delta);
 bool cpu_overutilized(int cpu);
 
