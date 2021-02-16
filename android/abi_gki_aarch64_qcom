@@ -635,6 +635,7 @@
   phy_init
   phy_power_off
   phy_power_on
+  pick_highest_pushable_task
   pinconf_generic_dt_node_to_map
   pinctrl_dev_get_drvdata
   pinctrl_lookup_state
