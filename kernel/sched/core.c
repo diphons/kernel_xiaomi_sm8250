@@ -54,18 +54,37 @@ struct cpumask min_cap_cpu_mask;
 
 void raw_spin_rq_lock_nested(struct rq *rq, int subclass)
 {
-	raw_spin_lock_nested(rq_lockp(rq), subclass);
+	raw_spin_lock_nested(&rq->__lock, subclass);
 }
 
 bool raw_spin_rq_trylock(struct rq *rq)
 {
-	return raw_spin_trylock(rq_lockp(rq));
+	return raw_spin_trylock(&rq->__lock);
 }
 
 void raw_spin_rq_unlock(struct rq *rq)
 {
 	raw_spin_unlock(rq_lockp(rq));
 }
+
+#ifdef CONFIG_SMP
+/*
+ * double_rq_lock - safely lock two runqueues
+ */
+void double_rq_lock(struct rq *rq1, struct rq *rq2)
+{
+	lockdep_assert_irqs_disabled();
+
+	if (rq_order_less(rq2, rq1))
+		swap(rq1, rq2);
+
+	raw_spin_rq_lock(rq1);
+	if (rq_lockp(rq1) == rq_lockp(rq2))
+		return;
+
+	raw_spin_rq_lock_nested(rq2, SINGLE_DEPTH_NESTING);
+}
+#endif
 
 /*
  * __task_rq_lock - lock the rq @p resides on.
