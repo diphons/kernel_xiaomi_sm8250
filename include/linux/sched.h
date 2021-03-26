@@ -2321,4 +2321,11 @@ extern inline bool is_inherit_top_app(struct task_struct *p);
 extern inline void set_inherit_top_app(struct task_struct *p,
 					struct task_struct *from);
 extern inline void restore_inherit_top_app(struct task_struct *p);
+
+#ifdef CONFIG_SCHED_CORE
+extern void sched_core_free(struct task_struct *tsk);
+#else
+static inline void sched_core_free(struct task_struct *tsk) { }
+#endif
+
 #endif
