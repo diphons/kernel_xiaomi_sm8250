@@ -8565,7 +8565,7 @@ int can_migrate_task(struct task_struct *p, struct lb_env *env)
 	    task_is_ineligible_on_dst_cpu(p, env->dst_cpu))
 		return 0;
 
-	if ((p->flags & PF_KTHREAD) && kthread_is_per_cpu(p))
+	if (kthread_is_per_cpu(p))
 		return 0;
 
 	if (!cpumask_test_cpu(env->dst_cpu, p->cpus_ptr)) {
