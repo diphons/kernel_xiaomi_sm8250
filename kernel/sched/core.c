@@ -8225,6 +8225,7 @@ void __init sched_init_smp(void)
 	/* Move init over to a non-isolated CPU */
 	if (set_cpus_allowed_ptr(current, housekeeping_cpumask(HK_TYPE_DOMAIN)) < 0)
 		BUG();
+	current->flags &= ~PF_NO_SETAFFINITY;
 	sched_init_granularity();
 
 	init_sched_rt_class();
