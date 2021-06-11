@@ -1532,9 +1532,9 @@ update_stats_dequeue_sleep(struct rq *rq, struct task_struct *p)
 {
 #ifdef CONFIG_SCHEDSTATS
 	struct sched_entity *se = &p->se;
-	if (p->state & TASK_INTERRUPTIBLE)
+	if (READ_ONCE(p->__state) & TASK_INTERRUPTIBLE)
 		se->statistics.sleep_start = rq_clock(rq);
-	if (p->state & TASK_UNINTERRUPTIBLE)
+	if (READ_ONCE(p->__state) & TASK_UNINTERRUPTIBLE)
 		se->statistics.block_start = rq_clock(rq);
 #endif
 }
