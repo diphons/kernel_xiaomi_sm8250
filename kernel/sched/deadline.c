@@ -2602,6 +2602,8 @@ static void switched_to_dl(struct rq *rq, struct task_struct *p)
 			wakeup_preempt_dl(rq, p, 0);
 		else
 			resched_curr(rq);
+	} else {
+		update_dl_rq_load_avg(rq_clock_pelt(rq), rq, 0);
 	}
 }
 
