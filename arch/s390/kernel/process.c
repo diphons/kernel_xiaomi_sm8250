@@ -185,13 +185,13 @@ int dump_fpu (struct pt_regs * regs, s390_fp_regs *fpregs)
 }
 EXPORT_SYMBOL(dump_fpu);
 
-unsigned long get_wchan(struct task_struct *p)
+unsigned long __get_wchan(struct task_struct *p)
 {
 	struct stack_frame *sf, *low, *high;
 	unsigned long return_address;
 	int count;
 
-	if (!p || p == current || task_is_running(p) || !task_stack_page(p))
+	if (!task_stack_page(p))
 		return 0;
 
 	if (!try_get_task_stack(p))
