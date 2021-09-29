@@ -789,13 +789,10 @@ unsigned long arch_randomize_brk(struct mm_struct *mm)
  * because the task might wake up and we might look at a stack
  * changing under us.
  */
-unsigned long get_wchan(struct task_struct *p)
+unsigned long __get_wchan(struct task_struct *p)
 {
 	unsigned long start, bottom, top, sp, fp, ip, ret = 0;
 	int count = 0;
-
-	if (!p || p == current || task_is_running(p))
-		return 0;
 
 	if (!try_get_task_stack(p))
 		return 0;

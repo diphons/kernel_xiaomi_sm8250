@@ -767,16 +767,13 @@ int dump_fpu (struct pt_regs * regs, elf_fpregset_t * fpregs)
 }
 EXPORT_SYMBOL(dump_fpu);
 
-unsigned long get_wchan(struct task_struct *task)
+unsigned long __get_wchan(struct task_struct *task)
 {
 	unsigned long pc, fp, bias = 0;
 	struct thread_info *tp;
 	struct reg_window *rw;
         unsigned long ret = 0;
 	int count = 0; 
-
-	if (!task || task == current || task_is_running(task))
-		goto out;
 
 	tp = task_thread_info(task);
 	bias = STACK_BIAS;

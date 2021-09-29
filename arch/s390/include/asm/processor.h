@@ -225,7 +225,7 @@ static inline void release_thread(struct task_struct *tsk) { }
 /* Free guarded storage control block */
 void guarded_storage_release(struct task_struct *tsk);
 
-unsigned long get_wchan(struct task_struct *p);
+unsigned long __get_wchan(struct task_struct *p);
 #define task_pt_regs(tsk) ((struct pt_regs *) \
         (task_stack_page(tsk) + THREAD_SIZE) - 1)
 #define KSTK_EIP(tsk)	(task_pt_regs(tsk)->psw.addr)

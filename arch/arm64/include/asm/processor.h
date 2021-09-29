@@ -231,7 +231,7 @@ struct task_struct;
 /* Free all resources held by a thread. */
 extern void release_thread(struct task_struct *);
 
-unsigned long get_wchan(struct task_struct *p);
+unsigned long __get_wchan(struct task_struct *p);
 
 /* Thread switching */
 extern struct task_struct *cpu_switch_to(struct task_struct *prev,
