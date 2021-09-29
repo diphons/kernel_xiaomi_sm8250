@@ -2004,13 +2004,10 @@ int validate_sp(unsigned long sp, struct task_struct *p,
 
 EXPORT_SYMBOL(validate_sp);
 
-unsigned long get_wchan(struct task_struct *p)
+unsigned long ___get_wchan(struct task_struct *p)
 {
 	unsigned long ip, sp;
 	int count = 0;
-
-	if (!p || p == current || task_is_running(p))
-		return 0;
 
 	sp = p->thread.ksp;
 	if (!validate_sp(sp, p, STACK_FRAME_OVERHEAD))
@@ -2030,6 +2027,23 @@ unsigned long get_wchan(struct task_struct *p)
 	return 0;
 }
 
+<<<<<<< HEAD
+=======
+unsigned long __get_wchan(struct task_struct *p)
+{
+	unsigned long ret;
+
+	if (!try_get_task_stack(p))
+		return 0;
+
+	ret = ___get_wchan(p);
+
+	put_task_stack(p);
+
+	return ret;
+}
+
+>>>>>>> 42a20f86dc19f (sched: Add wrapper for get_wchan() to keep task blocked)
 static int kstack_depth_to_print = CONFIG_PRINT_STACK_DEPTH;
 
 void show_stack(struct task_struct *tsk, unsigned long *stack)
