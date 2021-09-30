@@ -2120,6 +2120,9 @@ static inline int hrtick_enabled(struct rq *rq)
 
 #endif /* CONFIG_SCHED_HRTICK */
 
+#ifdef CONFIG_SPRD_ROTATION_TASK
+void check_for_task_rotation(struct rq *src_rq);
+#endif
 #ifdef CONFIG_SCHED_WALT
 u64 sched_ktime_clock(void);
 unsigned long
