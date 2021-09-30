@@ -8219,7 +8219,7 @@ static void select_cpu_candidates(struct sched_domain *sd, cpumask_t *cpus,
 		max_spare_cap = 0;
 
 		for_each_cpu_and(cpu, perf_domain_span(pd), sched_domain_span(sd)) {
-			if (!cpumask_test_cpu(cpu, &p->cpus_allowed))
+			if (!cpumask_test_cpu(cpu, &p->cpus_allowed) || is_reserved(cpu))
 				continue;
 
 			util = cpu_util_next(cpu, p, cpu);
@@ -11442,6 +11442,12 @@ no_move:
 
 			raw_spin_lock_irqsave(&busiest->lock, flags);
 
+			if (is_reserved(this_cpu) ||
+				is_reserved(cpu_of(busiest))) {
+				raw_spin_unlock_irqrestore(&busiest->lock, flags);
+				*continue_balancing = 0;
+				goto out;
+			}
 			/*
 			 * The CPUs are marked as reserved if tasks
 			 * are pushed/pulled from other CPUs. In that case,

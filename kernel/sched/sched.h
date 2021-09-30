@@ -1500,6 +1500,11 @@ static inline void sched_domains_numa_masks_set(unsigned int cpu) { }
 static inline void sched_domains_numa_masks_clear(unsigned int cpu) { }
 #endif
 
+#if defined(CONFIG_NUMA_BALANCING) || defined(CONFIG_SPRD_ROTATION_TASK)
+extern int migrate_swap(struct task_struct *p, struct task_struct *t,
+			int cpu, int scpu);
+#endif
+
 #ifdef CONFIG_NUMA_BALANCING
 /* The regions in numa_faults array from task_struct */
 enum numa_faults_stats {
@@ -2168,7 +2173,12 @@ unsigned long
 cpu_util_freq_walt(int cpu, struct sched_walt_cpu_load *walt_load);
 #else
 #define sched_ravg_window TICK_NSEC
+#ifdef CONFIG_SPRD_ROTATION_TASK
+void check_for_task_rotation(struct rq *src_rq);
+u64 sched_ktime_clock(void);
+#else
 #define sched_ktime_clock ktime_get_ns
+#endif
 #endif
 
 #ifndef arch_scale_freq_capacity
