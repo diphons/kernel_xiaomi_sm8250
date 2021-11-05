@@ -330,24 +330,18 @@ static ssize_t mem_used_max_store(struct device *dev,
 	return len;
 }
 
-static ssize_t idle_store(struct device *dev,
-		struct device_attribute *attr, const char *buf, size_t len)
+/*
+ * Mark all pages which are older than or equal to cutoff as IDLE.
+ * Callers should hold the zram init lock in read mode
+ */
+static void mark_idle(struct zram *zram, ktime_t cutoff)
 {
-	struct zram *zram = dev_to_zram(dev);
+	int is_idle = 1;
 	unsigned long nr_pages = zram->disksize >> PAGE_SHIFT;
 	int index;
 #ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
 	int mark_nr = 0;
 #endif
-
-	if (!sysfs_streq(buf, "all"))
-		return -EINVAL;
-
-	down_read(&zram->init_lock);
-	if (!init_done(zram)) {
-		up_read(&zram->init_lock);
-		return -EINVAL;
-	}
 
 	for (index = 0; index < nr_pages; index++) {
 		/*
@@ -357,25 +351,26 @@ static ssize_t idle_store(struct device *dev,
 		zram_slot_lock(zram, index);
 		if (zram_allocated(zram, index) &&
 				!zram_test_flag(zram, index, ZRAM_UNDER_WB)) {
+#ifdef CONFIG_ZRAM_MEMORY_TRACKING
+			is_idle = !cutoff || ktime_after(cutoff, zram->table[index].ac_time);
+#endif
 #ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
 			zram_inc_idle_count(zram, index);
 			if (!zram_test_flag(zram, index, ZRAM_IDLE)) {
-				zram_set_flag(zram, index, ZRAM_IDLE);
+				if (is_idle)
+					zram_set_flag(zram, index, ZRAM_IDLE);
 				mark_nr++;
 			}
 #else
-			zram_set_flag(zram, index, ZRAM_IDLE);
+			if (is_idle)
+				zram_set_flag(zram, index, ZRAM_IDLE);
 #endif
 		}
 		zram_slot_unlock(zram, index);
 	}
-
-	up_read(&zram->init_lock);
-
 #ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
 	pr_info("Mark IDLE finished. Mark %d pages\n", mark_nr);
 #endif
-	return len;
 }
 
 #ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
@@ -402,12 +397,43 @@ static ssize_t new_store(struct device *dev,
 		zram_clear_idle_count(zram, index);
 		zram_slot_unlock(zram, index);
 	}
-
-	up_read(&zram->init_lock);
-
-	return len;
 }
 #endif
+
+static ssize_t idle_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t len)
+{
+	struct zram *zram = dev_to_zram(dev);
+	ktime_t cutoff_time = 0;
+	ssize_t rv = -EINVAL;
+
+	if (!sysfs_streq(buf, "all")) {
+		/*
+		 * If it did not parse as 'all' try to treat it as an integer when
+		 * we have memory tracking enabled.
+		 */
+		u64 age_sec;
+
+		if (IS_ENABLED(CONFIG_ZRAM_MEMORY_TRACKING) && !kstrtoull(buf, 0, &age_sec))
+			cutoff_time = ktime_sub(ktime_get_boottime(),
+					ns_to_ktime(age_sec * NSEC_PER_SEC));
+		else
+			goto out;
+	}
+
+	down_read(&zram->init_lock);
+	if (!init_done(zram))
+		goto out_unlock;
+
+	/* A cutoff_time of 0 marks everything as idle, this is the "all" behavior */
+	mark_idle(zram, cutoff_time);
+	rv = len;
+
+out_unlock:
+	up_read(&zram->init_lock);
+out:
+	return rv;
+}
 
 #ifdef CONFIG_ZRAM_WRITEBACK
 static ssize_t writeback_limit_enable_store(struct device *dev,
