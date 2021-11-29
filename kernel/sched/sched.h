@@ -2792,6 +2792,17 @@ static inline bool sched_energy_enabled(void) { return false; }
 extern u64 avg_vruntime(struct cfs_rq *cfs_rq);
 
 #ifdef CONFIG_SMP
+static inline bool is_per_cpu_kthread(struct task_struct *p)
+{
+	if (!(p->flags & PF_KTHREAD))
+		return false;
+
+	if (p->nr_cpus_allowed != 1)
+		return false;
+
+	return true;
+}
+
 static inline void sched_irq_work_queue(struct irq_work *work)
 {
 	if (likely(cpu_online(raw_smp_processor_id())))
