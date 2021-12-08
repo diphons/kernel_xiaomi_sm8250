@@ -539,6 +539,18 @@ int bpf_jit_harden   __read_mostly;
 long bpf_jit_limit   __read_mostly;
 long bpf_jit_limit_max __read_mostly;
 
+#ifndef CONFIG_MODULES
+void * __weak module_alloc(unsigned long size)
+{
+	return vmalloc_exec(size);
+}
+
+void __weak module_memfree(void *module_region)
+{
+	vfree(module_region);
+}
+#endif
+
 static void
 bpf_prog_ksym_set_addr(struct bpf_prog *prog)
 {
