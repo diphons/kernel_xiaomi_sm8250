@@ -138,6 +138,9 @@ struct psi_trigger {
 	 * Stall time growth for the last event in ns.
 	 */
 	u64 last_event_growth;
+
+	/* Deferred event(s) from previous ratelimit window */
+	bool pending_event;
 };
 
 struct psi_group {
