@@ -4571,6 +4571,9 @@ struct bpf_sock_ops {
 				 * the outgoing header has not
 				 * been written yet.
 				 */
+	__u32 sk_uid;
+	__u32 voip_daddr;
+	__u32 voip_dport;
 };
 
 /* Definitions for bpf_sock_ops_cb_flags */
@@ -4735,6 +4738,8 @@ enum {
 					 * has already been written
 					 * by the kernel or the
 					 * earlier bpf-progs.
+					 */
+	BPF_SOCK_OPS_VOIP_CB,		/* Called on every udp states.
 					 */
 };
 
