@@ -1345,19 +1345,16 @@ static bool __maybe_unused rcu_try_advance_all_cbs(void)
  *
  * The caller must have disabled interrupts.
  */
-int rcu_needs_cpu(u64 basemono, u64 *nextevt)
+int rcu_needs_cpu(void)
 {
 	struct rcu_data *rdp = this_cpu_ptr(&rcu_data);
-	unsigned long dj;
 
 	lockdep_assert_irqs_disabled();
 
 	/* If no non-offloaded callbacks, RCU doesn't need the CPU. */
 	if (rcu_segcblist_empty(&rdp->cblist) ||
-	    rcu_segcblist_is_offloaded(&this_cpu_ptr(&rcu_data)->cblist)) {
-		*nextevt = KTIME_MAX;
+	    rcu_segcblist_is_offloaded(&this_cpu_ptr(&rcu_data)->cblist))
 		return 0;
-	}
 
 	/* Attempt to advance callbacks. */
 	if (rcu_try_advance_all_cbs()) {
@@ -1367,10 +1364,6 @@ int rcu_needs_cpu(u64 basemono, u64 *nextevt)
 	}
 	rdp->last_accelerate = jiffies;
 
-	/* Request timer and round. */
-	dj = round_up(rcu_idle_gp_delay + jiffies, rcu_idle_gp_delay) - jiffies;
-
-	*nextevt = basemono + dj * TICK_NSEC;
 	return 0;
 }
 
