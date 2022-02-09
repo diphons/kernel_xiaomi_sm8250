@@ -283,13 +283,6 @@ static int devfreq_gpubw_event_handler(struct devfreq *devfreq,
 	unsigned long freq;
 	struct device_node *node = devfreq->dev.parent->of_node;
 
-	/*
-	 * We want to restrict this governor be set only for
-	 * gpu devfreq devices.
-	 */
-	if (!of_device_is_compatible(node, "qcom,kgsl-busmon"))
-		return -EINVAL;
-
 	mutex_lock(&devfreq->lock);
 	freq = devfreq->previous_freq;
 	switch (event) {
