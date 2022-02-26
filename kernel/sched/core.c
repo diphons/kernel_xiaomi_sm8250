@@ -3990,6 +3990,7 @@ context_switch(struct rq *rq, struct task_struct *prev,
 			rq->prev_mm = prev->active_mm;
 			prev->active_mm = NULL;
 		}
+		lru_gen_use_mm(next->mm);
 	}
 
 	rq->clock_update_flags &= ~(RQCF_ACT_SKIP|RQCF_REQ_SKIP);
