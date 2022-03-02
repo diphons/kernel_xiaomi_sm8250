@@ -493,7 +493,7 @@ static void task_contending(struct sched_dl_entity *dl_se, int flags)
 
 static inline int is_leftmost(struct sched_dl_entity *dl_se, struct dl_rq *dl_rq)
 {
-	return dl_rq->root.rb_leftmost == &dl_se->rb_node;
+	return rb_first_cached(&dl_rq->root) == &dl_se->rb_node;
 }
 
 static void init_dl_rq_bw_ratio(struct dl_rq *dl_rq);
@@ -1850,6 +1850,9 @@ static void init_dl_inactive_task_timer(struct sched_dl_entity *dl_se)
 	timer->function = inactive_task_timer;
 }
 
+#define __node_2_dle(node) \
+	rb_entry((node), struct sched_dl_entity, rb_node)
+
 #ifdef CONFIG_SMP
 
 static void inc_dl_deadline(struct dl_rq *dl_rq, u64 deadline)
@@ -1879,10 +1882,9 @@ static void dec_dl_deadline(struct dl_rq *dl_rq, u64 deadline)
 		cpudl_clear(&rq->rd->cpudl, rq->cpu);
 		cpupri_set(&rq->rd->cpupri, rq->cpu, rq->rt.highest_prio.curr);
 	} else {
-		struct rb_node *leftmost = dl_rq->root.rb_leftmost;
-		struct sched_dl_entity *entry;
+		struct rb_node *leftmost = rb_first_cached(&dl_rq->root);
+		struct sched_dl_entity *entry = __node_2_dle(leftmost);
 
-		entry = rb_entry(leftmost, struct sched_dl_entity, rb_node);
 		dl_rq->earliest_dl.curr = entry->deadline;
 		cpudl_set(&rq->rd->cpudl, rq->cpu, entry->deadline);
 	}
@@ -1917,9 +1919,6 @@ void dec_dl_tasks(struct sched_dl_entity *dl_se, struct dl_rq *dl_rq)
 	dec_dl_deadline(dl_rq, dl_se->deadline);
 	dec_dl_migration(dl_se, dl_rq);
 }
-
-#define __node_2_dle(node) \
-	rb_entry((node), struct sched_dl_entity, rb_node)
 
 static inline bool __dl_less(struct rb_node *a, const struct rb_node *b)
 {
@@ -2419,7 +2418,7 @@ static struct sched_dl_entity *pick_next_dl_entity(struct dl_rq *dl_rq)
 	if (!left)
 		return NULL;
 
-	return rb_entry(left, struct sched_dl_entity, rb_node);
+	return __node_2_dle(left);
 }
 
 /*
@@ -2527,15 +2526,17 @@ static int pick_dl_task(struct rq *rq, struct task_struct *p, int cpu)
  */
 static struct task_struct *pick_earliest_pushable_dl_task(struct rq *rq, int cpu)
 {
-	struct rb_node *next_node = rq->dl.pushable_dl_tasks_root.rb_leftmost;
 	struct task_struct *p = NULL;
+	struct rb_node *next_node;
 
 	if (!has_pushable_dl_tasks(rq))
 		return NULL;
 
+	next_node = rb_first_cached(&rq->dl.pushable_dl_tasks_root);
+
 next_node:
 	if (next_node) {
-		p = rb_entry(next_node, struct task_struct, pushable_dl_tasks);
+		p = __node_2_pdl(next_node);
 
 		if (pick_dl_task(rq, p, cpu))
 			return p;
@@ -2698,8 +2699,7 @@ static struct task_struct *pick_next_pushable_dl_task(struct rq *rq)
 	if (!has_pushable_dl_tasks(rq))
 		return NULL;
 
-	p = rb_entry(rq->dl.pushable_dl_tasks_root.rb_leftmost,
-		     struct task_struct, pushable_dl_tasks);
+	p = __node_2_pdl(rb_first_cached(&rq->dl.pushable_dl_tasks_root));
 
 	BUG_ON(rq->cpu != task_cpu(p));
 	BUG_ON(task_current(rq, p));
