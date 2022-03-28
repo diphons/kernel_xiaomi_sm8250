@@ -608,20 +608,10 @@ static int lpm_cpuidle_select(struct cpuidle_driver *drv,
 static int lpm_cpuidle_enter(struct cpuidle_device *dev,
 		struct cpuidle_driver *drv, int idx)
 {
-	bool success = false;
-	ktime_t start = ktime_get();
-
-	lpm_stats_cpu_enter(idx, 0);
-
 	if (need_resched())
-		goto exit;
+		return idx;
 
 	wfi();
-	success = true;
-
-exit:
-	lpm_stats_cpu_exit(idx, 0, success);
-
 	return idx;
 }
 
