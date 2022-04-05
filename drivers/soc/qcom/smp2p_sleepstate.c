@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  */
 #include <linux/module.h>
 #include <linux/suspend.h>
@@ -96,6 +96,7 @@ static int smp2p_sleepstate_probe(struct platform_device *pdev)
 	return 0;
 err:
 	wakeup_source_unregister(notify_ws);
+	__pm_relax(notify_ws);
 err_ws:
 	unregister_pm_notifier(&sleepstate_pm_nb);
 	return ret;
