@@ -1088,7 +1088,7 @@ enum lru_status binder_alloc_free_page(struct list_head *item,
 
 	if (!mmget_not_zero(mm))
 		goto err_mmget;
-	if (!down_read_trylock(&mm->mmap_sem))
+	if (!mmap_read_trylock(mm))
 		goto err_mmap_read_lock_failed;
 	if (!spin_trylock(&alloc->lock))
 		goto err_get_alloc_lock_failed;
@@ -1121,7 +1121,7 @@ enum lru_status binder_alloc_free_page(struct list_head *item,
 		trace_binder_unmap_user_end(alloc, index);
 	}
 
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	mmput_async(mm);
 	__free_page(page_to_free);
 
@@ -1132,7 +1132,7 @@ err_invalid_vma:
 err_page_already_freed:
 	spin_unlock(&alloc->lock);
 err_get_alloc_lock_failed:
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 err_mmap_read_lock_failed:
 	mmput_async(mm);
 err_mmget:
