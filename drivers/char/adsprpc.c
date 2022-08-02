@@ -180,8 +180,10 @@ enum fastrpc_remote_subsys_state {
 static int fastrpc_pdr_notifier_cb(struct notifier_block *nb,
 					unsigned long code,
 					void *data);
+#ifdef CONFIG_DEBUG_FS
 static struct dentry *debugfs_root;
 static struct dentry *debugfs_global_file;
+#endif
 
 static inline void mem_barrier(void)
 {
@@ -4263,6 +4265,7 @@ static int fastrpc_set_process_info(struct fastrpc_file *fl)
 	cur_comm[TASK_COMM_LEN-1] = '\0';
 	fl->tgid = current->tgid;
 	snprintf(strpid, PID_SIZE, "%d", current->pid);
+#ifdef CONFIG_DEBUG_FS
 	if (debugfs_root) {
 		buf_size = strlen(cur_comm) + strlen("_")
 			+ strlen(strpid) + 1;
@@ -4292,6 +4295,7 @@ static int fastrpc_set_process_info(struct fastrpc_file *fl)
 			fl->debug_buf = NULL;
 		}
 	}
+#endif
 	return err;
 }
 
@@ -5023,6 +5027,7 @@ static int fastrpc_cb_probe(struct device *dev)
 	}
 
 	chan->sesscount++;
+#ifdef CONFIG_DEBUG_FS
 	if (debugfs_root) {
 		debugfs_global_file = debugfs_create_file("global", 0644,
 			debugfs_root, NULL, &debugfs_fops);
@@ -5032,6 +5037,7 @@ static int fastrpc_cb_probe(struct device *dev)
 			debugfs_global_file = NULL;
 		}
 	}
+#endif
 bail:
 	return err;
 }
@@ -5566,7 +5572,9 @@ static void __exit fastrpc_device_exit(void)
 		wakeup_source_unregister(me->wake_source);
 	if (me->wake_source_secure)
 		wakeup_source_unregister(me->wake_source_secure);
+#ifdef CONFIG_DEBUG_FS
 	debugfs_remove_recursive(debugfs_root);
+#endif
 }
 
 late_initcall(fastrpc_device_init);
