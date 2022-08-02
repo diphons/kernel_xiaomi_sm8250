@@ -313,6 +313,7 @@ enum cnss_utils_cc_src cnss_utils_get_cc_source(struct device *dev)
 }
 EXPORT_SYMBOL(cnss_utils_get_cc_source);
 
+#ifdef CONFIG_DEBUG_FS
 static ssize_t cnss_utils_mac_write(struct file *fp,
 				    const char __user *user_buf,
 				    size_t count, loff_t *off)
@@ -425,7 +426,6 @@ static const struct file_operations cnss_utils_mac_fops = {
 	.llseek		= seq_lseek,
 };
 
-#ifdef CONFIG_DEBUG_FS
 static int cnss_utils_debugfs_create(struct cnss_utils_priv *priv)
 {
 	int ret = 0;
