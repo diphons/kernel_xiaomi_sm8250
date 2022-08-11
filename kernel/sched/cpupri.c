@@ -171,7 +171,7 @@ int cpupri_find_fitness(struct cpupri *cp, struct task_struct *p,
 	bool drop_nopreempts = task_pri > CPUPRI_NORMAL;
 	int idx, cpu;
 
-	BUG_ON(task_pri >= CPUPRI_NR_PRIORITIES);
+	WARN_ON_ONCE(task_pri >= CPUPRI_NR_PRIORITIES);
 
 retry:
 	for (idx = 0; idx < task_pri; idx++) {
