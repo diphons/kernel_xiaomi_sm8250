@@ -401,8 +401,8 @@ static void task_non_contending(struct sched_dl_entity *dl_se)
 					sub_rq_bw(dl_se, &rq->dl);
 				raw_spin_lock(&dl_b->lock);
 				__dl_sub(dl_b, dl_se->dl_bw, dl_bw_cpus(task_cpu(p)));
-				__dl_clear_params(dl_se);
 				raw_spin_unlock(&dl_b->lock);
+				__dl_clear_params(dl_se);
 			}
 		}
 
