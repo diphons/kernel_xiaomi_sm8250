@@ -2424,7 +2424,7 @@ static int affine_move_task(struct rq *rq, struct task_struct *p, struct rq_flag
 		return -EINVAL;
 	}
 
-	if (task_running(rq, p) || p->__state == TASK_WAKING) {
+	if (task_on_cpu(rq, p) || p->__state == TASK_WAKING) {
 
 		/*
 		 * MIGRATE_ENABLE gets here because 'p == current', but for
@@ -2789,11 +2789,11 @@ unsigned long wait_task_inactive(struct task_struct *p, unsigned int match_state
 		 *
 		 * NOTE! Since we don't hold any locks, it's not
 		 * even sure that "rq" stays as the right runqueue!
-		 * But we don't care, since "task_running()" will
+		 * But we don't care, since "task_on_cpu()" will
 		 * return false if the runqueue has changed and p
 		 * is actually now running somewhere else!
 		 */
-		while (task_running(rq, p)) {
+		while (task_on_cpu(rq, p)) {
 			if (match_state && unlikely(READ_ONCE(p->__state) != match_state))
 				return 0;
 			cpu_relax();
@@ -2806,7 +2806,7 @@ unsigned long wait_task_inactive(struct task_struct *p, unsigned int match_state
 		 */
 		rq = task_rq_lock(p, &rf);
 		trace_sched_wait_task(p);
-		running = task_running(rq, p);
+		running = task_on_cpu(rq, p);
 		queued = task_on_rq_queued(p);
 		ncsw = 0;
 		if (!match_state || READ_ONCE(p->__state) == match_state)
@@ -3224,7 +3224,7 @@ static int ttwu_remote(struct task_struct *p, int wake_flags)
 		update_rq_clock(rq);
 		if (p->se.sched_delayed)
 			enqueue_task(rq, p, ENQUEUE_NOCLOCK | ENQUEUE_DELAYED);
-		if (!task_running(rq, p)) {
+		if (!task_on_cpu(rq, p)) {
 			/*
 			 * When on_rq && !on_cpu the task is preempted, see if
 			 * it should preempt the task that is current now.
@@ -5881,7 +5881,7 @@ void set_user_nice(struct task_struct *p, long nice)
 		 * If the task increased its priority or is running and
 		 * lowered its priority, then reschedule its CPU:
 		 */
-		if (delta < 0 || (delta > 0 && task_running(rq, p)))
+		if (delta < 0 || (delta > 0 && task_on_cpu(rq, p)))
 			resched_curr(rq);
 	}
 	if (running)
@@ -7319,7 +7319,7 @@ again:
 	if (curr->sched_class != p->sched_class)
 		goto out_unlock;
 
-	if (task_running(p_rq, p) || !task_is_running(p))
+	if (task_on_cpu(p_rq, p) || !task_is_running(p))
 		goto out_unlock;
 
 	yielded = curr->sched_class->yield_to_task(rq, p);
