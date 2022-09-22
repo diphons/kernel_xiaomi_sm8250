@@ -1700,6 +1700,12 @@ static inline void unregister_sched_domain_sysctl(void)
 }
 #endif
 
+static inline const struct cpumask *task_user_cpus(struct task_struct *p)
+{
+	if (!p->user_cpus_ptr)
+		return cpu_possible_mask; /* &init_task.cpus_mask */
+	return p->user_cpus_ptr;
+}
 #else
 
 static inline void sched_ttwu_pending(void) { }
@@ -1911,6 +1917,7 @@ extern const u32		sched_prio_to_wmult[40];
 
 struct affinity_context {
 	const struct cpumask *new_mask;
+	struct cpumask *user_mask;
 	unsigned int flags;
 };
 
@@ -2031,6 +2038,7 @@ extern struct task_struct *pick_next_task_idle(struct rq *rq);
 #define SCA_CHECK		0x01
 #define SCA_MIGRATE_DISABLE	0x02
 #define SCA_MIGRATE_ENABLE	0x04
+#define SCA_USER		0x08
 
 #ifdef CONFIG_SMP
 
