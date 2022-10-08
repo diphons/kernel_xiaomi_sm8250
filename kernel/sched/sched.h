@@ -963,6 +963,12 @@ struct uclamp_rq {
 DECLARE_STATIC_KEY_FALSE(sched_uclamp_used);
 #endif /* CONFIG_UCLAMP_TASK */
 
+struct rq;
+struct balance_callback {
+	struct balance_callback *next;
+	void (*func)(struct rq *rq);
+};
+
 /*
  * This is the main, per-CPU runqueue data structure.
  *
@@ -1050,7 +1056,7 @@ struct rq {
 
 	unsigned long		cpu_capacity;
 
-	struct callback_head	*balance_callback;
+	struct balance_callback *balance_callback;
 	unsigned char		balance_flags;
 
 	unsigned char		idle_balance;
@@ -1736,7 +1742,7 @@ extern int migrate_swap(struct task_struct *p, struct task_struct *t,
 
 static inline void
 queue_balance_callback(struct rq *rq,
-		       struct callback_head *head,
+		       struct balance_callback *head,
 		       void (*func)(struct rq *rq))
 {
 	lockdep_assert_rq_held(rq);
@@ -1744,7 +1750,7 @@ queue_balance_callback(struct rq *rq,
 	if (unlikely(head->next || (rq->balance_flags & BALANCE_PUSH)))
 		return;
 
-	head->func = (void (*)(struct callback_head *))func;
+	head->func = func;
 	head->next = rq->balance_callback;
 	rq->balance_callback = head;
 	rq->balance_flags |= BALANCE_WORK;
