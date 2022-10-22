@@ -7462,6 +7462,8 @@ int dsi_display_set_mode(struct dsi_display *display,
 	int rc = 0;
 	struct dsi_display_mode adj_mode;
 	struct dsi_mode_info timing;
+	struct mi_drm_notifier notify_data;
+	int fps;
 
 	if (!display || !mode || !display->panel) {
 		DSI_ERR("Invalid params\n");
@@ -7513,6 +7515,10 @@ int dsi_display_set_mode(struct dsi_display *display,
 	}
 
 	if (display->panel->cur_mode->timing.refresh_rate != timing.refresh_rate) {
+		fps = timing.refresh_rate;
+		notify_data.data = &fps;
+		notify_data.id = mi_get_disp_id(display);
+		mi_drm_notifier_call_chain(MI_DRM_FPS_CHANGE_EVENT, &notify_data);
 		sysfs_notify(&display->dev->kobj, NULL, "dynamic_fps");
 	}
 
