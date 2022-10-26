@@ -30,6 +30,7 @@
 #include <net/inet_sock.h>
 #include <net/ip_fib.h>
 #include <net/arp.h>
+#include <net/arp_scan.h>
 #include <net/ndisc.h>
 #include <linux/in_route.h>
 #include <linux/rtnetlink.h>
@@ -365,7 +366,23 @@ static inline struct neighbour *ip_neigh_gw4(struct net_device *dev,
 	return neigh;
 }
 
-static inline struct neighbour *ip_neigh_for_gw(struct rtable *rt,
+static inline struct neighbour *ip_neigh_arp(struct net *net, struct sock *sk,
+					     struct net_device *dev,
+					     __be32 daddr)
+{
+	struct neighbour *neigh;
+
+	neigh = __ipv4_neigh_lookup_noref(dev, (__force u32)daddr);
+	if (unlikely(!neigh)) {
+		neigh = __neigh_create(&arp_tbl, &daddr, dev, false);
+			arp_scan_create_neigh((__force u32)daddr, __kuid_val(sock_net_uid(net, sk)));
+	}
+
+	return neigh;
+}
+
+static inline struct neighbour *ip_neigh_for_gw(struct net *net, struct sock *sk, 
+						struct rtable *rt,
 						struct sk_buff *skb,
 						bool *is_v6gw)
 {
@@ -373,12 +390,12 @@ static inline struct neighbour *ip_neigh_for_gw(struct rtable *rt,
 	struct neighbour *neigh;
 
 	if (likely(rt->rt_gw_family == AF_INET)) {
-		neigh = ip_neigh_gw4(dev, rt->rt_gw4);
+		neigh = ip_neigh_arp(net, sk, dev, rt->rt_gw4);
 	} else if (rt->rt_gw_family == AF_INET6) {
 		neigh = ip_neigh_gw6(dev, &rt->rt_gw6);
 		*is_v6gw = true;
 	} else {
-		neigh = ip_neigh_gw4(dev, ip_hdr(skb)->daddr);
+		neigh = ip_neigh_arp(net, sk, dev, ip_hdr(skb)->daddr);
 	}
 	return neigh;
 }

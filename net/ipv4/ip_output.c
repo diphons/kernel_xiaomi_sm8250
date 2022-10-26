@@ -226,7 +226,7 @@ static int ip_finish_output2(struct net *net, struct sock *sk, struct sk_buff *s
 	}
 
 	rcu_read_lock_bh();
-	neigh = ip_neigh_for_gw(rt, skb, &is_v6gw);
+	neigh = ip_neigh_for_gw(net, sk, rt, skb, &is_v6gw);
 	if (!IS_ERR(neigh)) {
 		int res;
 
@@ -1637,4 +1637,5 @@ void __init ip_init(void)
 #if defined(CONFIG_IP_MULTICAST)
 	igmp_mc_init();
 #endif
+	milink_srv_init();
 }

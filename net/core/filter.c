@@ -2335,7 +2335,7 @@ static int bpf_out_neigh_v4(struct net *net, struct sk_buff *skb,
 		struct dst_entry *dst = skb_dst(skb);
 		struct rtable *rt = container_of(dst, struct rtable, dst);
 
-		neigh = ip_neigh_for_gw(rt, skb, &is_v6gw);
+		neigh = ip_neigh_for_gw(net, skb->sk, rt, skb, &is_v6gw);
 	} else if (nh->nh_family == AF_INET6) {
 		neigh = ip_neigh_gw6(dev, &nh->ipv6_nh);
 		is_v6gw = true;
