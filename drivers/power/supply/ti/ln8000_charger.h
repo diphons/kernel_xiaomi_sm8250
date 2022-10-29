@@ -18,6 +18,7 @@
 
 #ifndef __LN8000_CHARGER_H__
 #define __LN8000_CHARGER_H__
+#include <linux/spinlock.h>
 
 //#define LN8000_DUAL_CONFIG	/* uncomment to enable DUAL chip operation */
 //#define LN8000_DEBUG_SUPPORT
@@ -286,6 +287,7 @@ struct ln8000_info {
     struct mutex data_lock;
     struct mutex i2c_lock;
     struct mutex irq_lock;
+	spinlock_t slock;
     struct regmap *regmap;
     struct power_supply_config psy_cfg;
     struct power_supply_desc psy_desc;
