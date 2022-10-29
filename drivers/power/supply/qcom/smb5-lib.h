@@ -111,6 +111,7 @@ enum print_reason {
 #define MAX_TEMP_LEVEL		16
 /* defined for distinguish qc class_a and class_b */
 #define VOL_THR_FOR_QC_CLASS_AB		12400000
+#define VOL_THR_FOR_QC_CLASS_AB_DAGU	12300000
 #define VOL_THR_FOR_QC_CLASS_AB_PSYCHE	12300000
 #define COMP_FOR_LOW_RESISTANCE_CABLE	100000
 #define QC_CLASS_A_CURRENT_UA		3600000
@@ -145,7 +146,12 @@ enum print_reason {
 #define SDP_100_MA			100000
 #define SDP_CURRENT_UA			500000
 #define CDP_CURRENT_UA			1500000
+
+#ifdef CONFIG_QPNP_SMB5_DAGU
+#define DCP_CURRENT_UA			2000000
+#else
 #define DCP_CURRENT_UA			1600000
+#endif
 
 #ifdef CONFIG_RX1619_REMOVE
 #define HVDCP_START_CURRENT_UA		500000
@@ -197,6 +203,9 @@ enum print_reason {
 #define SW_CONN_THERM_VOTER		"SW_CONN_THERM_VOTER"
 
 #define QC3P5_CHARGER_ICL	2000000
+
+// smart battery
+#define SMART_BATTERY_FV   "SMART_BATTERY_FV"
 
 #ifndef CONFIG_FUEL_GAUGE_BQ27Z561_MUNCH
 #define ESR_WORK_VOTER			"ESR_WORK_VOTER"
@@ -610,6 +619,7 @@ struct smb_charger {
 	struct power_supply		*cp_chip_psy;
 	struct power_supply		*cp_psy;
 	struct power_supply             *cp_sec_psy;
+	struct power_supply             *ps_psy;
 #ifdef CONFIG_BATT_VERIFY_BY_DS28E16
 	struct power_supply		*batt_verify_psy;
 #endif
@@ -622,6 +632,8 @@ struct smb_charger {
 
 	/* parallel charging */
 	struct parallel_params	pl;
+	int smartBatVal;
+	int	mtbf_current; // mtbf test
 
 	/* CC Mode */
 	int	adapter_cc_mode;
@@ -987,6 +999,7 @@ struct smb_charger {
 
 	int			night_chg_flag;
 	u8			apsd_stats;
+	bool			has_dp;
 
 	/* lpd timer work */
 	struct workqueue_struct *wq;
@@ -1249,6 +1262,8 @@ int smblib_set_prop_typec_boost_otg_disable(struct smb_charger *chg,
 				     const union power_supply_propval *val);
 int smblib_set_prop_battery_charging_enabled(struct smb_charger *chg,
 				const union power_supply_propval *val);
+int smblib_set_prop_smart_battery_enabled(struct smb_charger *chg,
+				    const union power_supply_propval *val);
 int smblib_set_vbus_disable(struct smb_charger *chg,
 					bool disable);
 int smblib_get_iio_channel(struct smb_charger *chg, const char *propname,
