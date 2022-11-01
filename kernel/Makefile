@@ -128,7 +128,33 @@ obj-$(CONFIG_RSEQ) += rseq.o
 $(obj)/configs.o: $(obj)/config_data.h
 
 targets += config_data.gz
+ifeq ($(CONFIG_MACH_XIAOMI_ALIOTH),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/alioth-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_APOLLO),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/apollo-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_CAS),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/cas-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_CMI),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/cmi-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_DAGU),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/dagu-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_ELISH),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/elish-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_ENUMA),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/enuma-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_LMI),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/lmi-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_MUNCH),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/munch-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_PSYCHE),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/psyche-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_THYME),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/thyme-stock_defconfig FORCE
+else ifeq ($(CONFIG_MACH_XIAOMI_UMI),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/umi-stock_defconfig FORCE
+else
 $(obj)/config_data.gz: $(KCONFIG_CONFIG) FORCE
+endif
 	$(call if_changed,gzip)
 
       filechk_ikconfiggz = (echo "static const char kernel_config_data[] __used = MAGIC_START"; cat $< | scripts/bin2c; echo "MAGIC_END;")
