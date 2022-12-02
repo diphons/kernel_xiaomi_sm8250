@@ -300,7 +300,7 @@ static const struct mtk_pwm_platform_data mt7622_pwm_data = {
 	.num_pwms = 6,
 	.pwm45_fixup = false,
 	.has_clks = true,
-	.has_ck_26m_sel = false,
+	.has_ck_26m_sel = true,
 };
 
 static const struct mtk_pwm_platform_data mt7623_pwm_data = {
