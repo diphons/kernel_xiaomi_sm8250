@@ -101,8 +101,8 @@ config IPA
           to configure IPA core.
 
 config DISABLE_IPA_WAKELOCKS
-	tristate "Disable IPA_V2 Wakelocks"
-	depends on IPA
+	tristate "Disable IPA Wakelocks"
+	depends on IPA || IPA3
 	help
 	  Disables the wakelocks created by ipa driver in order to save power
 
