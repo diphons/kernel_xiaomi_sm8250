@@ -20,6 +20,7 @@
 #include <linux/of_address.h>
 #include <linux/of_device.h>
 #include <linux/spinlock.h>
+#include <linux/suspend.h>
 #include <linux/of_irq.h>
 #include <linux/err.h>
 #include <linux/platform_device.h>
@@ -499,6 +500,9 @@ static irqreturn_t msm_mpm_irq(int irq, void *dev_id)
 		pending = msm_mpm_read(MPM_REG_STATUS, i);
 		pending &= (unsigned long)value[i];
 
+		if (pending)
+			pm_system_wakeup();
+
 		trace_mpm_wakeup_pending_irqs(i, pending);
 		for_each_set_bit(k, &pending, 32) {
 			mpm_irq = 32 * i + k;
@@ -564,17 +568,8 @@ static int msm_mpm_init(struct device_node *node)
 		goto ipc_irq_err;
 	}
 
-	ret = irq_set_irq_wake(dev->ipc_irq, 1);
-	if (ret) {
-		pr_err("failed to set wakeup irq %lu: %d\n",
-			dev->ipc_irq, ret);
-		goto set_wake_irq_err;
-	}
-
 	return register_system_pm_ops(&pm_ops);
 
-set_wake_irq_err:
-	free_irq(dev->ipc_irq, msm_mpm_irq);
 ipc_irq_err:
 	iounmap(dev->mpm_ipc_reg);
 ipc_reg_err:
