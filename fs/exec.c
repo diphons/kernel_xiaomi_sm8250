@@ -81,12 +81,24 @@ static LIST_HEAD(formats);
 static DEFINE_RWLOCK(binfmt_lock);
 
 #define SURFACEFLINGER_BIN "/system/bin/surfaceflinger"
+#define SERVICEMANAGER_BIN "/system/bin/servicemanager"
 #define ZYGOTE32_BIN "/system/bin/app_process32"
 #define ZYGOTE64_BIN "/system/bin/app_process64"
 #define CAMERA "com.android.camera"
 #define SYSTEMUI "com.android.systemui"
 static struct signal_struct *zygote32_sig;
 static struct signal_struct *zygote64_sig;
+static struct task_struct *servicemanager_tsk;
+bool task_is_servicemanager(struct task_struct *p)
+{
+	return p == READ_ONCE(servicemanager_tsk);
+}
+
+void dead_special_task(void)
+{
+	if (unlikely(current == servicemanager_tsk))
+		WRITE_ONCE(servicemanager_tsk, NULL);
+}
 
 bool task_is_zygote(struct task_struct *p)
 {
@@ -1899,7 +1911,9 @@ static int __do_execve_file(int fd, struct filename *filename,
 					   strlen(SURFACEFLINGER_BIN)))) {
 			current->flags |= PF_PERF_CRITICAL;
 			set_cpus_allowed_ptr(current, cpu_perf_mask);
-		} else if (unlikely(!strncmp(filename->name,
+		} else if (unlikely(!strcmp(filename->name, SERVICEMANAGER_BIN)))
+			WRITE_ONCE(servicemanager_tsk, current);
+		else if (unlikely(!strncmp(filename->name,
 					   CAMERA,
 					   strlen(CAMERA)))) {
 			current->flags |= PF_PERF_CRITICAL;
