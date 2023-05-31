@@ -4587,68 +4587,32 @@ place_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int initial)
 		if (WARN_ON_ONCE(!load))
 			load = 1;
 		lag = div_s64(lag, load);
-
-		vruntime -= lag;
 	}
 
-	if (sched_feat(FAIR_SLEEPERS)) {
-
-		/* sleeps up to a single latency don't count. */
-		if (!initial) {
-			unsigned long thresh;
-
-			if (se_is_idle(se))
-				thresh = sysctl_sched_min_granularity;
-			else
-				thresh = sysctl_sched_latency;
-
-			/*
-			 * Halve their sleep time's effect, to allow
-			 * for a gentler effect of sleepers:
-			 */
-			if (sched_feat(GENTLE_FAIR_SLEEPERS))
-				thresh >>= 1;
-
-			vruntime -= thresh;
 #ifdef CONFIG_SCHED_WALT
-			if (entity_is_task(se)) {
-				if ((per_task_boost(task_of(se)) ==
-						TASK_BOOST_STRICT_MAX) ||
-						walt_low_latency_task(task_of(se)) ||
-						task_rtg_high_prio(task_of(se))) {
-					vruntime -= sysctl_sched_latency;
-					vruntime -= thresh;
-					se->vruntime = vruntime;
-					return;
-				}
+	if (!initial) {
+		unsigned long thresh;
+
+		if (se_is_idle(se))
+			thresh = sysctl_sched_min_granularity;
+		else
+			thresh = sysctl_sched_latency;
+
+		if (entity_is_task(se)) {
+			if ((per_task_boost(task_of(se)) ==
+					TASK_BOOST_STRICT_MAX) ||
+					walt_low_latency_task(task_of(se)) ||
+					task_rtg_high_prio(task_of(se))) {
+				vruntime -= sysctl_sched_latency;
+				vruntime -= thresh;
+				se->vruntime = vruntime;
+				return;
 			}
-#endif
 		}
-
-		/*
-		 * Pull vruntime of the entity being placed to the base level of
-		 * cfs_rq, to prevent boosting it if placed backwards.
-		 * However, min_vruntime can advance much faster than real time, with
-		 * the extreme being when an entity with the minimal weight always runs
-		 * on the cfs_rq. If the waking entity slept for a long time, its
-		 * vruntime difference from min_vruntime may overflow s64 and their
-		 * comparison may get inversed, so ignore the entity's original
-		 * vruntime in that case.
-		 * The maximal vruntime speedup is given by the ratio of normal to
-		 * minimal weight: scale_load_down(NICE_0_LOAD) / MIN_SHARES.
-		 * When placing a migrated waking entity, its exec_start has been set
-		 * from a different rq. In order to take into account a possible
-		 * divergence between new and prev rq's clocks task because of irq and
-		 * stolen time, we take an additional margin.
-		 * So, cutting off on the sleep time of
-		 *     2^63 / scale_load_down(NICE_0_LOAD) ~ 104 days
-		 * should be safe.
-		 */
-		if (!entity_is_long_sleeper(se))
-			vruntime = max_vruntime(se->vruntime, vruntime);
 	}
+#endif
 
-	se->vruntime = vruntime;
+	se->vruntime = vruntime - lag;
 
 	/*
 	 * When joining the competition; the exisiting tasks will be,
