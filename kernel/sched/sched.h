@@ -602,6 +602,9 @@ struct cfs_rq {
 	unsigned int		nr_running;
 	unsigned int		h_nr_running;
 
+	s64			avg_vruntime;
+	u64			avg_load;
+
 	u64			exec_clock;
 	u64			min_vruntime;
 	u64			min_vruntimex;
@@ -3354,3 +3357,5 @@ void __weak init_task_runtime_info(struct task_struct *tsk)
 	return;
 }
 #endif
+
+extern u64 avg_vruntime(struct cfs_rq *cfs_rq);
