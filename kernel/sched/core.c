@@ -2006,7 +2006,6 @@ static struct rq *__migrate_task(struct rq *rq, struct rq_flags *rf,
 	if (!is_cpu_allowed(p, dest_cpu))
 		return rq;
 
-	update_rq_clock(rq);
 	rq = move_queued_task(rq, rf, p, dest_cpu);
 
 	return rq;
@@ -2069,10 +2068,12 @@ static int migration_cpu_stop(void *data)
 			dest_cpu = cpumask_any_distribute(&p->cpus_mask);
 		}
 
-		if (task_on_rq_queued(p))
+		if (task_on_rq_queued(p)) {
+			update_rq_clock(rq);
 			rq = __migrate_task(rq, &rf, p, dest_cpu);
-		else
+		} else {
 			p->wake_cpu = dest_cpu;
+		}
 
 		/*
 		 * XXX __migrate_task() can fail, at which point we might end
