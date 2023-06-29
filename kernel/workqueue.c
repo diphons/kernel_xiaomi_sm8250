@@ -309,6 +309,9 @@ static bool workqueue_freezing;		/* PL: have wqs started freezing? */
 /* PL: allowable cpus for unbound wqs and work items */
 static cpumask_var_t wq_unbound_cpumask;
 
+/* for further constrain wq_unbound_cpumask by cmdline parameter*/
+static struct cpumask wq_cmdline_cpumask __initdata;
+
 /* CPU where unbound work was last round robin scheduled from this CPU */
 static DEFINE_PER_CPU(int, wq_rr_cpu_last);
 
@@ -5817,6 +5820,9 @@ int __init workqueue_init_early(void)
 	cpumask_copy(wq_unbound_cpumask, housekeeping_cpumask(HK_TYPE_WQ));
 	cpumask_and(wq_unbound_cpumask, wq_unbound_cpumask, housekeeping_cpumask(HK_TYPE_DOMAIN));
 
+	if (!cpumask_empty(&wq_cmdline_cpumask))
+		cpumask_and(wq_unbound_cpumask, wq_unbound_cpumask, &wq_cmdline_cpumask);
+
 	pwq_cache = KMEM_CACHE(pool_workqueue, SLAB_PANIC);
 
 	/*
@@ -5943,3 +5949,14 @@ int __init workqueue_init(void)
 
 	return 0;
 }
+
+static int __init workqueue_unbound_cpus_setup(char *str)
+{
+	if (cpulist_parse(str, &wq_cmdline_cpumask) < 0) {
+		cpumask_clear(&wq_cmdline_cpumask);
+		pr_warn("workqueue.unbound_cpus: incorrect CPU range, using default\n");
+	}
+
+	return 1;
+}
+__setup("workqueue.unbound_cpus=", workqueue_unbound_cpus_setup);
