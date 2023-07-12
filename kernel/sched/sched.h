@@ -503,6 +503,7 @@ extern void init_cfs_bandwidth(struct cfs_bandwidth *cfs_b, struct cfs_bandwidth
 extern void __refill_cfs_bandwidth_runtime(struct cfs_bandwidth *cfs_b);
 extern void start_cfs_bandwidth(struct cfs_bandwidth *cfs_b);
 extern void unthrottle_cfs_rq(struct cfs_rq *cfs_rq);
+extern bool cfs_task_bw_constrained(struct task_struct *p);
 
 extern void unregister_rt_sched_group(struct task_group *tg);
 extern void free_rt_sched_group(struct task_group *tg);
@@ -541,6 +542,7 @@ static inline void set_task_rq_fair(struct sched_entity *se,
 #else /* CONFIG_CGROUP_SCHED */
 
 struct cfs_bandwidth { };
+static inline bool cfs_task_bw_constrained(struct task_struct *p) { return false; }
 
 #endif	/* CONFIG_CGROUP_SCHED */
 
