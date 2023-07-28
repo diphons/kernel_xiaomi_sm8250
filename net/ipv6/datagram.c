@@ -51,7 +51,7 @@ static void ip6_datagram_flow_key_init(struct flowi6 *fl6, struct sock *sk)
 	fl6->daddr = sk->sk_v6_daddr;
 	fl6->saddr = np->saddr;
 	fl6->flowi6_oif = sk->sk_bound_dev_if;
-	fl6->flowi6_mark = sk->sk_mark;
+	fl6->flowi6_mark = READ_ONCE(sk->sk_mark);
 	fl6->fl6_dport = inet->inet_dport;
 	fl6->fl6_sport = inet->inet_sport;
 	fl6->flowlabel = ip6_make_flowinfo(np->tclass, np->flow_label);

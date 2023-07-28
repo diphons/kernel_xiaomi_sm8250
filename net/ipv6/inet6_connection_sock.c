@@ -95,7 +95,7 @@ static struct dst_entry *inet6_csk_route_socket(struct sock *sk,
 	fl6->flowlabel = np->flow_label;
 	IP6_ECN_flow_xmit(sk, fl6->flowlabel);
 	fl6->flowi6_oif = sk->sk_bound_dev_if;
-	fl6->flowi6_mark = sk->sk_mark;
+	fl6->flowi6_mark = READ_ONCE(sk->sk_mark);
 	fl6->fl6_sport = inet->inet_sport;
 	fl6->fl6_dport = inet->inet_dport;
 	fl6->flowi6_uid = sk->sk_uid;
@@ -136,7 +136,7 @@ int inet6_csk_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl_unused
 	/* Restore final destination back after routing done */
 	fl6.daddr = sk->sk_v6_daddr;
 
-	res = ip6_xmit(sk, skb, &fl6, sk->sk_mark, rcu_dereference(np->opt),
+	res = ip6_xmit(sk, skb, &fl6, READ_ONCE(sk->sk_mark), rcu_dereference(np->opt),
 		       np->tclass);
 	rcu_read_unlock();
 	return res;
