@@ -541,7 +541,7 @@ void icmp6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info,
 	if (!sk)
 		goto out_bh_enable;
 
-	sk->sk_mark = mark;
+	WRITE_ONCE(sk->sk_mark, mark);
 	np = inet6_sk(sk);
 
 	if (!icmpv6_xrlim_allow(sk, type, &fl6))
@@ -716,7 +716,7 @@ static void icmpv6_echo_reply(struct sk_buff *skb)
 	sk = icmpv6_xmit_lock(net);
 	if (!sk)
 		goto out_bh_enable;
-	sk->sk_mark = mark;
+	WRITE_ONCE(sk->sk_mark, mark);
 	np = inet6_sk(sk);
 
 	if (!fl6.flowi6_oif && ipv6_addr_is_multicast(&fl6.daddr))

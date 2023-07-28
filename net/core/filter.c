@@ -3940,8 +3940,8 @@ BPF_CALL_5(bpf_setsockopt, struct bpf_sock_ops_kern *, bpf_sock,
 			sk->sk_rcvlowat = val ? : 1;
 			break;
 		case SO_MARK:
-			if (sk->sk_mark != val) {
-				sk->sk_mark = val;
+			if (READ_ONCE(sk->sk_mark) != val) {
+				WRITE_ONCE(sk->sk_mark, val);
 				sk_dst_reset(sk);
 			}
 			break;

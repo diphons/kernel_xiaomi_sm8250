@@ -516,7 +516,7 @@ sticky_done:
 
 		memset(&fl6, 0, sizeof(fl6));
 		fl6.flowi6_oif = sk->sk_bound_dev_if;
-		fl6.flowi6_mark = sk->sk_mark;
+		fl6.flowi6_mark = READ_ONCE(sk->sk_mark);
 
 		if (optlen == 0)
 			goto update;

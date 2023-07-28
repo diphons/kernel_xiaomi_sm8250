@@ -955,7 +955,7 @@ set_rcvbuf:
 		if (!ns_capable(sock_net(sk)->user_ns, CAP_NET_ADMIN))
 			ret = -EPERM;
 		else
-			sk->sk_mark = val;
+			WRITE_ONCE(sk->sk_mark, val);
 		break;
 
 	case SO_RXQ_OVFL:
@@ -1305,7 +1305,7 @@ int sock_getsockopt(struct socket *sock, int level, int optname,
 		return security_socket_getpeersec_stream(sock, optval, optlen, len);
 
 	case SO_MARK:
-		v.val = sk->sk_mark;
+		v.val = READ_ONCE(sk->sk_mark);
 		break;
 
 	case SO_RXQ_OVFL:

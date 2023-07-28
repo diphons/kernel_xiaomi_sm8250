@@ -226,7 +226,7 @@ static int sctp_v6_xmit(struct sk_buff *skb, struct sctp_transport *transport)
 	SCTP_INC_STATS(sock_net(sk), SCTP_MIB_OUTSCTPPACKS);
 
 	rcu_read_lock();
-	res = ip6_xmit(sk, skb, fl6, sk->sk_mark, rcu_dereference(np->opt),
+	res = ip6_xmit(sk, skb, fl6, READ_ONCE(sk->sk_mark), rcu_dereference(np->opt),
 		       tclass);
 	rcu_read_unlock();
 	return res;
