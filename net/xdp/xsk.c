@@ -247,7 +247,7 @@ static int xsk_generic_xmit(struct sock *sk, struct msghdr *m,
 
 		skb->dev = xs->dev;
 		skb->priority = sk->sk_priority;
-		skb->mark = sk->sk_mark;
+		skb->mark = READ_ONCE(sk->sk_mark);
 		skb_shinfo(skb)->destructor_arg = (void *)(long)addr;
 		skb->destructor = xsk_destruct_skb;
 
