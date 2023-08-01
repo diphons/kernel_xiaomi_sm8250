@@ -2265,8 +2265,11 @@ static int rto_next_cpu(struct root_domain *rd)
 		if (cpu == this_cpu)
 			continue;
 
-		if (cpu < nr_cpu_ids)
+		if (cpu < nr_cpu_ids) {
+			if (!has_pushable_tasks(cpu_rq(cpu)))
+				continue;
 			return cpu;
+		}
 
 		rd->rto_cpu = -1;
 
