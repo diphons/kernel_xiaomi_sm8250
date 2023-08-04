@@ -179,7 +179,7 @@ unsigned int sched_capacity_margin_down[NR_CPUS] = {
 			1024, 1024, 1024, 1024, 1796, 1796, 1796, 1442
 }; /* Not used for small, ~43% margin for big, ~29% for big+ */
 unsigned int sched_capacity_margin_up_boosted[CPU_NR] = {
-	3658, 3658, 3658, 3658, 3658, 3658, 1078, 1024
+	3658, 3658, 3658, 3658, 1078, 1078, 1078, 1024
 }; /* 72% margin for small, 5% for big, 0% for big+ */
 unsigned int sched_capacity_margin_down_boosted[CPU_NR] = {
 	3658, 3658, 3658, 3658, 3658, 3658, 3658, 3658
