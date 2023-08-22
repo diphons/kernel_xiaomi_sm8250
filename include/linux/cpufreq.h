@@ -142,6 +142,9 @@ struct cpufreq_policy {
 	 */
 	bool			dvfs_possible_from_any_cpu;
 
+	/* Per policy boost enabled flag. */
+	bool			boost_enabled;
+
 	 /* Cached frequency lookup from cpufreq_driver_resolve_freq. */
 	unsigned int cached_target_freq;
 	int cached_resolved_idx;
