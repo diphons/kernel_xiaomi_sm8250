@@ -39,6 +39,8 @@ char gVers803x[21]={0};
 char gVers176x[21]={0};
 
 short gHallStatus = 0;
+bool prev_conn_status = 1;
+
 /** **************************************************************************
  * @brief
  *
@@ -74,6 +76,13 @@ Nanosic_i2c_specified_packets_detect(char* data)
     }else if(command == 0xA2 && source == FIELD_176X && object == FIELD_HOST){
         data += 4;
         STREAM_TO_UINT8(gHallStatus,data);
+        bool conn_status = (gHallStatus >> 0) & 0x1;
+
+        if (conn_status != prev_conn_status) {
+            prev_conn_status = conn_status;
+            conn_status ? Nanosic_input_register() : Nanosic_input_release();
+        }
+
     }
 
     return false;
