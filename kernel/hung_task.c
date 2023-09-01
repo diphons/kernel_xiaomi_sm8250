@@ -92,16 +92,47 @@ static struct notifier_block panic_block = {
 	.notifier_call = hung_task_panic,
 };
 
+static bool is_zygote_process(struct task_struct *t)
+{
+	const struct cred *tcred = __task_cred(t);
+	if(!strcmp(t->comm, "main") && (tcred->uid.val == 0) && (t->parent != 0 && !strcmp(t->parent->comm,"init"))  )
+		return true;
+	else
+		return false;
+	return false;
+}
+
 static void check_hung_task(struct task_struct *t, unsigned long timeout)
 {
 	unsigned long switch_count = t->nvcsw + t->nivcsw;
 
+#define DISP_TASK_COMM_LEN_MASK 10 //use len for masking
+	if(!strncmp(t->comm,"mdss_dsi_event", TASK_COMM_LEN)||
+		!strncmp(t->comm,"msm-core:sampli", TASK_COMM_LEN)||
+		!strncmp(t->comm,"mdss_fb0", TASK_COMM_LEN)||
+		!strncmp(t->comm,"mdss_fb_ffl0", TASK_COMM_LEN)||
+		!strncmp(t->comm,"hdcp_2x", TASK_COMM_LEN)||
+		!strncmp(t->comm,"dp_hdcp2p2", TASK_COMM_LEN)||
+		!strncmp(t->comm,"panic_flush", TASK_COMM_LEN)||
+		!strncmp(t->comm,"crtc_commit", DISP_TASK_COMM_LEN_MASK)||
+		!strncmp(t->comm,"crtc_event", DISP_TASK_COMM_LEN_MASK)){
+		return;
+	}
+	
 	/*
 	 * Ensure the task is not frozen.
 	 * Also, skip vfork and any other user process that freezer should skip.
 	 */
 	if (unlikely(t->flags & (PF_FROZEN | PF_FREEZER_SKIP)))
-	    return;
+		{
+		if (is_zygote_process(t) || !strncmp(t->comm,"system_server", TASK_COMM_LEN)
+			|| !strncmp(t->comm,"surfaceflinger", TASK_COMM_LEN)) {
+			if (t->flags & PF_FROZEN)
+				return;
+		}
+		else
+			return;
+	}
 
 	/*
 	 * When a freshly created task is scheduled once, changes its state to
