@@ -23,6 +23,9 @@
 #include <trace/events/sched.h>
 #include <linux/sched/sysctl.h>
 
+#define TWICE_DEATH_PERIOD	300000000000ULL	//300s
+#define MAX_DEATH_COUNT	3
+
 /*
  * The number of tasks checked:
  */
@@ -102,9 +105,12 @@ static bool is_zygote_process(struct task_struct *t)
 	return false;
 }
 
-static void check_hung_task(struct task_struct *t, unsigned long timeout)
+static void check_hung_task(struct task_struct *t, unsigned long timeout, unsigned int *iowait_count)
 {
 	unsigned long switch_count = t->nvcsw + t->nivcsw;
+	static unsigned long long last_death_time = 0;
+	unsigned long long cur_death_time = 0;
+	static int death_count = 0;
 
 #define DISP_TASK_COMM_LEN_MASK 10 //use len for masking
 	if(!strncmp(t->comm,"mdss_dsi_event", TASK_COMM_LEN)||
@@ -151,6 +157,24 @@ static void check_hung_task(struct task_struct *t, unsigned long timeout)
 		return;
 
 	trace_sched_process_hang(t);
+
+	//if this task blocked at iowait. so maybe we should reboot system first
+	if(t->in_iowait){
+		*iowait_count = *iowait_count + 1;
+	}
+	if (is_zygote_process(t) || !strncmp(t->comm,"system_server", TASK_COMM_LEN)
+		|| !strncmp(t->comm,"surfaceflinger", TASK_COMM_LEN) ) {
+		death_count++;
+		cur_death_time = local_clock();
+		last_death_time = cur_death_time;
+
+		sched_show_task(t);
+		trigger_all_cpu_backtrace();
+
+		t->flags |= PF_HUNG_TASK_KILLING;
+		do_send_sig_info(SIGKILL, SEND_SIG_FORCED, t, true);
+		wake_up_process(t);
+	}
 
 	if (sysctl_hung_task_panic) {
 		console_verbose();
@@ -213,6 +237,7 @@ static void check_hung_uninterruptible_tasks(unsigned long timeout)
 	int max_count = sysctl_hung_task_check_count;
 	unsigned long last_break = jiffies;
 	struct task_struct *g, *t;
+	unsigned int iowait_count = 0;
 
 	/*
 	 * If the system crashed already then all bets are off,
@@ -232,13 +257,11 @@ static void check_hung_uninterruptible_tasks(unsigned long timeout)
 			last_break = jiffies;
 		}
 		/* use "==" to skip the TASK_KILLABLE tasks waiting on NFS */
-		if (t->state == TASK_UNINTERRUPTIBLE)
-			/* Check for selective monitoring */
-			if (!sysctl_hung_task_selective_monitoring ||
-			    t->hang_detection_enabled)
-				check_hung_task(t, timeout);
+		if (t->state == TASK_UNINTERRUPTIBLE || t->state == TASK_STOPPED || t->state == TASK_TRACED)
+			check_hung_task(t, timeout,&iowait_count);
 	}
  unlock:
+	iowait_hung_cnt += iowait_count;
 	rcu_read_unlock();
 	if (hung_task_show_lock)
 		debug_show_all_locks();
