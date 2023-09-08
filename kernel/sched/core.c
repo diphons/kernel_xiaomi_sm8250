@@ -3533,7 +3533,6 @@ bool ttwu_state_match(struct task_struct *p, unsigned int state, int *success)
 		return true;
 	}
 
-#ifdef CONFIG_PREEMPT_RT
 	/*
 	 * Saved state preserves the task state across blocking on
 	 * an RT lock.  If the state matches, set p::saved_state to
@@ -3551,7 +3550,6 @@ bool ttwu_state_match(struct task_struct *p, unsigned int state, int *success)
 		p->saved_state = TASK_RUNNING;
 		*success = 1;
 	}
-#endif
 	return false;
 }
 
