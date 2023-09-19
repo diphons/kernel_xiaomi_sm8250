@@ -1735,12 +1735,12 @@ static inline void check_class_changed(struct rq *rq, struct task_struct *p,
 		p->sched_class->prio_changed(rq, p, oldprio);
 }
 
-void check_preempt_curr(struct rq *rq, struct task_struct *p, int flags)
+void wakeup_preempt(struct rq *rq, struct task_struct *p, int flags)
 {
 	const struct sched_class *class;
 
 	if (p->sched_class == rq->curr->sched_class) {
-		rq->curr->sched_class->check_preempt_curr(rq, p, flags);
+		rq->curr->sched_class->wakeup_preempt(rq, p, flags);
 	} else {
 		for_each_class(class) {
 			if (class == rq->curr->sched_class)
@@ -1812,7 +1812,7 @@ static struct rq *move_queued_task(struct rq *rq, struct rq_flags *rf,
 	BUG_ON(task_cpu(p) != new_cpu);
 	enqueue_task(rq, p, 0);
 	p->on_rq = TASK_ON_RQ_QUEUED;
-	check_preempt_curr(rq, p, 0);
+	wakeup_preempt(rq, p, 0);
 
 	return rq;
 }
@@ -2084,7 +2084,7 @@ static void __migrate_swap_task(struct task_struct *p, int cpu)
 		deactivate_task(src_rq, p, 0);
 		set_task_cpu(p, cpu);
 		activate_task(dst_rq, p, 0);
-		check_preempt_curr(dst_rq, p, 0);
+		wakeup_preempt(dst_rq, p, 0);
 
 		rq_unpin_lock(dst_rq, &drf);
 		rq_unpin_lock(src_rq, &srf);
@@ -2560,7 +2560,7 @@ ttwu_stat(struct task_struct *p, int cpu, int wake_flags)
 static void ttwu_do_wakeup(struct rq *rq, struct task_struct *p, int wake_flags,
 			   struct rq_flags *rf)
 {
-	check_preempt_curr(rq, p, wake_flags);
+	wakeup_preempt(rq, p, wake_flags);
 	p->state = TASK_RUNNING;
 	trace_sched_wakeup(p);
 
@@ -2639,7 +2639,7 @@ static int ttwu_remote(struct task_struct *p, int wake_flags)
 			 * When on_rq && !on_cpu the task is preempted, see if
 			 * it should preempt the task that is current now.
 			 */
-			check_preempt_curr(rq, p, wake_flags);
+			wakeup_preempt(rq, p, wake_flags);
 		}
 		p->state = TASK_RUNNING;
 		trace_sched_wakeup(p);
@@ -3505,7 +3505,7 @@ void wake_up_new_task(struct task_struct *p)
 
 	activate_task(rq, p, ENQUEUE_NOCLOCK);
 	trace_sched_wakeup_new(p);
-	check_preempt_curr(rq, p, WF_FORK);
+	wakeup_preempt(rq, p, WF_FORK);
 #ifdef CONFIG_SMP
 	if (p->sched_class->task_woken) {
 		/*
