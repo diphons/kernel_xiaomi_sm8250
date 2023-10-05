@@ -323,6 +323,17 @@ config RX_ON_URD
 	  Say Y to include support for rx wireless Charger on URD.
 	  supports device-tree interface.
 
+config FUDA_1665
+        tristate "fuda1665 wireless Charger"
+        depends on I2C
+        help
+          Say Y to include support for fuda1665 wireless Charger.
+          fuda1665 is a wireless battery charger.
+          The driver supports charger enable/disable.
+          The driver reports the charger status via the power supply framework.
+          The driver controls fuda1665 via I2C and
+          supports device-tree interface.
+
 config RX1619
 	tristate "RX1619 wireless Charger"
 	depends on I2C
