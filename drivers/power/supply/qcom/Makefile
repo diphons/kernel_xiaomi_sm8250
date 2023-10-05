@@ -27,6 +27,7 @@ obj-$(CONFIG_IDT_P9415)			+= idtp9415.o
 obj-$(CONFIG_IDT_P9418)			+= idtp9418.o
 obj-$(CONFIG_RX1619_TRIM)		+= rx1619_trim.o
 obj-$(CONFIG_RX1619)			+= rx1619.o
+obj-$(CONFIG_FUDA_1665)        += nu1665.o
 obj-$(CONFIG_LN8282)			+= ln8282.o
 obj-$(CONFIG_QPNP_SMBLITE)		+= step-chg-jeita.o battery.o qpnp-smblite.o smblite-lib.o pmic-voter.o storm-watch.o schgm-flashlite.o
 obj-$(CONFIG_QPNP_VM_BMS)		+= qpnp-vm-bms.o batterydata-lib.o batterydata-interface.o
