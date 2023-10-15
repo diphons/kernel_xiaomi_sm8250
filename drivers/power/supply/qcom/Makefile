@@ -2,6 +2,7 @@
 obj-$(CONFIG_SMB1360_CHARGER_FG)	+= smb1360-charger-fg.o
 obj-$(CONFIG_QPNP_SMB5)			+= step-chg-jeita.o battery.o qpnp-smb5.o smb5-lib.o pmic-voter.o storm-watch.o schgm-flash.o
 obj-$(CONFIG_QPNP_SMB5_DAGU)		+= step-chg-jeita-dagu.o battery.o qpnp-smb5-dagu.o smb5-lib-dagu.o pmic-voter.o storm-watch.o schgm-flash.o
+obj-$(CONFIG_QPNP_SMB5_PIPA)		+= step-chg-jeita-pipa.o battery.o qpnp-smb5-pipa.o smb5-lib-pipa.o pmic-voter.o storm-watch.o schgm-flash.o
 obj-$(CONFIG_QPNP_SMB5_PSYCHE)		+= step-chg-jeita-psyche.o battery.o qpnp-smb5-psyche.o smb5-lib-psyche.o pmic-voter.o storm-watch.o schgm-flash.o
 obj-$(CONFIG_QPNP_SMB5_POUSSIN)		+= step-chg-jeita-poussin.o battery.o qpnp-smb5-poussin.o smb5-lib-poussin.o pmic-voter.o storm-watch.o schgm-flash.o
 obj-$(CONFIG_QPNP_SMB5_MUNCH)		+= step-chg-jeita-munch.o battery.o qpnp-smb5-munch.o smb5-lib-munch.o pmic-voter.o storm-watch.o schgm-flash.o
