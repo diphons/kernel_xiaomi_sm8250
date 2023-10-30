@@ -80,7 +80,11 @@ Nanosic_i2c_specified_packets_detect(char* data)
 
         if (conn_status != prev_conn_status) {
             prev_conn_status = conn_status;
-            conn_status ? Nanosic_input_register() : Nanosic_input_release();
+            if (conn_status) {
+                Nanosic_set_caps_led(0);
+                Nanosic_input_register();
+            } else
+                Nanosic_input_release();
         }
 
     }
