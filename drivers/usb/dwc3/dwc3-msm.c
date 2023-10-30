@@ -69,6 +69,12 @@ MODULE_PARM_DESC(bc12_compliance, "Disable sending dp pulse for CDP");
 #define USB3_HCSPARAMS1		(0x4)
 #define USB3_PORTSC		(0x420)
 
+#if defined(CONFIG_BOARD_PIPA) || defined(CONFIG_MACH_XIAOMI_PIPA)
+#define DWC3_LLUCTL    0xd024
+/* Force Gen1 speed on Gen2 link */
+#define DWC3_LLUCTL_FORCE_GEN1 BIT(10)
+#endif
+
 /**
  *  USB QSCRATCH Hardware registers
  *
@@ -367,6 +373,9 @@ struct dwc3_msm {
 	dma_addr_t		dummy_gsi_db_dma;
 	int			orientation_override;
 	bool			usb_data_enabled;
+#if defined(CONFIG_BOARD_PIPA) || defined(CONFIG_MACH_XIAOMI_PIPA)
+	bool			force_gen1;
+#endif
 };
 
 #define USB_HSPHY_3P3_VOL_MIN		3050000 /* uV */
@@ -512,7 +521,7 @@ static inline bool dwc3_msm_is_dev_superspeed(struct dwc3_msm *mdwc)
 static inline bool dwc3_msm_is_superspeed(struct dwc3_msm *mdwc)
 {
 	int ret = 0;
-	if(!mdwc) {
+	if (!mdwc) {
 		pr_err("the data is null \n");
 		return 0;
 	}
@@ -2322,6 +2331,11 @@ static void dwc3_msm_power_collapse_por(struct dwc3_msm *mdwc)
 		dwc3_en_sleep_mode(dwc);
 	}
 
+#if defined(CONFIG_BOARD_PIPA) || defined(CONFIG_MACH_XIAOMI_PIPA)
+	/* Force Gen1 speed on Gen2 controller if required */
+	if (mdwc->force_gen1)
+		 dwc3_msm_write_reg_field(mdwc->base, DWC3_LLUCTL,  DWC3_LLUCTL_FORCE_GEN1, 1);
+#endif
 }
 
 static int dwc3_msm_prepare_suspend(struct dwc3_msm *mdwc)
@@ -4144,6 +4158,10 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	}
 
 	mutex_init(&mdwc->suspend_resume_mutex);
+
+#if defined(CONFIG_BOARD_PIPA) || defined(CONFIG_MACH_XIAOMI_PIPA)
+	mdwc->force_gen1 = of_property_read_bool(node, "qcom,force-gen1");
+#endif
 
 	/* set the initial value */
 	mdwc->usb_data_enabled = true;
