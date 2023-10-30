@@ -51,6 +51,8 @@ Nanosic_i2c_specified_packets_detect(char* data)
     char source;
     char object;
     char command;
+	bool conn_status;
+	bool conn_power;
 
     if(!data)
         return false;
@@ -76,11 +78,12 @@ Nanosic_i2c_specified_packets_detect(char* data)
     }else if(command == 0xA2 && source == FIELD_176X && object == FIELD_HOST){
         data += 4;
         STREAM_TO_UINT8(gHallStatus,data);
-        bool conn_status = (gHallStatus >> 0) & 0x1;
+        conn_status = (gHallStatus >> 0) & 0x1;
+		conn_power = (gHallStatus >> 1) & 0x1;
 
         if (conn_status != prev_conn_status) {
             prev_conn_status = conn_status;
-            if (conn_status) {
+            if (conn_status && conn_power) {
                 Nanosic_set_caps_led(0);
                 Nanosic_input_register();
             } else
