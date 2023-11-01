@@ -428,7 +428,7 @@ Nanosic_chardev_fops_write(
 
     rawdata_show("write cmd",data,copy);
 
-    if(copy != I2C_DATA_LENGTH_WRITE)
+    if(copy != I2C_DATA_LENGTH_WRITE && data[1] != 0xFF)
         return copy;
 
     if((data[0]==0x32) && (data[1]==0x00) && (data[2]==0x4F) && (data[3]==0x20) && (data[4]==0x80) && (data[5]==0x80) && (data[6]==0xE1) && (data[7]==0x01) && (data[8]==0x00)){
@@ -436,6 +436,14 @@ Nanosic_chardev_fops_write(
         ret = Nanosic_Hall_notify(gpio_hall_n_pin, gpio_hall_s_pin);
     } else if ((data[0]==0x32) && (data[2]==0x4F) && (data[3]==0x30) && (data[4]==0x80) && (data[5]==0x18) && (data[6]==0x1D)) {
         ret = Nanosic_GPIO_recovery(gI2c_client,data,copy);
+    } else if (data[0] == 0x32 && data[1] == 0xFF && data[2] == 0x00) {
+        if (!prev_conn_status)
+		    ret = Nanosic_input_release();
+    } else if (data[0] == 0x32 && data[1] == 0xFF && data[2] == 0x01) {
+        if (prev_conn_status) {
+		    Nanosic_set_caps_led(0);
+		    ret = Nanosic_input_register();
+        }
     } else {
         ret = Nanosic_i2c_write(gI2c_client,data,copy);
     }
