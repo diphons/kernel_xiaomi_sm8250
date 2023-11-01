@@ -442,7 +442,7 @@ Nanosic_chardev_fops_write(
 		    ret = Nanosic_input_release();
         }
     } else if (data[0] == 0x32 && data[1] == 0xFF && data[2] == 0x01) {
-        if (!prev_conn_status) {
+        if (!prev_conn_status && gpio_get_value(gpio_hall_s_pin)) {
 		    prev_conn_status = true;
 		    Nanosic_set_caps_led(0);
 		    ret = Nanosic_input_register();
