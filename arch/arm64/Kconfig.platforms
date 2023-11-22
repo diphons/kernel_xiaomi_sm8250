@@ -529,4 +529,9 @@ config BOARD_UMI
 endif
 endmenu
 
+config D8G_SERVICE
+	bool "d8g helper"
+	help
+	  This enables support for D8G features.
+
 endmenu
