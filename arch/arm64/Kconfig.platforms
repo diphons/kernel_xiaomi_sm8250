@@ -529,4 +529,9 @@ config BOARD_MONET
 	  This enables support for Xiaomi MI 10 Lite
 endif
 
+config D8G_SERVICE
+	bool "d8g helper"
+	help
+	  This enables support for D8G features.
+
 endmenu
