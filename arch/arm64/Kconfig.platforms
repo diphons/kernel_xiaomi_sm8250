@@ -428,4 +428,9 @@ config ARCH_ZYNQMP
 	help
 	  This enables support for Xilinx ZynqMP Family
 
+config D8G_SERVICE
+	bool "d8g helper"
+	help
+	  This enables support for D8G features.
+
 endmenu
