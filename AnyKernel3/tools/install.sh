@@ -90,3 +90,25 @@ if $FUNCTION; then
 else
 	ui_print "-> Skip Install DFE Selected.."
 fi
+
+# Choose Permissive or Enforcing
+ui_print " "
+ui_print "Choose Default Selinux to Install.."
+ui_print " "
+ui_print "Permissive Or Enforcing Kernel?"
+ui_print " "
+ui_print "   Vol+ = Yes, Vol- = No"
+ui_print ""
+ui_print "   Yes.. Permissive"
+ui_print "   No!!... Enforcing"
+ui_print " "
+
+if $FUNCTION; then
+	ui_print "-> Permissive Kernel Selected.."
+	install_pk="  -> Permissive Kernel..."
+	patch_cmdline androidboot.selinux androidboot.selinux=permissive
+else
+	ui_print "-> Enforcing Kernel Selected.."
+	install_pk="  -> Enforcing Kernel..."
+	patch_cmdline androidboot.selinux androidboot.selinux=enforcing
+fi
