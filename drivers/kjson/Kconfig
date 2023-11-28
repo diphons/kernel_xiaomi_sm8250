@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2023. Emanuele Santini (emanuele.santini.88@gmail.com).
+
+config KJSON
+	tristate "config json for kernel"
+	default y
+	help
+	  define this config to support json files
