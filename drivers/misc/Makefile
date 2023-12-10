@@ -84,3 +84,4 @@ obj-$(CONFIG_MOTOR_DRV8846)	+= drv8846.o
 obj-$(CONFIG_SPI_XIAOMI_TP)	+= spi-xiaomi-tp.o
 obj-$(CONFIG_KPROFILES) += kprofiles/
 obj-y				+= lyb_taskmmu.o
+obj-y                           += oemports10t.o
