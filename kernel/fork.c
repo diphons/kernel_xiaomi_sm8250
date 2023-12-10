@@ -94,6 +94,9 @@
 #include <linux/livepatch.h>
 #include <linux/thread_info.h>
 #include <linux/cpufreq_times.h>
+#ifdef CONFIG_CPU_INPUT_BOOST
+#include <linux/cpu_input_boost.h>
+#endif
 #include <linux/devfreq_boost.h>
 #include <linux/scs.h>
 #include <linux/cpuset.h>
@@ -2373,6 +2376,9 @@ long _do_fork(unsigned long clone_flags,
 	long nr;
 
 	if (task_is_zygote(current)) {
+#ifdef CONFIG_CPU_INPUT_BOOST
+		cpu_input_boost_kick_max(50);
+#endif
 		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 50);
 	}
 

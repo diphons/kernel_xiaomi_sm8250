@@ -14,6 +14,9 @@
 #include <linux/pid_namespace.h>
 #include <linux/cgroupstats.h>
 #include <linux/binfmts.h>
+#ifdef CONFIG_CPU_INPUT_BOOST
+#include <linux/cpu_input_boost.h>
+#endif
 #include <linux/devfreq_boost.h>
 #include <linux/cpu.h>
 
@@ -549,6 +552,9 @@ static ssize_t __cgroup1_procs_write(struct kernfs_open_file *of,
         if (!ret && !threadgroup &&
                !memcmp(of->kn->parent->name, "top-app", sizeof("top-app")) &&
                task_is_zygote(task->parent)) {
+#ifdef CONFIG_CPU_INPUT_BOOST
+                cpu_input_boost_kick_max(1000);
+#endif
                 devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 1000);
         }
 
