@@ -691,6 +691,69 @@ config TCP_CONG_BBR
 	bufferbloat, policers, or AQM schemes that do not provide a delay
 	signal. It requires the fq ("Fair Queue") pacing packet scheduler.
 
+config TCP_CONG_LIA
+	tristate "MPTCP Linked Increase"
+	depends on MPTCP
+	default n
+	---help---
+	MultiPath TCP Linked Increase Congestion Control
+	To enable it, just put 'lia' in tcp_congestion_control
+
+config TCP_CONG_OLIA
+	tristate "MPTCP Opportunistic Linked Increase"
+	depends on MPTCP
+	default n
+	---help---
+	MultiPath TCP Opportunistic Linked Increase Congestion Control
+	To enable it, just put 'olia' in tcp_congestion_control
+
+config TCP_CONG_WVEGAS
+	tristate "MPTCP WVEGAS CONGESTION CONTROL"
+	depends on MPTCP
+	default n
+	---help---
+	wVegas congestion control for MPTCP
+	To enable it, just put 'wvegas' in tcp_congestion_control
+
+config TCP_CONG_BALIA
+	tristate "MPTCP BALIA CONGESTION CONTROL"
+	depends on MPTCP
+	default n
+	---help---
+	Multipath TCP Balanced Linked Adaptation Congestion Control
+	To enable it, just put 'balia' in tcp_congestion_control
+
+config TCP_CONG_MCTCPDESYNC
+	tristate "DESYNCHRONIZED MCTCP CONGESTION CONTROL (EXPERIMENTAL)"
+	depends on MPTCP
+	default n
+	---help---
+	Desynchronized MultiChannel TCP Congestion Control. This is experimental
+	code that only supports single path and must have set mptcp_ndiffports
+	larger than one.
+	To enable it, just put 'mctcpdesync' in tcp_congestion_control
+	For further details see:
+	  http://ieeexplore.ieee.org/abstract/document/6911722/
+	  https://doi.org/10.1016/j.comcom.2015.07.010
+
+config TCP_CONG_BBR2
+	tristate "BBR2 TCP"
+	default n
+	---help---
+
+	BBR2 TCP congestion control is a model-based congestion control
+	algorithm that aims to maximize network utilization, keep queues and
+	retransmit rates low, and to be able to coexist with Reno/CUBIC in
+	common scenarios. It builds an explicit model of the network path.  It
+	tolerates a targeted degree of random packet loss and delay that are
+	unrelated to congestion. It can operate over LAN, WAN, cellular, wifi,
+	or cable modem links, and can use DCTCP-L4S-style ECN signals.  It can
+	coexist with flows that use loss-based congestion control, and can
+	operate with shallow buffers, deep buffers, bufferbloat, policers, or
+	AQM schemes that do not provide a delay signal. It requires pacing,
+	using either TCP internal pacing or the fq ("Fair Queue") pacing packet
+	scheduler.
+
 choice
 	prompt "Default TCP congestion control"
 	default DEFAULT_CUBIC
@@ -728,6 +791,24 @@ choice
 	config DEFAULT_BBR
 		bool "BBR" if TCP_CONG_BBR=y
 
+	config DEFAULT_LIA
+		bool "Lia" if TCP_CONG_LIA=y
+
+	config DEFAULT_OLIA
+		bool "Olia" if TCP_CONG_OLIA=y
+
+	config DEFAULT_WVEGAS
+		bool "Wvegas" if TCP_CONG_WVEGAS=y
+
+	config DEFAULT_BALIA
+		bool "Balia" if TCP_CONG_BALIA=y
+
+	config DEFAULT_MCTCPDESYNC
+		bool "Mctcpdesync (EXPERIMENTAL)" if TCP_CONG_MCTCPDESYNC=y
+
+	config DEFAULT_BBR2
+		bool "BBR2" if TCP_CONG_BBR2=y
+
 	config DEFAULT_RENO
 		bool "Reno"
 endchoice
@@ -752,6 +833,7 @@ config DEFAULT_TCP_CONG
 	default "dctcp" if DEFAULT_DCTCP
 	default "cdg" if DEFAULT_CDG
 	default "bbr" if DEFAULT_BBR
+	default "bbr2" if DEFAULT_BBR2
 	default "cubic"
 
 config TCP_MD5SIG
