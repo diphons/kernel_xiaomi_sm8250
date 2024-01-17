@@ -900,7 +900,7 @@ int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
 	if (panel->host_config.ext_bridge_mode)
 		return 0;
 
-	DSI_INFO("backlight type:%d lvl:%d\n", bl->type, bl_lvl);
+	DSI_DEBUG("backlight type:%d lvl:%d\n", bl->type, bl_lvl);
 
 	/* lmi panel must restore to last_bl_level to avoid flash high
 	 * brightness white exiting app lock with DC on (MIUI-1755728),
