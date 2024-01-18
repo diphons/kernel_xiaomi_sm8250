@@ -3164,14 +3164,9 @@ ext4_mb_normalize_request(struct ext4_allocation_context *ac,
 	start = max(start, rounddown(ac->ac_o_ex.fe_logical,
 			(ext4_lblk_t)EXT4_BLOCKS_PER_GROUP(ac->ac_sb)));
 
-	/*
-	 * For tiny groups (smaller than 8MB) the chosen allocation
-	 * alignment may be larger than group size. Make sure the
-	 * alignment does not move allocation to a different group which
-	 * makes mballoc fail assertions later.
-	 */
-	start = max(start, rounddown(ac->ac_o_ex.fe_logical,
-			(ext4_lblk_t)EXT4_BLOCKS_PER_GROUP(ac->ac_sb)));
+	/* avoid unnecessary preallocation that may trigger assertions */
+	if (start + size > EXT_MAX_BLOCKS)
+		size = EXT_MAX_BLOCKS - start;
 
 	/* don't cover already allocated blocks in selected range */
 	if (ar->pleft && start <= ar->lleft) {
