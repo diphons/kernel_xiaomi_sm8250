@@ -94,6 +94,7 @@
 #include <linux/livepatch.h>
 #include <linux/thread_info.h>
 #include <linux/cpufreq_times.h>
+#include <linux/devfreq_boost.h>
 #include <linux/scs.h>
 #ifdef CONFIG_XIAOMI_MIUI
 #include <linux/cpuset.h>
@@ -2374,7 +2375,7 @@ long _do_fork(unsigned long clone_flags,
 	long nr;
 
 	if (task_is_zygote(current)) {
-		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 50);
+		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 50);
 	}
 
 	/*
