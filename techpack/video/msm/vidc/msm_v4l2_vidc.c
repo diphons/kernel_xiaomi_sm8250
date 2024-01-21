@@ -790,7 +790,7 @@ static int __init msm_vidc_init(void)
 #ifdef CONFIG_DEBUG_FS
 	vidc_driver->debugfs_root = msm_vidc_debugfs_init_drv();
 	if (!vidc_driver->debugfs_root)
-		d_vpr_e("Failed to create debugfs for msm_vidc\n");
+		pr_debug("Failed to create debugfs for msm_vidc\n");
 #endif
 
 	rc = platform_driver_register(&msm_vidc_driver);
