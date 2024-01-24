@@ -182,8 +182,6 @@ static void a6xx_init(struct adreno_device *adreno_dev)
 			adreno_dev->highest_bank_bit = hbb;
 	}
 
-	a6xx_crashdump_init(adreno_dev);
-
 	/*
 	 * If the GMU is not enabled, rewrite the offset for the always on
 	 * counters to point to the CP always on instead of GMU always on
@@ -2732,7 +2730,6 @@ static void a6xx_clk_set_options(struct adreno_device *adreno_dev,
 struct adreno_gpudev adreno_a6xx_gpudev = {
 	.reg_offsets = &a6xx_reg_offsets,
 	.start = a6xx_start,
-	.snapshot = a6xx_snapshot,
 	.irq = &a6xx_irq,
 	.irq_trace = trace_kgsl_a5xx_irq_status,
 	.num_prio_levels = KGSL_PRIORITY_MAX_RB_LEVELS,

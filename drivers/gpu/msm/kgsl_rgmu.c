@@ -261,8 +261,6 @@ static void rgmu_snapshot(struct kgsl_device *device)
 	 */
 	gmu_dev_ops->halt_execution(device);
 
-	kgsl_device_snapshot(device, NULL, true);
-
 	adreno_write_gmureg(adreno_dev,
 			ADRENO_REG_GMU_GMU2HOST_INTR_CLR, 0xFFFFFFFF);
 	adreno_write_gmureg(adreno_dev,
@@ -486,7 +484,6 @@ struct gmu_core_ops rgmu_ops = {
 	.start = rgmu_start,
 	.stop = rgmu_stop,
 	.dcvs_set = rgmu_dcvs_set,
-	.snapshot = rgmu_snapshot,
 	.regulator_isenabled = rgmu_regulator_isenabled,
 	.suspend = rgmu_suspend,
 };

@@ -2080,25 +2080,6 @@ replay:
 static void do_header_and_snapshot(struct kgsl_device *device, int fault,
 		struct adreno_ringbuffer *rb, struct kgsl_drawobj_cmd *cmdobj)
 {
-	struct kgsl_drawobj *drawobj = DRAWOBJ(cmdobj);
-
-	/* Always dump the snapshot on a non-drawobj failure */
-	if (cmdobj == NULL) {
-		adreno_fault_header(device, rb, NULL, fault);
-		kgsl_device_snapshot(device, NULL, fault & ADRENO_GMU_FAULT);
-		return;
-	}
-
-	/* Skip everything if the PMDUMP flag is set */
-	if (test_bit(KGSL_FT_SKIP_PMDUMP, &cmdobj->fault_policy))
-		return;
-
-	/* Print the fault header */
-	adreno_fault_header(device, rb, cmdobj, fault);
-
-	if (!(drawobj->context->flags & KGSL_CONTEXT_NO_SNAPSHOT))
-		kgsl_device_snapshot(device, drawobj->context,
-					fault & ADRENO_GMU_FAULT);
 }
 
 static int dispatcher_do_fault(struct adreno_device *adreno_dev)
@@ -2227,9 +2208,6 @@ static int dispatcher_do_fault(struct adreno_device *adreno_dev)
 	if (!test_bit(KGSL_FT_PAGEFAULT_GPUHALT_ENABLE,
 		&adreno_dev->ft_pf_policy) && adreno_dev->cooperative_reset)
 		gmu_core_dev_cooperative_reset(device);
-
-	if (!(fault & ADRENO_GMU_FAULT_SKIP_SNAPSHOT))
-		do_header_and_snapshot(device, fault, hung_rb, cmdobj);
 
 	/* Turn off the KEEPALIVE vote from the ISR for hard fault */
 	if (gpudev->gpu_keepalive && fault & ADRENO_HARD_FAULT)

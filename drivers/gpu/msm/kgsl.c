@@ -5416,9 +5416,6 @@ int kgsl_device_platform_probe(struct kgsl_device *device)
 	device->events_wq = alloc_workqueue("kgsl-events",
 		WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS | WQ_HIGHPRI, 0);
 
-	/* Initialize the snapshot engine */
-	kgsl_device_snapshot_init(device);
-
 	/* Initialize common sysfs entries */
 	kgsl_pwrctrl_init_sysfs(device);
 
@@ -5441,8 +5438,6 @@ void kgsl_device_platform_remove(struct kgsl_device *device)
 
 	kfree(device->dev->dma_parms);
 	device->dev->dma_parms = NULL;
-
-	kgsl_device_snapshot_close(device);
 
 	kgsl_exit_page_pools();
 

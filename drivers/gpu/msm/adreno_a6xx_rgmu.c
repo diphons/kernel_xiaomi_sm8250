@@ -8,7 +8,6 @@
 
 #include "adreno.h"
 #include "adreno_a6xx.h"
-#include "adreno_snapshot.h"
 #include "kgsl_rgmu.h"
 #include "kgsl_trace.h"
 
@@ -121,7 +120,6 @@ static int a6xx_rgmu_oob_set(struct kgsl_device *device,
 	}
 
 	gmu_core_regwrite(device, A6XX_GMU_GMU2HOST_INTR_CLR, check);
-	trace_kgsl_gmu_oob_set(set);
 	return 0;
 }
 
@@ -134,7 +132,6 @@ static inline void a6xx_rgmu_oob_clear(struct kgsl_device *device,
 		enum oob_request req)
 {
 	gmu_core_regwrite(device, A6XX_GMU_HOST2GMU_INTR_SET, BIT(req + 24));
-	trace_kgsl_gmu_oob_clear(BIT(req + 24));
 }
 
 static void a6xx_rgmu_bcl_config(struct kgsl_device *device, bool on)
@@ -543,22 +540,6 @@ static void a6xx_rgmu_halt_execution(struct kgsl_device *device)
 
 }
 
-/*
- * a6xx_rgmu_snapshot() - A6XX GMU snapshot function
- * @adreno_dev: Device being snapshotted
- * @snapshot: Pointer to the snapshot instance
- *
- * This is where all of the A6XX GMU specific bits and pieces are grabbed
- * into the snapshot memory
- */
-static void a6xx_rgmu_snapshot(struct kgsl_device *device,
-		struct kgsl_snapshot *snapshot)
-{
-
-	adreno_snapshot_registers(device, snapshot, a6xx_rgmu_registers,
-					ARRAY_SIZE(a6xx_rgmu_registers) / 2);
-}
-
 struct gmu_dev_ops adreno_a6xx_rgmudev = {
 	.load_firmware = a6xx_rgmu_load_firmware,
 	.oob_set = a6xx_rgmu_oob_set,
@@ -571,7 +552,6 @@ struct gmu_dev_ops adreno_a6xx_rgmudev = {
 	.wait_for_lowest_idle = a6xx_rgmu_wait_for_lowest_idle,
 	.ifpc_store = a6xx_rgmu_ifpc_store,
 	.ifpc_show = a6xx_rgmu_ifpc_show,
-	.snapshot = a6xx_rgmu_snapshot,
 	.halt_execution = a6xx_rgmu_halt_execution,
 	.read_ao_counter = a6xx_gmu_read_ao_counter,
 	.gmu2host_intr_mask = RGMU_OOB_IRQ_MASK,
