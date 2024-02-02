@@ -45,9 +45,9 @@ ui_print "# D8G Kernel"
 ui_print "# by diphons" 
 ui_print "#";
 ui_print " ";
-ui_print "• Devices : $cekdevices ";
-ui_print "• Model : $getmodel ";
-ui_print "• RAM : $ram ";
+ui_print "• Device   : $cekdevices ";
+ui_print "• Model    : $getmodel ";
+ui_print "• Ram      : $ram ";
 ui_print " ";
 ui_print " ";
 
@@ -115,11 +115,11 @@ ui_print "   No!!... Skip Install DFE"
 ui_print " "
 if $FUNCTION; then
 	ui_print "-> Install DFE Selected.."
-	install_dfe="• DFE : Install"
+	install_dfe="• Dfe     : Install"
 	. /tmp/anykernel/tools/fstab.sh;
 else
 	ui_print "-> Skip Install DFE Selected.."
-	install_dfe="• DFE : Skip Install"
+	install_dfe="• Dfe     : Skip Install"
 fi
 
 # Choose Permissive or Enforcing
@@ -202,9 +202,9 @@ header_install(){
 	ui_print " "
 	ui_print "Flashing Kernel :"
 	ui_print "------------------------------------"
-	ui_print "• Device : $cekdevicename"
-	ui_print "• Model : $getmodel ";
-	ui_print "• RAM : $ram ";
+	ui_print "• Device  : $cekdevicename"
+	ui_print "• Model   : $getmodel ";
+	ui_print "• Ram     : $ram ";
 	ui_print "$install_av"
 	ui_print "$install_ocd"
 	ui_print "$install_dhz"
@@ -417,7 +417,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print " "
 			if $FUNCTION; then
 				ui_print "-> OC GPU 800 MHz Selected.."
-				install_ocd="• GPU : OC 800 MHz"
+				install_ocd="• Gpu     : OC 800 MHz"
 				dir_gpu=1;
 				select_ocd;
 			else
@@ -442,7 +442,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print " "
 			if $FUNCTION; then
 				ui_print "-> OC GPU 820 MHz Selected.."
-				install_ocd="• GPU : OC 820 MHz"
+				install_ocd="• Gpu     : OC 820 MHz"
 				dir_gpu=2;
 				select_ocd;
 			else
@@ -467,7 +467,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print " "
 			if $FUNCTION; then
 				ui_print "-> OC GPU 835 MHz Selected.."
-				install_ocd="• GPU : OC 835 MHz"
+				install_ocd="• Gpu     : OC 835 MHz"
 				dir_gpu=3;
 				select_ocd;
 			else
@@ -492,7 +492,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print " "
 			if $FUNCTION; then
 				ui_print "-> OC GPU 840 MHz Selected.."
-				install_ocd="• GPU : OC 840 MHz"
+				install_ocd="• Gpu     : OC 840 MHz"
 				dir_gpu=4;
 				select_ocd;
 			else
@@ -517,7 +517,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print " "
 			if $FUNCTION; then
 				ui_print "-> OC GPU 845 MHz Selected.."
-				install_ocd="• GPU : OC 845 MHz"
+				install_ocd="• Gpu     : OC 845 MHz"
 				dir_gpu=5;
 				select_ocd;
 			else
@@ -542,7 +542,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print " "
 			if $FUNCTION; then
 				ui_print "-> OC GPU 855 MHz Selected.."
-				install_ocd="• GPU : OC 855 MHz"
+				install_ocd="• Gpu     : OC 855 MHz"
 				dir_gpu=6;
 				select_ocd;
 			else
@@ -555,7 +555,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 
 	stock_mode(){
 		ui_print "-> Stock Selected.."
-		install_ocd="• GPU : Stock"
+		install_ocd="• Gpu     : Stock"
 		install_dhz="• Display : 60hz";
 		dir_gpu=0;
 		vhz=60;
@@ -591,7 +591,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 					gpu_select1;
 				else
 					ui_print "-> Stock GPU Selected.."
-					install_ocd="• GPU : Stock"
+					install_ocd="• Gpu     : Stock"
 					dir_gpu=0;
 					select_ocd;
 				fi;
@@ -610,7 +610,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print "   No!!... Stock display"
 			ui_print " "
 			if $FUNCTION; then
-				install_ocd="• GPU : Stock"
+				install_ocd="• Gpu     : Stock"
 				dir_gpu=0;
 				select_ocd;
 			else
@@ -766,16 +766,16 @@ else
 					ui_print " "
 					if $FUNCTION; then
 						ui_print "-> Include DTB with UV OC GPU selected.."
-						install_ocd="• GPU :  OC - UV"
+						install_ocd="• Gpu     : OC - UV"
 						cp $dtb_image_voc $home/dtb
 					else
 						ui_print "-> Include DTB with OC GPU selected.."
-						install_ocd="• GPU : OC"
+						install_ocd="• Gpu     : OC"
 						cp $dtb_image_oc $home/dtb
 					fi
 				else
 					ui_print "-> Include DTB with OC GPU selected.."
-					install_ocd="• GPU : OC"
+					install_ocd="• Gpu     : OC"
 					cp $dtb_image_oc $home/dtb
 				fi
 			else
@@ -792,16 +792,16 @@ else
 					ui_print " "
 					if $FUNCTION; then
 						ui_print "-> Include DTB with UV Stock GPU selected.."
-						install_ocd="• GPU : Stock - UV"
+						install_ocd="• Gpu     : Stock - UV"
 						cp $dtb_image_v $home/dtb
 					else
 						ui_print "-> Include DTB with Stock GPU selected.."
-						install_ocd="• GPU : Stock"
+						install_ocd="• Gpu     : Stock"
 						cp $dtb_image $home/dtb
 					fi
 				else
 					ui_print "-> Include DTB with Stock GPU selected.."
-					install_ocd="• GPU : Stock"
+					install_ocd="• Gpu     : Stock"
 					cp $dtb_image $home/dtb
 				fi
 			fi
@@ -819,16 +819,16 @@ else
 				ui_print " "
 				if $FUNCTION; then
 					ui_print "-> Include DTB with UV Stock GPU selected.."
-					install_ocd="• GPU : Stock - UV"
+					install_ocd="• Gpu     : Stock - UV"
 					cp $dtb_image_v $home/dtb
 				else
 					ui_print "-> Include DTB with Stock GPU selected.."
-					install_ocd="• GPU : Stock"
+					install_ocd="• Gpu     : Stock"
 					cp $dtb_image $home/dtb
 				fi
 			else
 				ui_print "-> Include DTB with Stock GPU selected.."
-				install_ocd="• GPU : Stock"
+				install_ocd="• Gpu     : Stock"
 				cp $dtb_image $home/dtb
 			fi
 		fi
