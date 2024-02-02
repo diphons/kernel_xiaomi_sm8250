@@ -186,7 +186,7 @@ header_install(){
 	ui_print " "
 	ui_print "Flashing Kernel :"
 	ui_print "------------------------------------"
-	ui_print "• Device : $cekdevices"
+	ui_print "• Device : $cekdevicename"
 	ui_print "• Model : $getmodel ";
 	ui_print "• RAM : $(free | grep Mem |  awk '{print $2}') ";
 	ui_print "$install_av"
@@ -622,9 +622,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 		header_abort;
 	fi
 else
-	if [[ $cekdevicename == *"in"* ]]; then
-		cekdevices=$(echo $cekdevicename | sed 's/in//g')
-	fi
+	cekdevices=$(echo $cekdevicename | sed 's/in//g')
 	dt_dir=$home/kernel/$cekdevices
 	if [ -f $dt_dir ]; then
 		cd $home/kernel
