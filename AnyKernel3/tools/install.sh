@@ -21,6 +21,22 @@ for cekdevicename in $cekdevice $cekproduct $cekvendordevice $cekvendorproduct; 
 	break 1;
 done;
 
+# read ram
+read_ram=$(free | grep Mem |  awk '{print $2}')
+if [ $read_ram -lt 4000000 ]; then
+ram="4 GB"
+elif [ $read_ram -lt 6000000 ]; then
+ram="6 GB"
+elif [ $read_ram -lt 8000000 ]; then
+ram="8 GB"
+elif [ $read_ram -lt 12000000 ]; then
+ram="12 GB"
+elif [ $read_ram -lt 16000000 ]; then
+ram="16 GB"
+else
+ram=$read_ram
+fi
+
 # Clear
 ui_print " ";
 ui_print " ";
@@ -31,7 +47,7 @@ ui_print "#";
 ui_print " ";
 ui_print "• Devices : $cekdevices ";
 ui_print "• Model : $getmodel ";
-ui_print "• RAM : $(free | grep Mem |  awk '{print $2}') ";
+ui_print "• RAM : $ram ";
 ui_print " ";
 ui_print " ";
 
@@ -188,7 +204,7 @@ header_install(){
 	ui_print "------------------------------------"
 	ui_print "• Device : $cekdevicename"
 	ui_print "• Model : $getmodel ";
-	ui_print "• RAM : $(free | grep Mem |  awk '{print $2}') ";
+	ui_print "• RAM : $ram ";
 	ui_print "$install_av"
 	ui_print "$install_ocd"
 	ui_print "$install_dhz"
