@@ -2,6 +2,7 @@
  * BQ2570x battery charging driver
  *
  * Copyright (C) 2017 Texas Instruments *
+ * Copyright (C) 2021 XiaoMi, Inc.
  * This package is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
@@ -152,34 +153,34 @@ static int bq2597x_mode_data[] = {
 #define VBAT_REG_STATUS_MASK		(1 << VBAT_REG_STATUS_SHIFT)
 #define IBAT_REG_STATUS_MASK		(1 << VBAT_REG_STATUS_SHIFT)
 
-#define bq_err(fmt, ...)								\
-do {											\
-	if (bq->mode == BQ25970_ROLE_MASTER)						\
-		printk(KERN_ERR "[bq2597x-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
-	else if (bq->mode == BQ25970_ROLE_SLAVE)					\
-		printk(KERN_ERR "[bq2597x-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
-	else										\
-		printk(KERN_ERR "[bq2597x-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
+#define bq_err(fmt, ...)							  \
+do {										  \
+	if (bq->mode == BQ25970_ROLE_MASTER)					  \
+		pr_debug("[bq2597x-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	  \
+	else if (bq->mode == BQ25970_ROLE_SLAVE)				  \
+		pr_debug("[bq2597x-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	  \
+	else									  \
+		pr_debug("[bq2597x-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
 } while (0);
 
-#define bq_info(fmt, ...)								\
-do {											\
-	if (bq->mode == BQ25970_ROLE_MASTER)						\
-		printk(KERN_INFO "[bq2597x-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
-	else if (bq->mode == BQ25970_ROLE_SLAVE)					\
-		printk(KERN_INFO "[bq2597x-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
-	else										\
-		printk(KERN_INFO "[bq2597x-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
+#define bq_info(fmt, ...)							  \
+do {										  \
+	if (bq->mode == BQ25970_ROLE_MASTER)					  \
+		pr_debug("[bq2597x-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	  \
+	else if (bq->mode == BQ25970_ROLE_SLAVE)				  \
+		pr_debug("[bq2597x-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	  \
+	else									  \
+		pr_debug("[bq2597x-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
 } while (0);
 
-#define bq_dbg(fmt, ...)								\
-do {											\
-	if (bq->mode == BQ25970_ROLE_MASTER)						\
-		printk(KERN_DEBUG "[bq2597x-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
-	else if (bq->mode == BQ25970_ROLE_SLAVE)					\
-		printk(KERN_DEBUG "[bq2597x-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
-	else										\
-		printk(KERN_DEBUG "[bq2597x-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
+#define bq_dbg(fmt, ...)							  \
+do {										  \
+	if (bq->mode == BQ25970_ROLE_MASTER)					  \
+		pr_debug("[bq2597x-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	  \
+	else if (bq->mode == BQ25970_ROLE_SLAVE)				  \
+		pr_debug("[bq2597x-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	  \
+	else									  \
+		pr_debug("[bq2597x-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
 } while (0);
 
 enum hvdcp3_type {
@@ -532,7 +533,7 @@ static int bq2597x_enable_wdt(struct bq2597x *bq, bool enable)
 }
 EXPORT_SYMBOL_GPL(bq2597x_enable_wdt);
 
-static int bq2597x_set_wdt(struct bq2597x *bq, int ms)
+static __maybe_unused int bq2597x_set_wdt(struct bq2597x *bq, int ms)
 {
 	int ret;
 	u8 val;
@@ -1195,7 +1196,7 @@ static int bq2597x_set_alarm_int_mask(struct bq2597x *bq, u8 mask)
 }
 EXPORT_SYMBOL_GPL(bq2597x_set_alarm_int_mask);
 
-static int bq2597x_clear_alarm_int_mask(struct bq2597x *bq, u8 mask)
+static __maybe_unused int bq2597x_clear_alarm_int_mask(struct bq2597x *bq, u8 mask)
 {
 	int ret;
 	u8 val;
@@ -1229,7 +1230,7 @@ static int bq2597x_set_fault_int_mask(struct bq2597x *bq, u8 mask)
 }
 EXPORT_SYMBOL_GPL(bq2597x_set_fault_int_mask);
 
-static int bq2597x_clear_fault_int_mask(struct bq2597x *bq, u8 mask)
+static __maybe_unused int bq2597x_clear_fault_int_mask(struct bq2597x *bq, u8 mask)
 {
 	int ret;
 	u8 val;
@@ -1454,7 +1455,7 @@ static int bq2597x_get_work_mode(struct bq2597x *bq, int *mode)
 	else
 		*mode = BQ25970_ROLE_STDALONE;
 
-	bq_info("work mode:%s\n", *mode == BQ25970_ROLE_STDALONE ? "Standalone" :
+	bq_dbg("work mode:%s\n", *mode == BQ25970_ROLE_STDALONE ? "Standalone" :
 			(*mode == BQ25970_ROLE_SLAVE ? "Slave" : "Master"));
 	return ret;
 }
@@ -1469,7 +1470,7 @@ static int bq2597x_detect_device(struct bq2597x *bq)
 		bq->part_no = (data & BQ2597X_DEV_ID_MASK);
 		bq->part_no >>= BQ2597X_DEV_ID_SHIFT;
 
-		pr_err("detect device:%d\n", data);
+		bq_dbg("detect device:%d\n", data);
 		if (data == SC8551_DEVICE_ID || data == SC8551A_DEVICE_ID)
 			bq->chip_vendor = SC8551;
 		else if (data == NU2105_DEVICE_ID)
@@ -2037,7 +2038,7 @@ static int bq2597x_charger_get_property(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
 		bq2597x_check_charge_enabled(bq, &bq->charge_enabled);
 		val->intval = bq->charge_enabled;
-		bq_info("POWER_SUPPLY_PROP_CHARGING_ENABLED: %s\n",
+		bq_dbg("POWER_SUPPLY_PROP_CHARGING_ENABLED: %s\n",
 				val->intval ? "enable" : "disable");
 		break;
 	case POWER_SUPPLY_PROP_STATUS:
@@ -2175,7 +2176,7 @@ static int bq2597x_charger_set_property(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_CHARGING_ENABLED:
 		bq2597x_enable_charge(bq, val->intval);
 		bq2597x_check_charge_enabled(bq, &bq->charge_enabled);
-		bq_info("POWER_SUPPLY_PROP_CHARGING_ENABLED: %s\n",
+		bq_dbg("POWER_SUPPLY_PROP_CHARGING_ENABLED: %s\n",
 				val->intval ? "enable" : "disable");
 		break;
 	case POWER_SUPPLY_PROP_PRESENT:
@@ -2243,7 +2244,7 @@ static int bq2597x_psy_register(struct bq2597x *bq)
 	return 0;
 }
 
-static void bq2597x_dump_reg(struct bq2597x *bq)
+static __maybe_unused void bq2597x_dump_reg(struct bq2597x *bq)
 {
 
 	int ret;
@@ -2267,32 +2268,32 @@ static void bq2597x_dump_important_regs(struct bq2597x *bq)
 
 	ret = bq2597x_read_byte(bq, BQ2597X_REG_0A, &val);
 	if (!ret)
-		bq_err("dump converter state Reg [%02X] = 0x%02X\n",
+		bq_dbg("dump converter state Reg [%02X] = 0x%02X\n",
 				BQ2597X_REG_0A, val);
 
 	ret = bq2597x_read_byte(bq, BQ2597X_REG_0D, &val);
 	if (!ret)
-		bq_err("dump int stat Reg[%02X] = 0x%02X\n",
+		bq_dbg("dump int stat Reg[%02X] = 0x%02X\n",
 				BQ2597X_REG_0D, val);
 
 	ret = bq2597x_read_byte(bq, BQ2597X_REG_0E, &val);
 	if (!ret)
-		bq_err("dump int flag Reg[%02X] = 0x%02X\n",
+		bq_dbg("dump int flag Reg[%02X] = 0x%02X\n",
 				BQ2597X_REG_0E, val);
 
 	ret = bq2597x_read_byte(bq, BQ2597X_REG_10, &val);
 	if (!ret)
-		bq_err("dump fault stat Reg[%02X] = 0x%02X\n",
+		bq_dbg("dump fault stat Reg[%02X] = 0x%02X\n",
 				BQ2597X_REG_10, val);
 
 	ret = bq2597x_read_byte(bq, BQ2597X_REG_11, &val);
 	if (!ret)
-		bq_err("dump fault flag Reg[%02X] = 0x%02X\n",
+		bq_dbg("dump fault flag Reg[%02X] = 0x%02X\n",
 				BQ2597X_REG_11, val);
 
 	ret = bq2597x_read_byte(bq, BQ2597X_REG_2D, &val);
 	if (!ret)
-		bq_err("dump regulation flag Reg[%02X] = 0x%02X\n",
+		bq_dbg("dump regulation flag Reg[%02X] = 0x%02X\n",
 				BQ2597X_REG_2D, val);
 }
 
@@ -2386,7 +2387,7 @@ static int bq2597x_check_vbus_error_status(struct bq2597x *bq)
 
 	ret = bq2597x_read_byte(bq, BQ2597X_REG_0A, &stat);
 	if (!ret) {
-		bq_info("BQ2597X_REG_0A:0x%02x\n", stat);
+		bq_dbg("BQ2597X_REG_0A:0x%02x\n", stat);
 		if (stat & VBUS_ERROR_LOW_MASK)
 			return VBUS_ERROR_LOW;
 		else if (stat & VBUS_ERROR_HIGH_MASK)
@@ -2671,7 +2672,7 @@ static int bq2597x_resume(struct device *dev)
 	}
 	bq2597x_enable_adc(bq, true);
 	power_supply_changed(bq->fc2_psy);
-	bq_err("Resume successfully!");
+	bq_dbg("Resume successfully!");
 
 	return 0;
 }
@@ -2735,4 +2736,3 @@ module_i2c_driver(bq2597x_charger_driver);
 MODULE_DESCRIPTION("TI BQ2597x Charger Driver");
 MODULE_LICENSE("GPL v2");
 MODULE_AUTHOR("Texas Instruments");
-
