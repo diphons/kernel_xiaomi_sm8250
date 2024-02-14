@@ -981,10 +981,10 @@ static int msm_drm_init(struct device *dev, struct drm_driver *drv)
 #endif
 
 #ifdef CONFIG_DEBUG_FS
-	ret = sde_dbg_debugfs_register(dev);
-	if (ret) {
-		dev_err(dev, "failed to reg sde dbg debugfs: %d\n", ret);
-		goto fail;
+	if (!msm_debugfs_late_init(ddev)) {
+		priv->debug_root = debugfs_create_dir("debug",
+						ddev->primary->debugfs_root);
+		sde_dbg_debugfs_register(dev);
 	}
 #endif
 
