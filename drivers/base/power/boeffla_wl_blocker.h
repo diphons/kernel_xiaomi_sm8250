@@ -24,7 +24,7 @@
 														"spi0.0;spi1.0;rmnet_ipa%d;rmnet_ctl;RMNET_SHS;pmo_wow_wl;" \
 														"IPA_CLIENT_APPS_WAN_CONS;wlan_pno_wl;wlan_deauth_rec_wl;" \
 														"wlan_auth_req_wl;wlan_ap_assoc_lost_wl;event1;event2;eventpoll;" \
-														"elliptic_wake_source"
+														"elliptic_wake_source;event5;bq2597x-standalone"
 
 #define LENGTH_LIST_WL				1024
 #define LENGTH_LIST_WL_DEFAULT		(strlen(LIST_WL_DEFAULT) + 1)
