@@ -114,9 +114,30 @@ ui_print "   Yes!!... Install DFE"
 ui_print "   No!!... Skip Install DFE"
 ui_print " "
 if $FUNCTION; then
-	ui_print "-> Install DFE Selected.."
-	install_dfe="• Dfe     : Install"
-	. /tmp/anykernel/tools/fstab.sh;
+	ui_print " "
+	ui_print "WARNING !!!"
+	ui_print " "
+	ui_print "   DFE only works for the first boot or has"
+	ui_print "   not yet booted into the system."
+	ui_print " "
+	ui_print "   If your device has previously booted and"
+	ui_print "   entered the system, you need to factory reset"
+	ui_print "   or format the data.If not, maybe your device"
+	ui_print "   will got bootloop"
+	ui_print " "
+	ui_print "   Do you want to continue?"
+	ui_print "   Vol+ = Yes, Vol- = No"
+	ui_print "   Yes!!... Install DFE"
+	ui_print "   No!!... Skip Install DFE"
+	ui_print " "
+	if $FUNCTION; then
+		ui_print "-> Install DFE Selected.."
+		install_dfe="• Dfe     : Install"
+		. /tmp/anykernel/tools/fstab.sh;
+	else
+		ui_print "-> Skip Install DFE Selected.."
+		install_dfe="• Dfe     : Skip Install"
+	fi
 else
 	ui_print "-> Skip Install DFE Selected.."
 	install_dfe="• Dfe     : Skip Install"
@@ -220,6 +241,19 @@ header_abort(){
 	ui_print "Image not ready to be flash"
 	ui_print " "
 	break 1;
+}
+print_oc_warn(){
+	ui_print " "
+	ui_print "WARNING !!!"
+	ui_print " "
+	ui_print "   We do not recommend use overclocking,"
+	ui_print "   any damage that occurs is the user's responsibility."
+	ui_print " "
+	ui_print "   If you choose overclocking, use it expedient"
+	ui_print "   to reduce the risk of damage"
+	ui_print " "
+	ui_print "   Do you want to continue?"
+	ui_print "   Vol+ = Yes, Vol- = No"
 }
 if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekdevices == "PocophoneF1" ]]; then
 	dir_gpu=0
@@ -570,30 +604,38 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print "Select OC or Stock?"
 			ui_print " "
 			ui_print "   Vol+ = Yes, Vol- = No"
-			ui_print ""
+			ui_print " "
 			ui_print "   Yes.. OC Mode"
 			ui_print "   No!!... Stock Mode"
 			ui_print " "
 			if $FUNCTION; then
-				ui_print "-> With OC Selected.."
-				# Choose Permissive or Enforcing
+				print_oc_warn
 				ui_print " "
-				ui_print "Choose GPU OC - Non OC.."
-				ui_print " "
-				ui_print "Select GPU OC or Stock?"
-				ui_print " "
-				ui_print "   Vol+ = Yes, Vol- = No"
-				ui_print ""
-				ui_print "   Yes.. OC GPU"
-				ui_print "   No!!... Stock GPU"
+				ui_print "   Yes.. OC Mode"
+				ui_print "   No!!... Stock Mode"
 				ui_print " "
 				if $FUNCTION; then
-					gpu_select1;
+					ui_print "-> With OC Selected.."
+					ui_print " "
+					ui_print "Choose GPU OC - Non OC.."
+					ui_print " "
+					ui_print "Select GPU OC or Stock?"
+					ui_print " "
+					ui_print "   Vol+ = Yes, Vol- = No"
+					ui_print " "
+					ui_print "   Yes.. OC GPU"
+					ui_print "   No!!... Stock GPU"
+					ui_print " "
+					if $FUNCTION; then
+						gpu_select1;
+					else
+						ui_print "-> Stock GPU Selected.."
+						install_ocd="• Gpu     : Stock"
+						dir_gpu=0;
+						select_ocd;
+					fi;
 				else
-					ui_print "-> Stock GPU Selected.."
-					install_ocd="• Gpu     : Stock"
-					dir_gpu=0;
-					select_ocd;
+					stock_mode
 				fi;
 			else
 				stock_mode
@@ -605,14 +647,23 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print "Select Display OC or Stock?"
 			ui_print " "
 			ui_print "   Vol+ = Yes, Vol- = No"
-			ui_print ""
+			ui_print " "
 			ui_print "   Yes.. Chose display framerate"
 			ui_print "   No!!... Stock display"
 			ui_print " "
 			if $FUNCTION; then
-				install_ocd="• Gpu     : Stock"
-				dir_gpu=0;
-				select_ocd;
+				print_oc_warn
+				ui_print " "
+				ui_print "   Yes.. Chose display framerate"
+				ui_print "   No!!... Stock display"
+				ui_print " "
+				if $FUNCTION; then
+					install_ocd="• Gpu     : Stock"
+					dir_gpu=0;
+					select_ocd;
+				else
+					stock_mode
+				fi
 			else
 				stock_mode
 			fi
@@ -748,35 +799,68 @@ else
 			ui_print "Over Clock GPU ?"
 			ui_print " "
 			ui_print "   Vol+ = Yes, Vol- = No"
-			ui_print ""
+			ui_print " "
 			ui_print "   Yes.. Over Clock GPU"
 			ui_print "   No!!... Stock with Under Clock GPU"
 			ui_print " "
 			if $FUNCTION; then
-				if [ -f $dtb_image_voc ]; then
-					ui_print " "
-					ui_print "Choose GPU to install.."
-					ui_print " "
-					ui_print "Undervolt GPU ?"
-					ui_print " "
-					ui_print "   Vol+ = Yes, Vol- = No"
-					ui_print ""
-					ui_print "   Yes.. Undervolt GPU"
-					ui_print "   No!!... Stock volt GPU"
-					ui_print " "
-					if $FUNCTION; then
-						ui_print "-> Include DTB with UV OC GPU selected.."
-						install_ocd="• Gpu     : OC - UV"
-						cp $dtb_image_voc $home/dtb
+				print_oc_warn
+				ui_print " "
+				ui_print "   Yes.. Over Clock GPU"
+				ui_print "   No!!... Stock with Under Clock GPU"
+				ui_print " "
+				if $FUNCTION; then
+					if [ -f $dtb_image_voc ]; then
+						ui_print " "
+						ui_print "Choose GPU to install.."
+						ui_print " "
+						ui_print "Undervolt GPU ?"
+						ui_print " "
+						ui_print "   Vol+ = Yes, Vol- = No"
+						ui_print ""
+						ui_print "   Yes.. Undervolt GPU"
+						ui_print "   No!!... Stock volt GPU"
+						ui_print " "
+						if $FUNCTION; then
+							ui_print "-> Include DTB with UV OC GPU selected.."
+							install_ocd="• Gpu     : OC - UV"
+							cp $dtb_image_voc $home/dtb
+						else
+							ui_print "-> Include DTB with OC GPU selected.."
+							install_ocd="• Gpu     : OC"
+							cp $dtb_image_oc $home/dtb
+						fi
 					else
 						ui_print "-> Include DTB with OC GPU selected.."
 						install_ocd="• Gpu     : OC"
 						cp $dtb_image_oc $home/dtb
 					fi
 				else
-					ui_print "-> Include DTB with OC GPU selected.."
-					install_ocd="• Gpu     : OC"
-					cp $dtb_image_oc $home/dtb
+					if [ -f $dtb_image_v ]; then
+						ui_print " "
+						ui_print "Choose GPU to install.."
+						ui_print " "
+						ui_print "Undervolt GPU ?"
+						ui_print " "
+						ui_print "   Vol+ = Yes, Vol- = No"
+						ui_print ""
+						ui_print "   Yes.. Undervolt GPU"
+						ui_print "   No!!... Stock volt GPU"
+						ui_print " "
+						if $FUNCTION; then
+							ui_print "-> Include DTB with UV Stock GPU selected.."
+							install_ocd="• Gpu     : Stock - UV"
+							cp $dtb_image_v $home/dtb
+						else
+							ui_print "-> Include DTB with Stock GPU selected.."
+							install_ocd="• Gpu     : Stock"
+							cp $dtb_image $home/dtb
+						fi
+					else
+						ui_print "-> Include DTB with Stock GPU selected.."
+						install_ocd="• Gpu     : Stock"
+						cp $dtb_image $home/dtb
+					fi
 				fi
 			else
 				if [ -f $dtb_image_v ]; then
