@@ -9,33 +9,39 @@ find $fstab_dir -name "fstab.*" -exec sed -i 's/fileencryption=ice//g' {} +
 
 ui_print " "; ui_print "Set DFE mount points...";
 umount /vendor || true
-if [ -f /dev/block/mapper/vendor_a ]; then
-ui_print "mounting vendor /dev/block/mapper/vendor_a...";
-mount -o rw /dev/block/mapper/vendor_a /vendor
-elif [ -f /dev/block/mapper/vendor_b ]; then
-ui_print "mounting vendor /dev/block/mapper/vendor_b...";
-mount -o rw /dev/block/mapper/vendor_b /vendor
-elif [ -f /dev/block/mapper/vendor ]; then
-ui_print "mounting vendor /dev/block/mapper/vendor...";
-mount -o rw /dev/block/mapper/vendor /vendor
+if [ -d /dev/block/mapper ]; then
+ui_print "mounting vendor /dev/block/mapper/vendor$get_slot...";
+mount -o ro /dev/block/mapper/vendor$get_slot /vendor
+mount -o remount,rw /vendor
 else
 ui_print "mounting vendor /dev/block/bootdevice/by-name/vendor...";
 mount -o rw /dev/block/bootdevice/by-name/vendor /vendor
-fi;
+fi
 
+ui_print " ";
 if [ -d /vendor/bin ]; then
-ui_print "vendor: check and apply dfe...";
+crwv=/vendor/bin/cek_rw_vendor
+ui_print " - check writable...";
+echo "test" > $crwv
+cek_vdr=$(cat $crwv)
+if [ $cek_vdr = "test" ]; then
+ui_print " - applying dfe...";
+rm -f $crwv
 fstab_dir=/vendor/etc
 dfe_main
-ui_print "vendor: set dfe finished...";
+ui_print " - set dfe finished...";
 umount /vendor || true
-else
-ui_print "failed to mount vendor...";
-fi;
 if [ -d $ramdisk ]; then
 ui_print "ramdisk: check and apply dfe...";
 fstab_dir=$ramdisk
-ui_print "ramdisk: set dfe finished...";
 dfe_main
+ui_print "ramdisk: set dfe finished...";
 fi
+else
+ui_print " - vendor is not writable...";
+ui_print " - Aborting dfe...";
+fi
+else
+ui_print " - failed to mount vendor...";
+fi;
 ui_print " ";
