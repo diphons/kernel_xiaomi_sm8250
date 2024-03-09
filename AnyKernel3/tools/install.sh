@@ -106,6 +106,7 @@ fi
 ui_print " ";
 ui_print " ";
 
+if [ $DFE = 1 ]; then
 # Choose DFE
 ui_print " "
 ui_print "Install DFE ?"
@@ -141,6 +142,7 @@ if $FUNCTION; then
 else
 	ui_print "-> Skip Install DFE Selected.."
 	install_dfe="• Dfe     : Skip Install"
+fi
 fi
 
 # Choose Permissive or Enforcing
@@ -255,6 +257,16 @@ print_oc_warn(){
 	ui_print "   Do you want to continue?"
 	ui_print "   Vol+ = Yes, Vol- = No"
 }
+header_ocd(){
+	ui_print " "
+	ui_print "Choose your favorite display hz?"
+	ui_print " "
+	ui_print "Jangan dipaksa, gunakan semampu device kalian"
+	ui_print " "
+	ui_print "   Vol+ = Yes, Vol- = No"
+	ui_print ""
+}
+
 if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekdevices == "PocophoneF1" ]]; then
 	dir_gpu=0
 	vhz=60
@@ -271,14 +283,9 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 	fi;
 	# display Select
 	select_ocd(){
+		# Clean vhz
+		vhz=""
 		# Choose dts
-		ui_print " "
-		ui_print "Choose your favorite display hz?"
-		ui_print " "
-		ui_print "Jangan dipaksa, gunakan semampu device kalian"
-		ui_print " "
-		ui_print "   Vol+ = Yes, Vol- = No"
-		ui_print ""
 		ui_print "   Yes!!... Install FPS 60hz"
 		ui_print "   No!!... Choose again"
 		ui_print " "
@@ -383,48 +390,15 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 									else
 										ui_print "   Vol+ = Yes, Vol- = No"
 										ui_print "   Yes!!... Install FPS 71hz"
-										if [ -f $dt_dir/$dir_gpu/75/beryllium-mp-v2.1.dtb ]; then
-											ui_print "   No!!... Install Stock FPS - 75hz"
-										elif [ -f $dt_dir/$dir_gpu/76/beryllium-mp-v2.1.dtb ]; then
-											ui_print "   No!!... Install Stock FPS - 76hz"
-										elif [ -f $dt_dir/$dir_gpu/77/beryllium-mp-v2.1.dtb ]; then
-											ui_print "   No!!... Install Stock FPS - 77hz"
-										elif [ -f $dt_dir/$dir_gpu/78/beryllium-mp-v2.1.dtb ]; then
-											ui_print "   No!!... Install Stock FPS - 78hz"
-										elif [ -f $dt_dir/$dir_gpu/80/beryllium-mp-v2.1.dtb ]; then
-											ui_print "   No!!... Install Stock FPS - 80hz"
-										elif [ -f $dt_dir/$dir_gpu/81/beryllium-mp-v2.1.dtb ]; then
-											ui_print "   No!!... Install Stock FPS - 81hz"
-										elif [ -f $dt_dir/$dir_gpu/90/beryllium-mp-v2.1.dtb ]; then
-											ui_print "   No!!... Install Stock FPS - 90hz"
-										else
-											ui_print "   No!!... Install Stock FPS - 60hz"
-										fi;
+										ui_print "   No!!... Choose again"
 										ui_print " "
 										if $FUNCTION; then
 											# 71hz
 											ui_print "-> Display 71hz Selected.."
 											install_dhz="• Display : 71hz";
-											#if [[ -f $compressed_image ]; then
-												# Concatenate all of the dtbs to the kernel
-												vhz=71
-											#fi
+											vhz=71
 										else
-											if [ -f $dt_dir/$dir_gpu/75/beryllium-mp-v2.1.dtb ]; then
-												set75
-											elif [ -f $dt_dir/$dir_gpu/76/beryllium-mp-v2.1.dtb ]; then
-												set76
-											elif [ -f $dt_dir/$dir_gpu/77/beryllium-mp-v2.1.dtb ]; then
-												set77
-											elif [ -f $dt_dir/$dir_gpu/78/beryllium-mp-v2.1.dtb ]; then
-												set78
-											elif [ -f $dt_dir/$dir_gpu/80/beryllium-mp-v2.1.dtb ]; then
-												set80
-											elif [ -f $dt_dir/$dir_gpu/81/beryllium-mp-v2.1.dtb ]; then
-												set81
-											else
-												set90
-											fi
+											select_ocd
 										fi
 									fi
 								fi
@@ -434,7 +408,11 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 				fi
 			fi
 		fi
-		cat $dt_dir/Image.gz $dt_dir/$dir_gpu/$vhz/*.dtb > $home/Image.gz-dtb;
+		if [ $vhz = "" ]; then
+			select_ocd;
+		else
+			cat $dt_dir/Image.gz $dt_dir/$dir_gpu/$vhz/*.dtb > $home/Image.gz-dtb;
+		fi
 	}
 
 	gpu_select1(){
@@ -453,6 +431,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 				ui_print "-> OC GPU 800 MHz Selected.."
 				install_ocd="• Gpu     : OC 800 MHz"
 				dir_gpu=1;
+				header_ocd;
 				select_ocd;
 			else
 				gpu_select2
@@ -478,6 +457,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 				ui_print "-> OC GPU 820 MHz Selected.."
 				install_ocd="• Gpu     : OC 820 MHz"
 				dir_gpu=2;
+				header_ocd;
 				select_ocd;
 			else
 				gpu_select3
@@ -503,6 +483,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 				ui_print "-> OC GPU 835 MHz Selected.."
 				install_ocd="• Gpu     : OC 835 MHz"
 				dir_gpu=3;
+				header_ocd;
 				select_ocd;
 			else
 				gpu_select4
@@ -528,6 +509,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 				ui_print "-> OC GPU 840 MHz Selected.."
 				install_ocd="• Gpu     : OC 840 MHz"
 				dir_gpu=4;
+				header_ocd;
 				select_ocd;
 			else
 				gpu_select5;
@@ -553,6 +535,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 				ui_print "-> OC GPU 845 MHz Selected.."
 				install_ocd="• Gpu     : OC 845 MHz"
 				dir_gpu=5;
+				header_ocd;
 				select_ocd;
 			else
 				gpu_select6
@@ -578,6 +561,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 				ui_print "-> OC GPU 855 MHz Selected.."
 				install_ocd="• Gpu     : OC 855 MHz"
 				dir_gpu=6;
+				header_ocd;
 				select_ocd;
 			else
 				gpu_select
@@ -632,6 +616,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 						ui_print "-> Stock GPU Selected.."
 						install_ocd="• Gpu     : Stock"
 						dir_gpu=0;
+						header_ocd;
 						select_ocd;
 					fi;
 				else
@@ -648,7 +633,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 			ui_print " "
 			ui_print "   Vol+ = Yes, Vol- = No"
 			ui_print " "
-			ui_print "   Yes.. Chose display framerate"
+			ui_print "   Yes.. Overclock display"
 			ui_print "   No!!... Stock display"
 			ui_print " "
 			if $FUNCTION; then
@@ -660,6 +645,7 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 				if $FUNCTION; then
 					install_ocd="• Gpu     : Stock"
 					dir_gpu=0;
+					header_ocd;
 					select_ocd;
 				else
 					stock_mode
