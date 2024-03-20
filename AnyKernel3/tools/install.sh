@@ -4,10 +4,14 @@
 get_slot=$(getprop ro.boot.slot_suffix 2>/dev/null);
 block=/dev/block/bootdevice/by-name/boot;
 
+START_DUMP=$(date +"%s")
 # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
 . tools/ak3-core.sh
 
 dump_boot # use split_boot to skip ramdisk unpack, e.g. for devices with init_boot ramdisk
+
+END_DUMP=$(date +"%s")
+DIFF_DUMP=$(($END_DUMP - $START_DUMP))
 
 patch_cmdline "skip_override" "";
 
@@ -233,6 +237,7 @@ header_install(){
 	ui_print "$install_dhz"
 	ui_print "$install_pk"
 	ui_print "$install_dfe"
+	START_FLASH=$(date +"%s")
 }
 header_abort(){
 	# reset for boot patching
@@ -952,4 +957,18 @@ else
 		ui_print " "
 		break 1;
 	fi
+fi;
+
+if [[ ! -z $START_FLASH ]]; then
+	END_FLASH=$(date +"%s")
+	DIFF_FLASH=$(($END_FLASH - $START_FLASH))
+	DIFF=$(($DIFF_FLASH + $DIFF_DUMP))
+	MINUTE=$(($DIFF / 60))
+	ui_print " "
+	ui_print " "
+	if [[ $MINUTE -gt 0 ]]; then
+		ui_print "Flash completed in $MINUTE minute(s) and '$(($DIFF % 60))' seconds"
+	else
+		ui_print "Flash completed in '$(($DIFF % 60))' seconds"
+	fi;
 fi;
