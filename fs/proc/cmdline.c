@@ -3,6 +3,9 @@
 #include <linux/init.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
+#ifdef CONFIG_KSU_SUSFS_SPOOF_PROC_CMDLINE
+#include <linux/susfs.h>
+#endif
 #ifdef CONFIG_INITRAMFS_IGNORE_SKIP_FLAG
 #include <asm/setup.h>
 #endif
@@ -29,6 +32,12 @@ static void proc_command_line_init(void) {
 
 static int cmdline_proc_show(struct seq_file *m, void *v)
 {
+#ifdef CONFIG_KSU_SUSFS_SPOOF_PROC_CMDLINE
+	if (!susfs_spoof_proc_cmdline(m)) {
+		seq_putc(m, '\n');
+		return 0;
+	}
+#endif
 #ifdef CONFIG_INITRAMFS_IGNORE_SKIP_FLAG
 	seq_puts(m, proc_command_line);
 #else
