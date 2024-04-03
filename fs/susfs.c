@@ -20,10 +20,6 @@
 
 static spinlock_t susfs_spin_lock;
 
-#ifdef CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT
-static const char *magic_mount_workdir = "/debug_ramdisk/workdir";
-#endif
-
 extern bool susfs_is_current_ksu_domain(void);
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 extern void ksu_try_umount(const char *mnt, bool check_mnt, int flags);
@@ -587,7 +583,7 @@ void susfs_auto_add_try_umount_for_bind_mount(struct path *path) {
 	}
 
 #ifdef CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT
-	if (strstr(dpath, magic_mount_workdir)) {
+	if (strstr(dpath, MAGIC_MOUNT_WORKDIR)) {
 		is_magic_mount_path = true;
 	}
 #endif
@@ -613,7 +609,7 @@ void susfs_auto_add_try_umount_for_bind_mount(struct path *path) {
 
 #ifdef CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT
 	if (is_magic_mount_path) {
-		strncpy(new_list->info.target_pathname, dpath + strlen(magic_mount_workdir), SUSFS_MAX_LEN_PATHNAME-1);
+		strncpy(new_list->info.target_pathname, dpath + strlen(MAGIC_MOUNT_WORKDIR), SUSFS_MAX_LEN_PATHNAME-1);
 		goto out_add_to_list;
 	}
 #endif
