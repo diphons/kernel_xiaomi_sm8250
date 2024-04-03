@@ -1561,7 +1561,11 @@ struct task_struct {
 #else
 	ANDROID_KABI_RESERVE(7);
 #endif
+#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+	ANDROID_KABI_USE(8, u64 susfs_last_fake_mnt_id);
+#else
 	ANDROID_KABI_RESERVE(8);
+#endif
 
 #ifdef CONFIG_PACKAGE_RUNTIME_INFO
 struct package_runtime_info pkg;
@@ -1577,7 +1581,7 @@ struct package_runtime_info pkg;
 	 */
 #if defined(CONFIG_KSU_SUSFS_SUS_MOUNT) && !defined(ANDROID_KABI_RESERVE)
 	u64 susfs_task_state;
-	u64 android_kabi_reserved8;
+	u64 susfs_last_fake_mnt_id;
 #endif
 	randomized_struct_fields_end
 
