@@ -14,9 +14,7 @@
 #include <linux/fdtable.h>
 #include <linux/statfs.h>
 #include <linux/susfs.h>
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15,0)
-#include "pnode.h"
-#endif
+#include "mount.h"
 
 static spinlock_t susfs_spin_lock;
 
@@ -143,6 +141,7 @@ int susfs_sus_ino_for_filldir64(unsigned long ino) {
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 static LIST_HEAD(LH_SUS_MOUNT);
 static void susfs_update_sus_mount_inode(char *target_pathname) {
+	struct mount *mnt = NULL;
 	struct path p;
 	struct inode *inode = NULL;
 	int err = 0;
@@ -150,6 +149,18 @@ static void susfs_update_sus_mount_inode(char *target_pathname) {
 	err = kern_path(target_pathname, LOOKUP_FOLLOW, &p);
 	if (err) {
 		SUSFS_LOGE("Failed opening file '%s'\n", target_pathname);
+		return;
+	}
+
+	/* It is important to check if the mount has a legit peer group id, if so we cannot add them to sus_mount,
+	 * since there are chances that the mount is a legit mountpoint, and it can be misued by other susfs functions in future.
+	 * And by doing this it won't affect the sus_mount check as other susfs functions check by mnt->mnt_id
+	 * instead of INODE_STATE_SUS_MOUNT.
+	 */
+	mnt = real_mount(p.mnt);
+	if (mnt->mnt_group_id > 0 && // 0 means no peer group
+		mnt->mnt_group_id < DEFAULT_SUS_MNT_GROUP_ID) {
+		SUSFS_LOGE("skip setting SUS_MOUNT inode state for path '%s' since its source mount has a legit peer group id\n", target_pathname);
 		return;
 	}
 
@@ -220,8 +231,16 @@ int susfs_add_sus_mount(struct st_susfs_sus_mount* __user user_info) {
 
 #ifdef CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT
 int susfs_auto_add_sus_bind_mount(const char *pathname, struct path *path_target) {
+	struct mount *mnt;
 	struct inode *inode;
 
+	mnt = real_mount(path_target->mnt);
+	if (mnt->mnt_group_id > 0 && // 0 means no peer group
+		mnt->mnt_group_id < DEFAULT_SUS_MNT_GROUP_ID) {
+		SUSFS_LOGE("skip setting SUS_MOUNT inode state for path '%s' since its source mount has a legit peer group id\n", pathname);
+		// return 0 here as we still want it to be added to try_umount list
+		return 0;
+	}
 	inode = path_target->dentry->d_inode;
 	if (!inode) return 1;
 	if (!(inode->i_state & INODE_STATE_SUS_MOUNT)) {
