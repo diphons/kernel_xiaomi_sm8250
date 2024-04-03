@@ -40,7 +40,7 @@ config KSU_SUSFS_SUS_PATH
     help
       - Allow hiding the user-defined path and all its sub-paths from various system calls.
       - tmpfs filesystem is not allowed to be added. 
-      - Effective on process with uid > 2000 only.
+      - Effective only on zygote spawned user app process.
       - Use with cautious as it may cause performance loss and will be vulnerable to side channel attacks,
         just disable this feature if it doesn't work for you or you don't need it at all.
 
@@ -78,7 +78,7 @@ config KSU_SUSFS_SUS_KSTAT
     default y
     help
       - Allow spoofing the kstat of user-defined file/directory.
-      - Effective on all processes.
+      - Effective only on zygote spawned user app process.
 
 config KSU_SUSFS_SUS_OVERLAYFS
     bool "Enable to automatically spoof kstat and kstatfs for overlayed files/directories"
