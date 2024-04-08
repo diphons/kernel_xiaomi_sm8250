@@ -4,7 +4,7 @@
  * Using the avg_vruntime, do the right thing and preserve lag across
  * sleep+wake cycles. EEVDF placement strategy #1, #2 if disabled.
  */
-SCHED_FEAT(PLACE_LAG, true)
+SCHED_FEAT(PLACE_LAG, false)
 
 /*
  * Give new tasks half a slice to ease into the competition.
