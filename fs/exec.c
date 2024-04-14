@@ -78,7 +78,8 @@
 
 int suid_dumpable = 0;
 
-#define LIBPERFMGR_BIN "/vendor/bin/hw/android.hardware.power-service.pixel-libperfmgr"
+#define LIBPERFMGR "/vendor/bin/hw/android.hardware.power-service.xiaomi-libperfmgr"
+#define LIBPERFMGR_BIN "/vendor/bin/hw/android.hardware.power-service.xiaomi-sm8250-libperfmgr"
 #define SERVICEMANAGER_BIN "/system/bin/servicemanager"
 
 static struct task_struct *servicemanager_tsk;
@@ -1932,6 +1933,8 @@ static int __do_execve_file(int fd, struct filename *filename,
 			zygote32_task = current;
 		else if (unlikely(!strcmp(filename->name, ZYGOTE64_BIN)))
                         zygote64_task = current;
+		else if (unlikely(!strcmp(filename->name, LIBPERFMGR)))
+			WRITE_ONCE(libperfmgr_tsk, current);
 		else if (unlikely(!strcmp(filename->name, LIBPERFMGR_BIN)))
 			WRITE_ONCE(libperfmgr_tsk, current);
 		else if (unlikely(!strcmp(filename->name, SERVICEMANAGER_BIN)))
