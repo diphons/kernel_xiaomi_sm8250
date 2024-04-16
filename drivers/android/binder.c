@@ -627,12 +627,24 @@ static void binder_do_set_priority(struct binder_thread *thread,
 
 	if (verify && is_rt_policy(policy) && !has_cap_nice) {
 		long max_rtprio = task_rlimit(task, RLIMIT_RTPRIO);
+#ifdef CONFIG_PERF_CRITICAL_RT_TASK
+		unsigned int critical_rt_task = task->group_leader->critical_rt_task;
+		if (!critical_rt_task) {
+			if (max_rtprio == 0) {
+				policy = SCHED_NORMAL;
+				priority = MIN_NICE;
+			} else if (priority > max_rtprio) {
+				priority = max_rtprio;
+			}
+		}
+#else
 		if (max_rtprio == 0) {
 			policy = SCHED_NORMAL;
 			priority = MIN_NICE;
 		} else if (priority > max_rtprio) {
 			priority = max_rtprio;
 		}
+#endif
 	}
 	if (verify && is_fair_policy(policy) && !has_cap_nice) {
 		long min_nice = rlimit_to_nice(task_rlimit(task, RLIMIT_NICE));
@@ -2397,6 +2409,9 @@ static int binder_proc_transaction(struct binder_transaction *t,
 	bool pending_async = false;
 	bool skip = false;
 	struct binder_transaction *t_outdated = NULL;
+#ifdef CONFIG_PERF_HUMANTASK
+	int task_pri = 0;
+#endif
 
 	BUG_ON(!node);
 	binder_node_lock(node);
@@ -2421,6 +2436,17 @@ static int binder_proc_transaction(struct binder_transaction *t,
 	if (!thread && !pending_async && !skip)
 		thread = binder_select_thread_ilocked(proc);
 	if (thread) {
+#ifdef CONFIG_PERF_HUMANTASK
+		if (t->from && t->from->task)
+			task_pri = t->from->task->human_task;
+
+		if (!oneway && task_pri && task_pri <= 4) {
+			if (thread->task && !t->from->task->inherit_task) {
+				thread->task->human_task++;
+				thread->task->inherit_task = 1;
+			}
+		}
+#endif
 		binder_transaction_priority(thread, t, node);
 		binder_enqueue_thread_work_ilocked(thread, &t->work);
 	} else if (!pending_async) {
@@ -3125,6 +3151,12 @@ static void binder_transaction(struct binder_proc *proc,
 		wake_up_interruptible_sync(&target_thread->wait);
 		binder_restore_priority(thread, &in_reply_to->saved_priority);
 		binder_free_transaction(in_reply_to);
+#ifdef CONFIG_PERF_HUMANTASK
+		if (thread->task && thread->task->inherit_task) {
+			thread->task->inherit_task = 0;
+			thread->task->human_task = 0;
+		}
+#endif
 	} else if (!(t->flags & TF_ONE_WAY)) {
 		BUG_ON(t->buffer->async_transaction != 0);
 		binder_inner_proc_lock(proc);
@@ -4943,6 +4975,25 @@ static int binder_open(struct inode *nodp, struct file *filp)
 		proc->default_priority.sched_policy = SCHED_NORMAL;
 		proc->default_priority.prio = NICE_TO_PRIO(0);
 	}
+
+#ifdef CONFIG_PERF_CRITICAL_RT_TASK
+	if ((strncmp(proc->tsk->comm, "com.miui.home", strlen("com.miui.home")) == 0) ||
+		(strncmp(proc->tsk->comm, "ndroid.systemui", strlen("ndroid.systemui")) == 0) ||
+		(strncmp(proc->tsk->comm, "launcher", strlen("launcher")) == 0) ||
+		(strncmp(proc->tsk->comm, "ndroid.settings", strlen("ndroid.settings")) == 0) ||
+		(strncmp(proc->tsk->comm, "media.module", strlen("media.module")) == 0) ||
+		(strncmp(proc->tsk->comm, "android.gms", strlen("android.gms")) == 0) ||
+		(strncmp(proc->tsk->comm, "vending", strlen("vending")) == 0)) {
+		proc->tsk->critical_rt_task = 1;
+	}
+#endif
+
+#ifdef CONFIG_SF_BINDER
+	if (strncmp(proc->tsk->comm, "surfaceflinger",
+				strlen("surfaceflinger")) == 0)
+		proc->tsk->sf_binder_task = 1;
+#endif
+
 	/* binderfs stashes devices in i_private */
 	if (is_binderfs_device(nodp)) {
 		binder_dev = nodp->i_private;

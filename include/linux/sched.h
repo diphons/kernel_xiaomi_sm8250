@@ -1403,8 +1403,8 @@ struct task_struct {
 	unsigned int			sf_binder_task;
 #endif
 #ifdef CONFIG_PERF_HUMANTASK
-	unsigned int                    human_task;
-	unsigned int			cpux;
+	unsigned int			human_task;
+	unsigned int			inherit_task;
 #endif
 
 #ifdef CONFIG_KASAN

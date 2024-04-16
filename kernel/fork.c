@@ -2430,7 +2430,8 @@ long _do_fork(unsigned long clone_flags,
 	p->top_app = 0;
 	p->inherit_top_app = 0;
 #ifdef CONFIG_PERF_HUMANTASK
-        p->human_task = 0;
+    p->human_task = 0;
+	p->inherit_task = 0;
 #endif
 	p->critical_task = 0;
 
