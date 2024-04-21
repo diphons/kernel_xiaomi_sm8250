@@ -2719,8 +2719,6 @@ static inline bool uclamp_rq_is_idle(struct rq *rq)
 }
 #endif /* CONFIG_UCLAMP_TASK */
 
-unsigned long task_util_est(struct task_struct *p);
-unsigned int uclamp_task(struct task_struct *p);
 bool uclamp_latency_sensitive(struct task_struct *p);
 bool uclamp_boosted(struct task_struct *p);
 
