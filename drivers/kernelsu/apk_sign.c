@@ -1,21 +1,23 @@
-#include "linux/err.h"
-#include "linux/fs.h"
-#include "linux/gfp.h"
-#include "linux/kernel.h"
-#include "linux/moduleparam.h"
+#include <linux/err.h>
+#include <linux/fs.h>
+#include <linux/gfp.h>
+#include <linux/kernel.h>
+#include <linux/slab.h>
+#include <linux/version.h>
+#ifdef CONFIG_KSU_DEBUG
+#include <linux/moduleparam.h>
+#endif
+#include <crypto/hash.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+#include <crypto/sha2.h>
+#else
+#include <crypto/sha.h>
+#endif
 
 #include "apk_sign.h"
 #include "klog.h" // IWYU pragma: keep
 #include "kernel_compat.h"
-#include "crypto/hash.h"
-#include "linux/slab.h"
-#include "linux/version.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
-#include "crypto/sha2.h"
-#else
-#include "crypto/sha.h"
-#endif
 
 struct sdesc {
 	struct shash_desc shash;
@@ -229,7 +231,7 @@ static __always_inline bool check_v2_signature(char *path,
 		goto clean;
 	}
 
-    int loop_count = 0;
+	int loop_count = 0;
 	while (loop_count++ < 10) {
 		uint32_t id;
 		uint32_t offset;
