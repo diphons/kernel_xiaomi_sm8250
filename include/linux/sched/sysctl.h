@@ -169,4 +169,7 @@ extern int sysctl_schedstats(struct ctl_table *table, int write,
 extern unsigned int sysctl_sched_energy_aware;
 #endif
 
+#define LIB_PATH_LENGTH 512
+static char sched_lib_name[LIB_PATH_LENGTH];
+static unsigned int sched_lib_mask_force;
 #endif /* _LINUX_SCHED_SYSCTL_H */
