@@ -3652,6 +3652,9 @@ void wake_up_new_task(struct task_struct *p)
 	update_rq_clock(rq);
 	post_init_entity_util_avg(&p->se);
 
+#ifdef CONFIG_SPRD_ROTATION_TASK
+	p->last_enqueue_ts = sched_ktime_clock();
+#endif
 	mark_task_starting(p);
 	activate_task(rq, p, ENQUEUE_NOCLOCK);
 
