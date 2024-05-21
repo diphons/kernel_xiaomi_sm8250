@@ -7609,7 +7609,6 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	}
 
 	if (is_top_app(p) && cpu_online(super_big_cpu) &&
-		!cpu_isolated(super_big_cpu) &&
 		cpumask_test_cpu(super_big_cpu, p->cpus_ptr)) {
 		best_energy_cpu = super_big_cpu;
 		goto done;
