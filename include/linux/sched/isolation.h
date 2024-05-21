@@ -54,7 +54,7 @@ static inline bool housekeeping_cpu(int cpu, enum hk_flags flags)
 	if (static_branch_unlikely(&housekeeping_overriden))
 		return housekeeping_test_cpu(cpu, flags);
 #endif
-	return !cpu_isolated(cpu);
+	return true;
 }
 
 #endif /* _LINUX_SCHED_ISOLATION_H */
