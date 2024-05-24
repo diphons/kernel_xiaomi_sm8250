@@ -20,6 +20,9 @@
 
 static struct proc_dir_entry *f2fs_proc_root;
 
+bool may_compress __read_mostly = false;
+bool may_set_compr_fl __read_mostly = false;
+
 /* Sysfs support for f2fs */
 enum {
 	GC_THREAD,	/* struct f2fs_gc_thread */
@@ -382,6 +385,45 @@ out:
 		return ret ? ret : count;
 	}
 
+#ifdef CONFIG_F2FS_FS_COMPRESSION_FIXED_OUTPUT
+	if (!strcmp(a->attr.name, "compress_extension")) {
+		char *token = NULL, *name = strim((char *)buf);
+		unsigned char (*ext)[F2FS_EXTENSION_LEN];
+		unsigned char extensions[COMPRESS_EXT_NUM][F2FS_EXTENSION_LEN];
+		unsigned char ext_cnt = 0;
+		ssize_t sz;
+
+		memset(extensions, 0, sizeof(extensions));
+		while ((token = strsep(&name, ",")) != NULL) {
+			sz = strlen(token);
+			if (sz == 0)
+				continue;
+			if (sz >= F2FS_EXTENSION_LEN)
+				return -EINVAL;
+			if (ext_cnt >= COMPRESS_EXT_NUM)
+				return -EINVAL;
+			if (!strcmp(token, "disable")) {
+				memset(extensions, 0, sizeof(extensions));
+				ext_cnt = 0;
+				break;
+			}
+			memcpy(extensions[ext_cnt++], token, sz);
+		}
+
+		ext = F2FS_OPTION(sbi).extensions;
+		down_write(&sbi->sb_lock);
+		memset(ext, 0, sizeof(F2FS_OPTION(sbi).extensions));
+		memcpy(ext, extensions, ext_cnt * F2FS_EXTENSION_LEN);
+		F2FS_OPTION(sbi).compress_ext_cnt = ext_cnt;
+		/*
+		 * no need to persist the new extensions since RUS could
+		 * update it manually
+		 */
+		up_write(&sbi->sb_lock);
+		return count;
+	}
+#endif
+
 	ui = (unsigned int *)(ptr + a->offset);
 
 	ret = kstrtoull(skip_spaces(buf), 0, &t);
@@ -538,40 +580,6 @@ out:
 #endif
 #endif
 
-#ifdef CONFIG_F2FS_FS_COMPRESSION_FIXED_OUTPUT
-	if (!strcmp(a->attr.name, "compress_extension")) {
-		char *token = NULL, *name = strim((char *)buf);
-		unsigned char (*ext)[F2FS_EXTENSION_LEN];
-		unsigned char extensions[COMPRESS_EXT_NUM][F2FS_EXTENSION_LEN];
-		unsigned char ext_cnt = 0;
-		ssize_t sz;
-
-		memset(extensions, 0, sizeof(extensions));
-		while ((token = strsep(&name, ",")) != NULL) {
-			sz = strlen(token);
-			if (sz == 0)
-				continue;
-			if (sz >= F2FS_EXTENSION_LEN)
-				return -EINVAL;
-			if (ext_cnt >= COMPRESS_EXT_NUM)
-				return -EINVAL;
-			memcpy(extensions[ext_cnt++], token, sz);
-		}
-
-		ext = F2FS_OPTION(sbi).extensions;
-		down_write(&sbi->sb_lock);
-		memset(ext, 0, sizeof(F2FS_OPTION(sbi).extensions));
-		memcpy(ext, extensions, ext_cnt * F2FS_EXTENSION_LEN);
-		F2FS_OPTION(sbi).compress_ext_cnt = ext_cnt;
-		/*
-		 * no need to persist the new extensions since RUS could
-		 * update it manually
-		 */
-		up_write(&sbi->sb_lock);
-		return count;
-	}
-#endif
-
 	*ui = (unsigned int)t;
 
 	return count;
@@ -669,6 +677,31 @@ static ssize_t f2fs_feature_show(struct f2fs_attr *a,
 	return 0;
 }
 
+static ssize_t f2fs_may_compr_show(struct f2fs_attr *a,
+		struct f2fs_sb_info *sbi, char *buf)
+{
+	if (!strcmp(a->attr.name, "may_compress"))
+		return sprintf(buf, "%d", may_compress ? 1 : 0);
+	else if (!strcmp(a->attr.name, "may_set_compr_fl"))
+		return sprintf(buf, "%d", may_set_compr_fl ? 1 : 0);
+	return -EINVAL;
+}
+
+static ssize_t f2fs_may_compr_store(struct f2fs_attr *a,
+			struct f2fs_sb_info *sbi, const char *buf, size_t count)
+{
+	int val, ret;
+
+	ret = kstrtoint(buf, 0, &val);
+	if (ret < 0)
+		return ret;
+	if (!strcmp(a->attr.name, "may_compress"))
+		may_compress = val == 0 ? false : true;
+	else if (!strcmp(a->attr.name, "may_set_compr_fl"))
+		may_set_compr_fl = val == 0 ? false : true;
+	return count;
+}
+
 #define F2FS_ATTR_OFFSET(_struct_type, _name, _mode, _show, _store, _offset) \
 static struct f2fs_attr f2fs_attr_##_name = {			\
 	.attr = {.name = __stringify(_name), .mode = _mode },	\
@@ -691,6 +724,13 @@ static struct f2fs_attr f2fs_attr_##_name = {			\
 	.attr = {.name = __stringify(_name), .mode = 0444 },	\
 	.show	= f2fs_feature_show,				\
 	.id	= _id,						\
+}
+
+#define F2FS_FEATURE_RW_ATTR(_name)				\
+static struct f2fs_attr f2fs_attr_##_name = {			\
+	.attr = {.name = __stringify(_name), .mode = 0644 },	\
+	.show	= f2fs_may_compr_show,				\
+	.store	= f2fs_may_compr_store,				\
 }
 
 #define F2FS_STAT_ATTR(_struct_type, _struct_name, _name, _elname)	\
@@ -828,6 +868,8 @@ F2FS_RW_ATTR(COMP_EXT, f2fs_mount_info, compress_log_size, compress_log_size);
 #ifdef CONFIG_F2FS_FS_DEDUP
 F2FS_FEATURE_RO_ATTR(dedup, FEAT_DEDUP);
 #endif
+F2FS_FEATURE_RW_ATTR(may_compress);
+F2FS_FEATURE_RW_ATTR(may_set_compr_fl);
 
 #define ATTR_LIST(name) (&f2fs_attr_##name.attr)
 static struct attribute *f2fs_attrs[] = {
@@ -958,6 +1000,8 @@ static struct attribute *f2fs_feat_attrs[] = {
 #ifdef CONFIG_F2FS_FS_DEDUP
 	ATTR_LIST(dedup),
 #endif
+	ATTR_LIST(may_compress),
+	ATTR_LIST(may_set_compr_fl),
 	NULL,
 };
 

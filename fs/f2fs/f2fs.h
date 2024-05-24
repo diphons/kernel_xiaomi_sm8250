@@ -114,7 +114,7 @@ struct f2fs_fault_info {
 };
 
 extern const char *f2fs_fault_name[FAULT_MAX];
-#define IS_FAULT_SET(fi, type) ((fi)->inject_type & (1 << (type)))
+#define IS_FAULT_SET(fi, type) ((fi)->inject_type & (1ULL << (type)))
 #endif
 
 /*
@@ -1026,6 +1026,9 @@ enum {
 	FI_DOING_DEDUP,
 	FI_META_UN_MODIFY,
 	FI_DATA_UN_MODIFY,
+#ifdef CONFIG_F2FS_APPBOOST
+	FI_MERGED_FILE,
+#endif
 #endif
 	FI_MAX,			/* max flag, never be used */
 #ifdef CONFIG_OPLUS_FEATURE_OF2FS
@@ -3284,6 +3287,10 @@ static inline void f2fs_change_bit(unsigned int nr, char *addr)
 
 #define F2FS_META_UN_MODIFY_FL		0x00000100
 #define F2FS_DATA_UN_MODIFY_FL		0x00000200
+
+#ifdef CONFIG_F2FS_APPBOOST
+#define F2FS_MERGED_FILE_FL		0x00000400
+#endif
 #endif
 
 /* Flags that should be inherited by new inodes from their parent. */
@@ -3330,6 +3337,9 @@ static inline void __mark_inode_dirty_flag(struct inode *inode,
 	case FI_DOING_DEDUP:
 	case FI_META_UN_MODIFY:
 	case FI_DATA_UN_MODIFY:
+#ifdef CONFIG_F2FS_APPBOOST
+	case FI_MERGED_FILE:
+#endif
 #endif
 		f2fs_mark_inode_dirty_sync(inode, true);
 	}
@@ -3677,6 +3687,10 @@ static inline void get_dedup_flags_info(struct inode *inode, struct f2fs_inode *
 		set_bit(FI_META_UN_MODIFY, fi->flags);
 	if (i_dedup_flags & F2FS_DATA_UN_MODIFY_FL)
 		set_bit(FI_DATA_UN_MODIFY, fi->flags);
+#ifdef CONFIG_F2FS_APPBOOST
+	if (i_dedup_flags & F2FS_MERGED_FILE_FL)
+		set_bit(FI_MERGED_FILE, fi->flags);
+#endif
 }
 
 static inline void set_raw_dedup_flags(struct inode *inode, struct f2fs_inode *ri)
@@ -3697,6 +3711,10 @@ static inline void set_raw_dedup_flags(struct inode *inode, struct f2fs_inode *r
 		i_dedup_flags |= F2FS_META_UN_MODIFY_FL;
 	if (is_inode_flag_set(inode, FI_DATA_UN_MODIFY))
 		i_dedup_flags |= F2FS_DATA_UN_MODIFY_FL;
+#ifdef CONFIG_F2FS_APPBOOST
+	if (is_inode_flag_set(inode, FI_MERGED_FILE))
+		i_dedup_flags |= F2FS_MERGED_FILE_FL;
+#endif
 
 	ri->i_dedup_flags = cpu_to_le32(i_dedup_flags);
 }
@@ -4911,13 +4929,17 @@ static inline void f2fs_invalidate_compress_pages(struct f2fs_sb_info *sbi,
 #define inc_compr_inode_stat(inode)		do { } while (0)
 #endif
 
+extern bool may_compress __read_mostly ;
+extern bool may_set_compr_fl __read_mostly ;
+
 static inline int set_compress_context(struct inode *inode)
 {
 #ifdef CONFIG_F2FS_FS_COMPRESSION
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
 
-	if (inode)
+	if (!may_compress)
 		return -EOPNOTSUPP;
+
 	F2FS_I(inode)->i_compress_algorithm =
 			F2FS_OPTION(sbi).compress_algorithm;
 	F2FS_I(inode)->i_log_cluster_size =
@@ -5209,6 +5231,22 @@ static inline bool f2fs_is_space_free(struct f2fs_sb_info *sbi)
 			avail_block - dcc->undiscard_blks > device_threshold;
 }
 #endif
+
+static inline void f2fs_truncate_meta_inode_pages(struct f2fs_sb_info *sbi,
+					block_t blkaddr, unsigned int cnt)
+{
+	f2fs_submit_merged_write_cond(sbi, sbi->meta_inode, NULL, 0, DATA);
+	truncate_inode_pages_range(META_MAPPING(sbi),
+			F2FS_BLK_TO_BYTES((loff_t)blkaddr),
+			F2FS_BLK_END_BYTES((loff_t)(blkaddr + cnt - 1)));
+}
+
+static inline void f2fs_invalidate_internal_cache(struct f2fs_sb_info *sbi,
+								block_t blkaddr)
+{
+	f2fs_truncate_meta_inode_pages(sbi, blkaddr, 1);
+	f2fs_invalidate_compress_page(sbi, blkaddr);
+}
 
 #define EFSBADCRC	EBADMSG		/* Bad CRC detected */
 #define EFSCORRUPTED	EUCLEAN		/* Filesystem is corrupted */

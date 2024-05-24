@@ -317,9 +317,10 @@ static int f2fs_fscrypt_decrypt_pagecache_blocks(struct page *page, unsigned int
 		goto out;
 	}
 
-	for (i = offs; i < offs + len; i += blocksize, lblk_num++) {
+	for (i = offs; i < offs + len; lblk_num++) {
 		err = fscrypt_encrypt_block_inplace(inode, page,
 				blocksize, i, lblk_num, GFP_NOFS);
+		i += blocksize;
 		if (err)
 			goto out;
 	}
@@ -1484,11 +1485,8 @@ alloc:
 	if (err)
 		return err;
 
-	if (GET_SEGNO(sbi, old_blkaddr) != NULL_SEGNO) {
-		invalidate_mapping_pages(META_MAPPING(sbi),
-					old_blkaddr, old_blkaddr);
-		f2fs_invalidate_compress_page(sbi, old_blkaddr);
-	}
+	if (GET_SEGNO(sbi, old_blkaddr) != NULL_SEGNO)
+		f2fs_invalidate_internal_cache(sbi, old_blkaddr);
 	f2fs_update_data_blkaddr(dn, dn->data_blkaddr);
 
 	/*
@@ -3193,6 +3191,9 @@ retry:
 	while (!done && !retry && (index <= end)) {
 		nr_pages = find_get_pages_range_tag(mapping, &index, end,
 				tag, max_pages, pages);
+		/* fix coverity error: Dereferencing a pointer that might be NULL pages */
+		if (!pages)
+			break;
 		if (nr_pages == 0)
 			break;
 
