@@ -32,6 +32,7 @@
 #include <linux/vmalloc.h>
 #include <linux/pm_qos.h>
 #include <linux/string.h>
+#include <linux/mmhardware_others.h>
 #ifdef CONFIG_D8G_SERVICE
 #include <misc/d8g_helper.h>
 #endif
@@ -67,6 +68,12 @@
 
 #define OSC_CALIBRATION_T_LENGTH 5100000
 #define PM_QOS_VALUE_VB 400
+
+#ifdef CONFIG_MMHARDWARE_OTHER_DETECTION
+static DEFINE_MUTEX(haptic_lock);
+static int dev_cnt = 0;
+#endif
+
 struct pm_qos_request pm_qos_req_vb;
 /******************************************************
  *
@@ -6846,6 +6853,25 @@ static int aw8697_i2c_probe(struct i2c_client *i2c,
 	}
 
 	dev_set_drvdata(&i2c->dev, aw8697);
+
+#ifdef CONFIG_MMHARDWARE_OTHER_DETECTION
+	mutex_lock(&haptic_lock);
+	dev_cnt++;
+	mutex_unlock(&haptic_lock);
+
+	dev_err(aw8697->dev, "%s: dev_cnt %d \n", __func__, dev_cnt);
+	switch (dev_cnt) {
+		case 1:
+			register_otherkobj_under_mmsysfs(MM_HW_HAPTIC_1, "haptic1");
+			break;
+		case 2:
+			register_otherkobj_under_mmsysfs(MM_HW_HAPTIC_2, "haptic2");
+			break;
+		default:
+			break;
+	}
+#endif
+
 	if (aw8697->chip_version == AW8697_CHIP_9X) {
 		ret = sysfs_create_group(&i2c->dev.kobj,
 					 &aw8697_vibrator_attribute_group);
