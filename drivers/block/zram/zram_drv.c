@@ -18,6 +18,9 @@
 #define KMSG_COMPONENT "zram"
 #endif
 #define pr_fmt(fmt) KMSG_COMPONENT ": " fmt
+#ifdef CONFIG_MEMCG
+#define MAGIC_NUMBER 8988778932
+#endif
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -39,6 +42,9 @@
 #include <linux/cpuhotplug.h>
 #include <linux/sched.h>
 #include <linux/sched/signal.h>
+#ifdef CONFIG_MEMCG
+#include <linux/memcontrol.h>
+#endif
 
 #include "zram_drv.h"
 
@@ -892,6 +898,10 @@ static ssize_t writeback_store(struct device *dev,
 		if (mode == HUGE_WRITEBACK &&
 			  !zram_test_flag(zram, index, ZRAM_HUGE))
 			goto next;
+#ifdef CONFIG_MEMCG
+		if (zram_test_flag(zram, index, ZRAM_IMPORTANT))
+			goto next;
+#endif
 		/*
 		 * Clearing ZRAM_UNDER_WB is duty of caller.
 		 * IOW, zram_free_page never clear it.
@@ -1448,7 +1458,11 @@ static ssize_t mm_stat_show(struct device *dev,
 	max_used = atomic_long_read(&zram->stats.max_used_pages);
 
 	ret = scnprintf(buf, PAGE_SIZE,
+#ifdef CONFIG_MEMCG
+			"%8llu %8llu %8llu %8lu %8ld %8llu %8lu %8llu %8llu %8llu %8llu %8llu %8llu\n",
+#else
 			"%8llu %8llu %8llu %8lu %8ld %8llu %8lu %8llu %8llu %8llu %8llu\n",
+#endif
 			orig_size << PAGE_SHIFT,
 			(u64)atomic64_read(&zram->stats.compr_data_size),
 			mem_used << PAGE_SHIFT,
@@ -1459,7 +1473,13 @@ static ssize_t mm_stat_show(struct device *dev,
 			(u64)atomic64_read(&zram->stats.huge_pages),
 			(u64)atomic64_read(&zram->stats.huge_pages_since),
 			zram_dedup_dup_size(zram),
+#ifdef CONFIG_MEMCG
+			zram_dedup_meta_size(zram),
+			(u64)atomic64_read(&zram->stats.important_pages),
+			(u64)atomic64_read(&zram->stats.important_compr_data_size) / 4096);
+#else
 			zram_dedup_meta_size(zram));
+#endif
 	up_read(&zram->init_lock);
 
 	return ret;
@@ -1897,6 +1917,14 @@ static void zram_free_page(struct zram *zram, size_t index)
 		atomic64_dec(&zram->stats.huge_pages);
 	}
 
+#ifdef CONFIG_MEMCG
+	if (zram_test_flag(zram, index, ZRAM_IMPORTANT)) {
+		zram_clear_flag(zram, index, ZRAM_IMPORTANT);
+		atomic64_dec(&zram->stats.important_pages);
+		atomic64_sub(zram_get_obj_size(zram, index), &zram->stats.important_compr_data_size);
+	}
+#endif
+
 	if (zram_test_flag(zram, index, ZRAM_WB)) {
 		zram_clear_flag(zram, index, ZRAM_WB);
 		free_block_bdev(zram, zram_get_element(zram, index));
@@ -2040,6 +2068,10 @@ static int __zram_bvec_write(struct zram *zram, struct bio_vec *bvec,
 	u32 checksum;
 	unsigned long element = 0;
 	enum zram_pageflags flags = 0;
+#ifdef CONFIG_MEMCG
+	struct mem_cgroup *memcg = page_memcg(page);
+	unsigned long soft_limit;
+#endif
 
 	mem = kmap_atomic(page);
 	if (page_same_filled(mem, &element)) {
@@ -2148,6 +2180,18 @@ out:
 		zram_set_entry(zram, index, entry);
 		zram_set_obj_size(zram, index, comp_len);
 	}
+
+#ifdef CONFIG_MEMCG
+	if (memcg != NULL) {
+		soft_limit = READ_ONCE(memcg->soft_limit);
+		if (soft_limit == MAGIC_NUMBER) {
+			zram_set_flag(zram, index, ZRAM_IMPORTANT);
+			atomic64_inc(&zram->stats.important_pages);
+			atomic64_add(comp_len, &zram->stats.important_compr_data_size);
+		}
+	}
+#endif
+
 	zram_slot_unlock(zram, index);
 
 	/* Update stats */
@@ -2445,6 +2489,9 @@ static void zram_reset_device(struct zram *zram)
 	memset(&zram->stats, 0, sizeof(zram->stats));
 	zcomp_destroy(comp);
 	reset_bdev(zram);
+#ifdef CONFIG_MEMCG
+	up_write(&zram->init_lock);
+#endif
 }
 
 static ssize_t disksize_store(struct device *dev,
@@ -2532,7 +2579,11 @@ static ssize_t reset_store(struct device *dev,
 	mutex_unlock(&bdev->bd_mutex);
 
 	/* Make sure all the pending I/O are finished */
+#ifdef CONFIG_MEMCG
+	sync_blockdev(bdev);
+#else
 	fsync_bdev(bdev);
+#endif
 	zram_reset_device(zram);
 	revalidate_disk(zram->disk);
 	bdput(bdev);
@@ -2757,7 +2808,11 @@ static int zram_remove(struct zram *zram)
 
 	zram_debugfs_unregister(zram);
 	/* Make sure all the pending I/O are finished */
+#ifdef CONFIG_MEMCG
+	sync_blockdev(bdev);
+#else
 	fsync_bdev(bdev);
+#endif
 	zram_reset_device(zram);
 	bdput(bdev);
 
