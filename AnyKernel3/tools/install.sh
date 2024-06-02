@@ -692,7 +692,7 @@ else
 		rm -f $cekdevices.gz
 		cd $home
 	fi;
-	if [ -d $dt_dir ]; then
+	if [[ -d $dt_dir ]]; then
 		if [ -f $dt_dir/Image.gz ]; then
 			cp $dt_dir/Image.gz $home/Image.gz
 		fi
@@ -783,7 +783,7 @@ else
 		dtb_image_oc=$dtb_dir/dtb_oc
 		dtb_image_v=$dtb_dir/dtb_v
 		dtb_image_voc=$dtb_dir/dtb_voc
-		if [ -f $dtb_image_oc ]; then
+		if [[ -f $dtb_image_oc ]]; then
 			ui_print " "
 			ui_print "Choose GPU to install.."
 			ui_print " "
@@ -937,12 +937,12 @@ else
 		fi
 
 		# Check vendor dtb before flashing
-		if [ -f $home/dtb ]; then
+		if [[ -f $home/dtb ]]; then
 			ui_print " "
 			ui_print " "
 			ui_print "Vendor Boot"
 			ui_print "------------------------------------"
-			if [ $cekdevices = "apollo" ]; then
+			if [[ $cekdevices = "apollo" ]] || [[ $cekdevices = "cmi" ]] || [[ $cekdevices = "lmi" ]] || [[ $cekdevices = "umi" ]]; then
 				ui_print "No vendor boot. Skip"
 			else
 				vendor_boot_patch
