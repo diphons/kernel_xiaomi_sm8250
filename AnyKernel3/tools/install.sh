@@ -1,5 +1,8 @@
 #!/sbin/sh
 
+#get zip name
+zipname=${ZIPFILE##*/};
+
 #get slot
 get_slot=$(getprop ro.boot.slot_suffix 2>/dev/null);
 block=/dev/block/bootdevice/by-name/boot;
@@ -661,8 +664,12 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 		fi
 	}
 
-	if [ -f $dt_dir/$dir_gpu/$vhz/beryllium-mp-v2.1.dtb ]; then
-		gpu_select
+	if [[ -f $dt_dir/$dir_gpu/$vhz/beryllium-mp-v2.1.dtb ]]; then
+		if [[ $zipname == *"perf"* ]]; then
+			stock_mode
+		else
+			gpu_select
+		fi
 	else
 		if [ -f  $dt_dir/Image.gz-dtb ]; then
 			cp $dt_dir/Image.gz-dtb $home/Image.gz-dtb
