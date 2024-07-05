@@ -746,6 +746,7 @@ CONFIG_TTY_PRINTK=y
 # CONFIG_LCD_CLASS_DEVICE is not set
 CONFIG_UNICODE=y
 CONFIG_USB_UAS=y
+CONFIG_INITRAMFS_IGNORE_SKIP_FLAG=y
 
 #
 # ARM errata workarounds via the alternatives framework
