@@ -6321,7 +6321,12 @@ stune_util(int cpu, unsigned long other_util,
 
 	trace_sched_boost_cpu(cpu, util, margin);
 
-	return util + margin;
+#ifdef CONFIG_D8G_SERVICE
+	if (oprofile == 0 || oprofile == 4)
+		return util;
+	else
+#endif
+		return util + margin;
 }
 
 #else /* CONFIG_SCHED_TUNE */

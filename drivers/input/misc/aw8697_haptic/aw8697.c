@@ -32,6 +32,9 @@
 #include <linux/vmalloc.h>
 #include <linux/pm_qos.h>
 #include <linux/string.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include "aw8697_config.h"
 #include "aw8697_reg.h"
 #include "aw869xx_reg.h"
@@ -1232,13 +1235,54 @@ static int aw869xx_haptic_set_bst_peak_cur(struct aw8697 *aw8697)
 	}
 	return 0;
 }
+
+#ifndef CONFIG_D8G_SERVICE
+static int haptic_gain = 80;
+module_param(haptic_gain, int, 0644);
+int haptic_gain_show = 0;
+module_param(haptic_gain_show, int, 0444);
+#endif
+static unsigned char haptic_set_level(int gain)
+{
+    int val = 128;
+	int max_val = 160;
+
+	/*
+	* Max level default is 255
+	* Guard max level of haptic
+	*/
+    if (max_val > 255)
+        max_val = 255;
+
+	// Set gain to use max_val
+	if (gain < max_val || gain > max_val)
+		gain = max_val;
+
+	// haptic_gain in percent
+	if (haptic_gain > 100 )
+		haptic_gain = 100;
+	if (haptic_gain < 20 )
+		haptic_gain = 20;
+
+	val = haptic_gain * gain / 100;
+
+    if (val > max_val)
+        val = max_val;
+	// don't change value on min level
+    if (val < 30)
+        val = 30;
+
+    return val;
+}
+
 static int aw8697_haptic_set_gain(struct aw8697 *aw8697, unsigned char gain)
 {
 	if (aw8697->chip_version == AW8697_CHIP_9X) {
-		aw8697_i2c_write(aw8697, AW8697_REG_DATDBG, gain);
+		aw8697_i2c_write(aw8697, AW8697_REG_DATDBG, haptic_set_level(gain));
 	} else {
-		aw8697_i2c_write(aw8697, AW869XX_REG_PLAYCFG2, gain);
+		aw8697_i2c_write(aw8697, AW869XX_REG_PLAYCFG2, haptic_set_level(gain));
 	}
+	haptic_gain_show = haptic_set_level(gain);
 	return 0;
 }
 static int aw8697_haptic_set_pwm(struct aw8697 *aw8697, unsigned char mode)

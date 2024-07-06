@@ -5,6 +5,9 @@
  */
 
 #include <linux/sysfs.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #include "adreno.h"
 
@@ -265,6 +268,10 @@ static unsigned int _hwcg_show(struct adreno_device *adreno_dev)
 static int _throttling_store(struct adreno_device *adreno_dev,
 	unsigned int val)
 {
+#ifdef CONFIG_D8G_SERVICE
+	if (game_ai_enable && !ongame && game_ai_video_mode && game_ai_vcall)
+		return _pwrctrl_store(adreno_dev, val, ADRENO_THROTTLING_CTRL);
+#endif
 	return 0;
 }
 
