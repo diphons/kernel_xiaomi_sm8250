@@ -146,6 +146,8 @@ else ifeq ($(CONFIG_BOARD_LMI),y)
 $(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/lmi-stock_defconfig FORCE
 else ifeq ($(CONFIG_BOARD_MUNCH),y)
 $(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/munch-stock_defconfig FORCE
+else ifeq ($(CONFIG_BOARD_PIPA),y)
+$(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/pipa-stock_defconfig FORCE
 else ifeq ($(CONFIG_BOARD_PSYCHE),y)
 $(obj)/config_data.gz: arch/arm64/configs/vendor/xiaomi/stock/psyche-stock_defconfig FORCE
 else ifeq ($(CONFIG_BOARD_THYME),y)
