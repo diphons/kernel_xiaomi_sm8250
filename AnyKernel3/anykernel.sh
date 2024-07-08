@@ -21,6 +21,7 @@ device.name8=munchin
 device.name9=lmi
 device.name10=cmi
 device.name11=umi
+device.name12=pipa
 supported.versions=
 supported.patchlevels=
 supported.vendorpatchlevels=
