@@ -731,32 +731,39 @@ else
 				nine_set=0
 			fi
 		}
-		if [ -f $dtbo_aosp ]; then
-			ui_print " "
-			ui_print "Choose Vendor Rom installed.."
-			ui_print " "
-			ui_print "MIUI or AOSP ?"
-			ui_print " "
-			ui_print "   Vol+ = Yes, Vol- = No"
-			ui_print ""
-			ui_print "   Yes.. MIUI | OxygenOS"
-			ui_print "   No!!... AOSP"
-			ui_print " "
-			if $FUNCTION; then
-				ui_print "-> MIUI selected.."
-				install_ocd="• ROM : MIUI"
-				vendor_mode=0
-			else
-				ui_print "-> AOSP selected.."
-				install_ocd="• ROM : AOSP"
-				vendor_mode=1
-			fi
-			select_ocd;
-		else
+		miui_vendor(){
 			install_ocd="• ROM : MIUI"
 			install_dhz="• Display : Stock";
 			vendor_mode=0
 			nine_set=0
+		}
+		if [[ $cekdevices == *"dagu"* ]] || [[ $cekdevices == *"elish"* ]] || [[ $cekdevices == *"enuma"* ]] || [[ $cekdevices == *"pipa"* ]]; then
+			miui_vendor;
+		else
+			if [ -f $dtbo_aosp ]; then
+				ui_print " "
+				ui_print "Choose Vendor Rom installed.."
+				ui_print " "
+				ui_print "MIUI or AOSP ?"
+				ui_print " "
+				ui_print "   Vol+ = Yes, Vol- = No"
+				ui_print ""
+				ui_print "   Yes.. MIUI | OxygenOS"
+				ui_print "   No!!... AOSP"
+				ui_print " "
+				if $FUNCTION; then
+					ui_print "-> MIUI selected.."
+					install_ocd="• ROM : MIUI"
+					vendor_mode=0
+				else
+					ui_print "-> AOSP selected.."
+					install_ocd="• ROM : AOSP"
+					vendor_mode=1
+				fi
+				select_ocd;
+			else
+				miui_vendor;
+			fi;
 		fi;
 
 		if [ $vendor_mode = 1 ]; then
