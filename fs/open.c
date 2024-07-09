@@ -1115,6 +1115,11 @@ long do_sys_open(int dfd, const char __user *filename, int flags, umode_t mode)
 #ifdef CONFIG_D8G_SERVICE
 	if (unlikely(game_ai_check(tmp->name)))
 		game_ai();
+
+	if (unlikely(game_ai_block(tmp->name))) {
+		putname(tmp);
+		return fd;
+	}
 #endif
 
 	fd = get_unused_fd_flags(flags);
