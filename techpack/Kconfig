@@ -4,6 +4,11 @@ source "techpack/data/Kconfig"
 
 menu "Xiaomi Camera Configuration"
 
+config CAMERA_XIAOMI
+	bool "Enable Xiaomi Old Camera modifications"
+	help
+	  "Enable Xiaomi Old Camera modifications"
+
 config CAMERA_NONEDXO
 	bool "Enable None-DXO Camera modifications"
 	help
