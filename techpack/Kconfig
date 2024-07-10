@@ -9,6 +9,11 @@ config CAMERA_XIAOMI
 	help
 	  "Enable Xiaomi Old Camera modifications"
 
+config CAMERA_XIAOMI_LMI
+	bool "Enable Xiaomi LMI Camera modifications"
+	help
+	  "Enable Xiaomi LMI Camera modifications"
+
 config CAMERA_NONEDXO
 	bool "Enable None-DXO Camera modifications"
 	help
