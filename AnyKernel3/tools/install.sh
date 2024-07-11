@@ -700,8 +700,10 @@ else
 		cd $home
 	fi;
 	if [[ -d $dt_dir ]]; then
-		if [ -f $dt_dir/Image.gz ]; then
+		if [[ -f $dt_dir/Image.gz ]]; then
 			cp $dt_dir/Image.gz $home/Image.gz
+		elif [[ -f $dt_dir/Image ]]; then
+			cp $dt_dir/Image $home/Image
 		fi
 		dtbo_aosp=$dt_dir/dtbo_aosp.img
 		dtbo_aosp_90=$dt_dir/dtbo_aosp_90.img
@@ -942,7 +944,7 @@ else
 		}
 
 		# Check image before flashing
-		if [ -f $home/Image.gz ]; then
+		if [[ -f $home/Image.gz ]] || [[ -f $home/Image ]]; then
 			header_install
 			write_boot # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
 			## end boot install
