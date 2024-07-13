@@ -2556,6 +2556,7 @@ out:
 #define LOW_TEMP_CHARGING_DELTA		10000
 #define LOW_TEMP_DISCHARGING_DELTA	20000
 #define FFC_SMOOTH_LEN			4
+#define SMOOTH_VOLT_LEN			4
 #define FG_RAW_SOC_FULL			10000
 #define FG_REPORT_FULL_SOC_PHONE	9400
 #define FG_REPORT_FULL_SOC_DEVICE	9500
@@ -2573,6 +2574,18 @@ struct ffc_smooth ffc_dischg_smooth[FFC_SMOOTH_LEN] = {
 	{300,  150000},
 	{600,   72000},
 	{1000,  50000},
+};
+
+struct LowSoc_HighVolt_Smooth{
+	int volt_lim;
+	int time;
+};
+
+struct LowSoc_HighVolt_Smooth lowsoc_highvolt_smooth[SMOOTH_VOLT_LEN] = {
+	{0,    10000},
+	{3400, 30000},
+	{3500, 45000},
+	{3600, 60000},
 };
 
 static int bq_battery_soc_smooth_tracking(struct bq_fg_chip *bq,
@@ -2597,6 +2610,7 @@ static int bq_battery_soc_smooth_tracking(struct bq_fg_chip *bq,
 	static int last_raw_soc[FG_MAX_INDEX];
 	union power_supply_propval pval = {0, };
 	int batt_ma_avg, i;
+	int batt_mv;
 
 	if (bq->optimiz_soc > 0) {
 		bq->ffc_smooth = true;
@@ -2701,6 +2715,18 @@ static int bq_battery_soc_smooth_tracking(struct bq_fg_chip *bq,
 		else
 			cold_smooth[bq->fg_index] = false;
 	}
+
+	//increase unit_time when low power but high voltage, to prevent cliff fall when low power but high voltage
+	if(raw_soc == 0 && bq->last_soc > 1){
+		batt_mv = fg_read_volt(bq);
+		for(i = SMOOTH_VOLT_LEN; i > 0; i--){
+			if(batt_mv > lowsoc_highvolt_smooth[i-1].volt_lim){
+				unit_time = lowsoc_highvolt_smooth[i-1].time;
+				break;
+			}
+		}
+	}	
+
 	if (unit_time > 0) {
 		delta_time = change_delta / unit_time;
 		soc_changed = min(1, delta_time);
