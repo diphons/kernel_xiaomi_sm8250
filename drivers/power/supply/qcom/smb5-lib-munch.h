@@ -621,6 +621,7 @@ struct smb_charger {
 #endif
 	enum power_supply_type		real_charger_type;
 	enum power_supply_type          wireless_charger_type;
+	enum power_supply_type		quick_charge_type_info;
 
 	/* notifiers */
 	struct notifier_block	nb;
