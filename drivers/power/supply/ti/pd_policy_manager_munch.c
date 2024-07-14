@@ -1312,7 +1312,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 		pm_config.fc2_taper_current = TAPER_DONE_NORMAL_MA;
 	}
 	usbpd_set_new_fcc_voter(pdpm);
-	pr_info("pdpm->cp.bms_vbat_mv: %d,pm_config.bat_volt_lp_lmt:%d\n", pdpm->cp.bms_vbat_mv,pm_config.bat_volt_lp_lmt);
+	pr_debug("pdpm->cp.bms_vbat_mv: %d,pm_config.bat_volt_lp_lmt:%d\n", pdpm->cp.bms_vbat_mv,pm_config.bat_volt_lp_lmt);
 	/* if cell vol read from fuel gauge is higher than threshold, vote saft fcc to protect battery */
 	if (!pdpm->use_qcom_gauge && is_fastcharge_mode) {
 		if (pdpm->cp.bms_vbat_mv > pdpm->cell_vol_max_threshold_mv) {
@@ -1380,7 +1380,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 				if (pdpm->fcc_votable)
 					vote(pdpm->fcc_votable, BQ_TAPER_CELL_HGIH_FCC_VOTER,
 							true, pdpm->step_charge_high_vol_curr_max * 1000);
-				pr_info("step_charge_high_vol_curr_max: %d\n", pdpm->step_charge_high_vol_curr_max);
+				pr_debug("step_charge_high_vol_curr_max: %d\n", pdpm->step_charge_high_vol_curr_max);
 			}
 		} else {
 			pdpm->over_cell_vol_high_count = 0;
@@ -1509,7 +1509,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 		pdpm->unsupport_pps_ta_check_count++;
 		if (pdpm->unsupport_pps_ta_check_count > 3)
 			unsupport_pps_status = true;
-			pr_info("unsupport_pps_status:%d\n", unsupport_pps_status);
+			pr_debug("unsupport_pps_status:%d\n", unsupport_pps_status);
 	} else {
 		pdpm->unsupport_pps_ta_check_count = 0;
 	}
@@ -1584,7 +1584,7 @@ reg[%d-%d-%d-%d-%d],step[%d-%d-%d-%d-%d-%d-%d-%d],pmconfig[%d-%d-%d,%d-%d-%d-%d]
 		if(pdpm->cp.sc8551_charge_mode != chg_mode && chg_mode != SC8551_CHARGE_MODE_STANDBY) {
 			if(chg_mode == SC8551_CHARGE_MODE_DIV2 || pdpm->cp_model == CHARGEPUMP_SC8551)
 				usbpd_pm_switch_cp_charge_mode(pdpm,chg_mode);
-			pr_info("charge mode changed, re-run statemachine\n");
+			pr_debug("charge mode changed, re-run statemachine\n");
 			return PM_ALGO_RET_CHG_DISABLED;
 		}
 	}
