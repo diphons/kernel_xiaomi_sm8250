@@ -1307,30 +1307,30 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 
 		wl_get_batt_current_thermal_level(pm, &thermal_level);
 		pm->is_temp_out_fc2_range = wl_disable_cp_by_jeita_status(pm);
-		pr_info("is_temp_out_fc2_range:%d\n", pm->is_temp_out_fc2_range);
+		pr_debug("is_temp_out_fc2_range:%d\n", pm->is_temp_out_fc2_range);
 
 		pm->night_charging = wldc_pm_get_night_charging_enabled(pm);
-		pr_info("night charging is open :%d\n", pm->night_charging);
+		pr_debug("night charging is open :%d\n", pm->night_charging);
 
 		if (pm->cp.vbat_volt < pm_config.min_vbat_for_cp) {
-			pr_info("batt_volt %d, waiting...\n", pm->cp.vbat_volt);
+			pr_debug("batt_volt %d, waiting...\n", pm->cp.vbat_volt);
 		} else if (tx_adapter_type > ADAPTER_XIAOMI_PD_100W ||
 			tx_adapter_type < ADAPTER_XIAOMI_QC3) {
-			pr_info("not our defined quick chargers, waiting...\n");
+			pr_debug("not our defined quick chargers, waiting...\n");
 		} else if (pm->cp.vbat_volt > pm_config.bat_volt_lp_lmt - VBAT_HIGH_FOR_FC_HYS_MV
 				|| capacity >= CAPACITY_TOO_HIGH_THR) {
-			pr_info("batt_volt %d or capacity is too high for cp,\
+			pr_debug("batt_volt %d or capacity is too high for cp,\
 					charging with switch charger\n",
 					pm->cp.vbat_volt);
 			wldc_pm_move_state(pm, CP_PM_STATE_FC2_EXIT);
 		} else if (thermal_level >= MAX_THERMAL_LEVEL || pm->is_temp_out_fc2_range) {
-			pr_info("thermal level is too high, waiting...\n");
+			pr_debug("thermal level is too high, waiting...\n");
 		} else if (pm->night_charging) {
-			pr_info("night charging is open, waiting...\n");
+			pr_debug("night charging is open, waiting...\n");
 		} else if (effective_fcc_val <= MIN_FCC_FOR_OPEN_BQ_MA) {
-			pr_info("fcc %d is too low, waiting...\n", effective_fcc_val);
+			pr_debug("fcc %d is too low, waiting...\n", effective_fcc_val);
 		} else {
-			pr_info("batt_volt-%d is ok, start flash charging\n",
+			pr_debug("batt_volt-%d is ok, start flash charging\n",
 					pm->cp.vbat_volt);
 			wldc_pm_move_state(pm, CP_PM_STATE_FC2_ENTRY);
 		}
@@ -1348,7 +1348,7 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 			while (effective_usb_icl > MAX_MAIN_CHARGER_ICL_UA ) {
 				vote(pm->usb_icl_votable, STEP_BMS_CHG_VOTER, true, effective_usb_icl);
 				effective_usb_icl -= MAX_MAIN_CHARGER_ICL_STEP_UA;
-				pr_info("smooth down the icl \n");
+				pr_debug("smooth down the icl \n");
 				msleep(50);
 			}
 			vote(pm->usb_icl_votable, STEP_BMS_CHG_VOTER, true, MAX_MAIN_CHARGER_ICL_UA);
@@ -1361,7 +1361,7 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 			wldc_pm_move_state(pm, CP_PM_STATE_FC2_ENTRY_3);
 			break;
 		} else {
-			pr_info("wldc security confirm failed, enter state fc2_entry_1 now\n");
+			pr_debug("wldc security confirm failed, enter state fc2_entry_1 now\n");
 			wldc_pm_move_state(pm, CP_PM_STATE_FC2_ENTRY_1);
 		}
 		break;
@@ -1435,29 +1435,29 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 	case CP_PM_STATE_FC2_TUNE:
 		ret = wldc_pm_fc2_charge_algo(pm);
 		if (ret == PM_ALGO_RET_THERM_FAULT) {
-			pr_info("Move to stop charging:%d\n", ret);
+			pr_debug("Move to stop charging:%d\n", ret);
 			stop_sw = true;
 			wldc_pm_move_state(pm, CP_PM_STATE_FC2_EXIT);
 			break;
 		} else if (ret == PM_ALGO_RET_OTHER_FAULT || ret == PM_ALGO_RET_TAPER_DONE) {
-			pr_info("Move to switch charging:%d\n", ret);
+			pr_debug("Move to switch charging:%d\n", ret);
 			wldc_pm_move_state(pm, CP_PM_STATE_FC2_EXIT);
 			break;
 		} else if (ret == PM_ALGO_RET_CHG_DISABLED) {
-			pr_info("Move to switch charging, will try to recover flash charging:%d\n",
+			pr_debug("Move to switch charging, will try to recover flash charging:%d\n",
 					ret);
 			recover = true;
 			wldc_pm_move_state(pm, CP_PM_STATE_FC2_EXIT);
 			break;
 		} else {
 			wldc_regulate_power(pm, pm->rx_vout_set);
-			pr_info("rx_vout_set:%d\n", pm->rx_vout_set);
+			pr_debug("rx_vout_set:%d\n", pm->rx_vout_set);
 		}
 		/*stop second charge pump if either of ibus is lower than 500ma during CV */
 		if (pm_config.cp_sec_enable && pm->cp_sec.charge_enabled
 				&& pm->cp.vbat_volt > pm_config.bat_volt_lp_lmt - 80
 				&& (pm->cp.ibus_curr < MIN_IBUS_FOR_TWIN_BQ_MA || pm->cp_sec.ibus_curr < MIN_IBUS_FOR_TWIN_BQ_MA)) {
-			pr_info("second cp is disabled due to ibus < 500mA\n");
+			pr_debug("second cp is disabled due to ibus < 500mA\n");
 			wldc_pm_enable_cp_sec(pm, false);
 			wldc_pm_check_cp_sec_enabled(pm);
 		}
@@ -1467,7 +1467,7 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 				&& !pm->cp_sec.charge_enabled
 				&& pm->cp.vbat_volt > pm_config.bat_volt_lp_lmt - 80
 				&& pm->cp.ibus_curr < MIN_IBUS_FOR_SINGLE_BQ_MA) {
-			pr_info("master cp is disabled due sto ibus < 750 ma \n");
+			pr_debug("master cp is disabled due sto ibus < 750 ma \n");
 			wldc_pm_move_state(pm, CP_PM_STATE_FC2_EXIT);
 			break;
 		}
@@ -1476,7 +1476,7 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 		if (!wldc_is_fcc_voter_esr(pm)) {
 			if (effective_fcc_val <= MIN_FCC_FOR_OPEN_BQ_MA) {
 				/* close BQs */
-				pr_info("disable bq because of fcc :%d ma \n", effective_fcc_val);
+				pr_debug("disable bq because of fcc :%d ma \n", effective_fcc_val);
 				wldc_pm_move_state(pm, CP_PM_STATE_FC2_EXIT);
 				/* we need recovery after fcc is larger later */
 				recover = true;
@@ -1484,7 +1484,7 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 			} else if (effective_fcc_val < MIN_FCC_FOR_SINGLE_BQ_MA) {
 				/* close slave bq*/
 				if (pm_config.cp_sec_enable && pm->cp_sec.charge_enabled) {
-					pr_info("second cp is disabled due to fcc :%d too low \n", effective_fcc_val);
+					pr_debug("second cp is disabled due to fcc :%d too low \n", effective_fcc_val);
 					wldc_pm_enable_cp_sec(pm, false);
 					wldc_pm_check_cp_sec_enabled(pm);
 				}
@@ -1494,7 +1494,7 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 				if (pm_config.cp_sec_enable
 					&& !pm->cp_sec.charge_enabled
 					&& pm->cp.ibus_curr >= MIN_IBUS_FOR_SINGLE_BQ_MA) {
-					pr_info("second cp is enabled due to fcc :%d\n", effective_fcc_val);
+					pr_debug("second cp is enabled due to fcc :%d\n", effective_fcc_val);
 					ret = wldc_pm_enable_cp_sec(pm, true);
 					ret = wldc_pm_check_cp_sec_enabled(pm);
 				}
