@@ -935,7 +935,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 
 	/* if cell vol read from fuel gauge is higher than threshold, vote saft fcc to protect battery */
 	if (!pdpm->use_qcom_gauge && is_fastcharge_mode) {
-		pr_info("pdpm->cp.bms_vbat_mv: %d\n", pdpm->cp.bms_vbat_mv);
+		pr_debug("pdpm->cp.bms_vbat_mv: %d\n", pdpm->cp.bms_vbat_mv);
 		if (pdpm->cp.bms_vbat_mv > pdpm->cell_vol_max_threshold_mv) {
 			if (pdpm->over_cell_vol_max_count++ > CELL_VOLTAGE_MAX_COUNT_MAX) {
 				pdpm->over_cell_vol_max_count = 0;
@@ -981,7 +981,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 				curr_ibus_limit += 30;
 			}
 		}
-		pr_info("curr_ibus_limit:%d\n", curr_ibus_limit);
+		pr_debug("curr_ibus_limit:%d\n", curr_ibus_limit);
 	}
 
 	/* if cell vol read from fuel gauge is higher than threshold, vote saft fcc to protect battery */
@@ -1055,7 +1055,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 	} else {
 		ibus_lmt_change_timer = 0;
 	}
-	pr_info("ibus_limit:%d\n", ibus_limit);
+	pr_debug("ibus_limit:%d\n", ibus_limit);
 
 	/* battery voltage loop*/
 
@@ -1077,7 +1077,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 			step_ibat = pm_config.fc2_steps;
 		else if (pdpm->cp.ibat_curr > curr_fcc_limit + 50)
 			step_ibat = -pm_config.fc2_steps;
-		pr_info("step_ibat:%d\n", step_ibat);
+		pr_debug("step_ibat:%d\n", step_ibat);
 	}
 
 	/* bus current loop*/
@@ -1088,20 +1088,20 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 		pd_bq_check_ibus_to_enable_dual_bq(pdpm, ibus_total);
 	}
 
-	pr_info("ibus_total_ma: %d\n", ibus_total);
-	pr_info("ibus_master_ma: %d\n", pdpm->cp.ibus_curr);
-	pr_info("ibus_slave_ma: %d\n", pdpm->cp_sec.ibus_curr);
-	pr_info("vbus_mv: %d\n", pdpm->cp.vbus_volt);
-	pr_info("vbat_mv: %d\n", pdpm->cp.vbat_volt);
-	pr_info("ibat_ma: %d\n", pdpm->cp.ibat_curr);
+	pr_debug("ibus_total_ma: %d\n", ibus_total);
+	pr_debug("ibus_master_ma: %d\n", pdpm->cp.ibus_curr);
+	pr_debug("ibus_slave_ma: %d\n", pdpm->cp_sec.ibus_curr);
+	pr_debug("vbus_mv: %d\n", pdpm->cp.vbus_volt);
+	pr_debug("vbat_mv: %d\n", pdpm->cp.vbat_volt);
+	pr_debug("ibat_ma: %d\n", pdpm->cp.ibat_curr);
 
 	if (ibus_total < ibus_limit - 50)
 		step_ibus = pm_config.fc2_steps;
 	else if (ibus_total > ibus_limit)
 		step_ibus = -pm_config.fc2_steps;
-	pr_info("step_ibus:%d\n", step_ibus);
+	pr_debug("step_ibus:%d\n", step_ibus);
 
-	pr_info("pdpm->cp.vbat_reg:%d, pdpm->cp.ibat_reg:%d\n",
+	pr_debug("pdpm->cp.vbat_reg:%d, pdpm->cp.ibat_reg:%d\n",
 			pdpm->cp.vbat_reg, pdpm->cp.ibat_reg);
 	/* hardware regulation loop*/
 	if (pdpm->cp.vbat_reg) /*|| pdpm->cp.ibat_reg*/
@@ -1109,7 +1109,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 	else
 		step_bat_reg = pm_config.fc2_steps;
 
-	pr_info("step_bat_reg:%d\n", step_bat_reg);
+	pr_debug("step_bat_reg:%d\n", step_bat_reg);
 
 	/*
 	 * As qcom gauge ibat changes every 1 second,
@@ -1123,13 +1123,13 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 
 	sw_ctrl_steps = min(sw_ctrl_steps, step_bat_reg);
 
-	pr_info("sw_ctrl_steps:%d\n", sw_ctrl_steps);
+	pr_debug("sw_ctrl_steps:%d\n", sw_ctrl_steps);
 	/* hardware alarm loop */
 	if (pdpm->cp.bus_ocp_alarm || pdpm->cp.bus_ovp_alarm)
 		hw_ctrl_steps = -pm_config.fc2_steps;
 	else
 		hw_ctrl_steps = pm_config.fc2_steps;
-	pr_info("hw_ctrl_steps:%d\n", hw_ctrl_steps);
+	pr_debug("hw_ctrl_steps:%d\n", hw_ctrl_steps);
 	/* check if cp disabled due to other reason*/
 	usbpd_pm_check_cp_enabled(pdpm);
 
@@ -1138,7 +1138,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 
 	pd_get_batt_current_thermal_level(pdpm, &thermal_level);
 	pdpm->is_temp_out_fc2_range = pd_disable_cp_by_jeita_status(pdpm);
-	pr_info("is_temp_out_fc2_range:%d\n", pdpm->is_temp_out_fc2_range);
+	pr_debug("is_temp_out_fc2_range:%d\n", pdpm->is_temp_out_fc2_range);
 
 	if (pdpm->pd_active == POWER_SUPPLY_PPS_NON_VERIFIED &&
 		pdpm->cp.ibat_curr > MAX_UNSUPPORT_PPS_CURRENT_MA) {
@@ -1208,7 +1208,7 @@ reg[%d-%d-%d-%d-%d],step[%d-%d-%d-%d-%d-%d-%d-%d],pmconfig[%d-%d-%d,%d-%d-%d-%d]
 			&& !pdpm->chg_enable_k81
 			&& pdpm->cp.ibat_curr < pm_config.fc2_taper_current) {
 		if (fc2_taper_timer++ > TAPER_TIMEOUT) {
-			pr_info("charge pump taper charging done\n");
+			pr_debug("charge pump taper charging done\n");
 			fc2_taper_timer = 0;
 			return PM_ALGO_RET_TAPER_DONE;
 		}
@@ -1216,7 +1216,7 @@ reg[%d-%d-%d-%d-%d],step[%d-%d-%d-%d-%d-%d-%d-%d],pmconfig[%d-%d-%d,%d-%d-%d-%d]
 			&& pdpm->chg_enable_k81
 			&& pdpm->cp.ibat_curr < pm_config.fc2_taper_current) {
 			if (fc2_taper_timer++ > TAPER_TIMEOUT) {
-				pr_info("charge pump taper charging done\n");
+				pr_debug("charge pump taper charging done\n");
 				fc2_taper_timer = 0;
 				return PM_ALGO_RET_TAPER_DONE;
 			}
@@ -1228,11 +1228,11 @@ reg[%d-%d-%d-%d-%d],step[%d-%d-%d-%d-%d-%d-%d-%d],pmconfig[%d-%d-%d,%d-%d-%d-%d]
 	 * thermal mitigation*/
 
 	steps = min(sw_ctrl_steps, hw_ctrl_steps);
-	pr_info("steps: %d, sw_ctrl_steps:%d, hw_ctrl_steps:%d\n", steps, sw_ctrl_steps, hw_ctrl_steps);
+	pr_debug("steps: %d, sw_ctrl_steps:%d, hw_ctrl_steps:%d\n", steps, sw_ctrl_steps, hw_ctrl_steps);
 	pdpm->request_voltage += steps * STEP_MV;
 
 	pdpm->request_current = min(pdpm->apdo_max_curr, curr_ibus_limit);
-	pr_info("steps: %d, pdpm->request_voltage: %d\n", steps, pdpm->request_voltage);
+	pr_debug("steps: %d, pdpm->request_voltage: %d\n", steps, pdpm->request_voltage);
 
 	/*if (pdpm->apdo_max_volt == PPS_VOL_MAX)
 		pdpm->apdo_max_volt = pdpm->apdo_max_volt - PPS_VOL_HYS;*/
