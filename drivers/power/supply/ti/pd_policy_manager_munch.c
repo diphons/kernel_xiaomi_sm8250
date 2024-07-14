@@ -1800,10 +1800,10 @@ static int usbpd_pm_sm(struct usbpd_pm *pdpm)
 					pdpm->cp.sc8551_charge_mode = chg_mode;
 				else if (pdpm->cp_model == CHARGEPUMP_SC8551)
 					usbpd_pm_switch_cp_charge_mode(pdpm,chg_mode);
-			pr_info("charge mode changed,begin to switch to %d\n",chg_mode);
+			pr_debug("charge mode changed,begin to switch to %d\n",chg_mode);
 			}
 		}
-		//pr_info("charge mode changed,chg_mode: %d,sc8551_charge_mode:%d\n",chg_mode,pdpm->cp.sc8551_charge_mode);
+		//pr_debug("charge mode changed,chg_mode: %d,sc8551_charge_mode:%d\n",chg_mode,pdpm->cp.sc8551_charge_mode);
 		if (pdpm->cp.sc8551_charge_mode == 1) {
 			pdpm->request_voltage = pdpm->cp.vbat_volt + 300;
 			pr_err("%s ENTRY_1  request_voltage [%d-%d]\n", __func__,pdpm->request_voltage, pdpm->cp.vbat_volt);
@@ -1912,7 +1912,7 @@ static int usbpd_pm_sm(struct usbpd_pm *pdpm)
 	//}
 
 		if (pdpm->cp_model == CHARGEPUMP_LN8000 && chg_mode == SC8551_CHARGE_MODE_BYPASS) {
-			pr_info("PD_PM_STATE_FC2_ENTRY_3,chg_mode: %d,cp_model:%d\n",chg_mode,pdpm->cp_model);
+			pr_debug("PD_PM_STATE_FC2_ENTRY_3,chg_mode: %d,cp_model:%d\n",chg_mode,pdpm->cp_model);
 			usbpd_pm_switch_cp_charge_mode(pdpm,chg_mode);
 		}
 
@@ -1947,7 +1947,7 @@ static int usbpd_pm_sm(struct usbpd_pm *pdpm)
 
 		ret = usbpd_pm_fc2_charge_algo(pdpm);
 		if (ret == PM_ALGO_RET_THERM_FAULT) {
-			pr_info("Move to stop charging:%d\n", ret);
+			pr_debug("Move to stop charging:%d\n", ret);
 			stop_sw = true;
 			usbpd_pm_move_state(pdpm, PD_PM_STATE_FC2_EXIT);
 			break;
