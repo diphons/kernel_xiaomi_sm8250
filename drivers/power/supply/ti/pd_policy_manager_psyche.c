@@ -1107,13 +1107,13 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 	pd_log_count++;
 	if (pd_log_count >= 20) {
 		pd_log_count = 0;
-		pr_info("ibus_limit:%d, ibus_total_ma:%d, ibus_master_ma:%d, ibus_slave_ma:%d, ibat_ma:%d\n",
+		pr_debug("ibus_limit:%d, ibus_total_ma:%d, ibus_master_ma:%d, ibus_slave_ma:%d, ibat_ma:%d\n",
 				ibus_limit, ibus_total, pdpm->cp.ibus_curr, pdpm->cp_sec.ibus_curr, pdpm->cp.ibat_curr);
-		pr_info("vbus_mv:%d, cp_vbat:%d, bms_vbat:%d\n",
+		pr_debug("vbus_mv:%d, cp_vbat:%d, bms_vbat:%d\n",
 				pdpm->cp.vbus_volt, pdpm->cp.vbat_volt, pdpm->cp.bms_vbat_mv);
-		pr_info("master_cp_enable:%d, slave_cp_enable:%d\n",
+		pr_debug("master_cp_enable:%d, slave_cp_enable:%d\n",
 				pdpm->cp.charge_enabled, pdpm->cp_sec.charge_enabled);
-		pr_info("step_ibus:%d, step_ibat:%d, step_vbat, vbat_reg:%d, ibat_reg:%d, sw_ctrl_steps:%d, hw_ctrl_steps:%d\n",
+		pr_debug("step_ibus:%d, step_ibat:%d, step_vbat, vbat_reg:%d, ibat_reg:%d, sw_ctrl_steps:%d, hw_ctrl_steps:%d\n",
 				step_ibus, step_ibat, step_vbat, pdpm->cp.vbat_reg, pdpm->cp.ibat_reg, sw_ctrl_steps, hw_ctrl_steps);
 	}
 
@@ -1155,7 +1155,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 	if (pdpm->cp.bms_vbat_mv > pm_config.bat_volt_lp_lmt - TAPER_VOL_HYS
 			&& pdpm->cp.ibat_curr < pm_config.fc2_taper_current) {
 			if (fc2_taper_timer++ > TAPER_TIMEOUT) {
-				pr_info("charge pump taper charging done, vbat[%d], ibat_curr[%d], soc[%d]\n",
+				pr_debug("charge pump taper charging done, vbat[%d], ibat_curr[%d], soc[%d]\n",
 							pdpm->cp.bms_vbat_mv, pdpm->cp.ibat_curr, capacity);
 				fc2_taper_timer = 0;
 				return PM_ALGO_RET_TAPER_DONE;
@@ -1178,7 +1178,7 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 	if (pdpm->request_voltage >= pdpm->apdo_max_volt)
 		pdpm->request_voltage = pdpm->apdo_max_volt - STEP_MV;
 
-	pr_info("steps: %d, pdpm->request_voltage: %d\n", steps, pdpm->request_voltage);
+	pr_debug("steps: %d, pdpm->request_voltage: %d\n", steps, pdpm->request_voltage);
 
 	/*if (pdpm->adapter_voltage > 0
 			&& pdpm->request_voltage > pdpm->adapter_voltage + 500)
