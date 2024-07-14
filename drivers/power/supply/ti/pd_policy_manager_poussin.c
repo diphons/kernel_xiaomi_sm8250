@@ -1178,7 +1178,7 @@ reg[%d-%d-%d-%d-%d],step[%d-%d-%d-%d-%d-%d-%d-%d],pmconfig[%d-%d-%d,%d-%d-%d-%d]
 			&& capacity >= HIGH_SOC_CV) {
 			if (fc2_taper_timer++ > TAPER_TIMEOUT) {
 				pr_err("charge pump taper charging done\n");
-				pr_info("charge pump taper charging done, vbat[%d], ibat_curr[%d], soc[%d]\n",
+				pr_debug("charge pump taper charging done, vbat[%d], ibat_curr[%d], soc[%d]\n",
 							pdpm->cp.bms_vbat_mv, pdpm->cp.ibat_curr, capacity);
 				fc2_taper_timer = 0;
 				cv_fv_state = 1;
