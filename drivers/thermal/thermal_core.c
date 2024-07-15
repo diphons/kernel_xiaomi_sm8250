@@ -23,6 +23,9 @@
 #include <net/genetlink.h>
 #include <linux/suspend.h>
 #include <linux/cpu_cooling.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #ifdef CONFIG_DRM
 #include <drm/drm_notifier_mi.h>
@@ -69,7 +72,11 @@ struct screen_monitor sm;
 #endif
 
 static struct device thermal_message_dev;
+#ifdef CONFIG_D8G_SERVICE
+atomic_t __read_mostly switch_mode = ATOMIC_INIT(-1);
+#else
 static atomic_t switch_mode = ATOMIC_INIT(-1);
+#endif
 static atomic_t temp_state = ATOMIC_INIT(0);
 static char boost_buf[128];
 const char *board_sensor;
