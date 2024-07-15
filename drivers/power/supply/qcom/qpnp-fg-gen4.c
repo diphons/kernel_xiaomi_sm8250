@@ -3591,7 +3591,7 @@ static int fg_gen4_validate_soc_scale_mode(struct fg_gen4_chip *chip)
 		vbatt_scale_mv = 3400;
 	else
 		vbatt_scale_mv = chip->dt.vbatt_scale_thr_mv;
-	pr_info("get vbatt_scale_mv = %d, current now = %d\n", vbatt_scale_mv, chip->current_now);
+	pr_debug("get vbatt_scale_mv = %d, current now = %d\n", vbatt_scale_mv, chip->current_now);
 	if (!chip->soc_scale_mode && fg->charge_status ==
 		POWER_SUPPLY_STATUS_DISCHARGING &&
 		chip->current_now  > 0 &&
@@ -4334,7 +4334,7 @@ static int calculate_average_current(struct fg_gen4_chip *chip)
 	}
 
 unchanged:
-	pr_info("current_now_ma=%d averaged_iavg_ma=%d\n",
+	pr_debug("current_now_ma=%d averaged_iavg_ma=%d\n",
 				fg->param.batt_ma, fg->param.batt_ma_avg);
 	return fg->param.batt_ma_avg;
 }
@@ -7029,7 +7029,7 @@ static void fg_battery_soc_smooth_tracking(struct fg_gen4_chip *chip)
 	struct timespec last_change_time = fg->param.last_soc_change_time;
 
 	calculate_delta_time(&last_change_time, &time_since_last_change_sec);
-	pr_info("entry:smooth_batt_soc%d\n", fg->param.smooth_batt_soc);
+	pr_debug("entry:smooth_batt_soc%d\n", fg->param.smooth_batt_soc);
 
 	/* calculate average ibat */
 	calculate_average_current(chip);
@@ -7118,31 +7118,31 @@ static void fg_battery_soc_smooth_tracking(struct fg_gen4_chip *chip)
 				&& (last_batt_soc < 3)
 				&& off_charge_flag
 				&& (fg->param.smooth_low_batt_soc < fg->param.smooth_batt_soc)) {
-			pr_info("smooth_low_batt_soc%d", fg->param.smooth_low_batt_soc);
-			pr_info("smooth_batt_soc%d", fg->param.smooth_batt_soc);
+			pr_debug("smooth_low_batt_soc%d", fg->param.smooth_low_batt_soc);
+			pr_debug("smooth_batt_soc%d", fg->param.smooth_batt_soc);
 			fg->param.smooth_low_batt_soc += DETAL_SOC;
 			fg->param.smooth_batt_soc = fg->param.smooth_low_batt_soc;
 		}
 
-		pr_info("last_smooth_batt_soc:%d, smooth_batt_soc:%d\n", last_smooth_batt_soc, fg->param.smooth_batt_soc);
+		pr_debug("last_smooth_batt_soc:%d, smooth_batt_soc:%d\n", last_smooth_batt_soc, fg->param.smooth_batt_soc);
 
 		if (last_smooth_batt_soc > 0) {
 			/*compare with last soc. avoid soc jump*/
 			if ((fg->param.smooth_batt_soc - last_smooth_batt_soc) > 1) {
 				fg->param.smooth_batt_soc = last_smooth_batt_soc + DETAL_SOC;
-				pr_info("batt_soc:++\n");
+				pr_debug("batt_soc:++\n");
 			} else if ((last_smooth_batt_soc - fg->param.smooth_batt_soc) > 1) {
 				fg->param.smooth_batt_soc = last_smooth_batt_soc - DETAL_SOC;
-				pr_info("batt_soc:--\n");
+				pr_debug("batt_soc:--\n");
 			}
-			pr_info("last_smooth_batt_soc:%d, smooth_batt_soc:%d\n", last_smooth_batt_soc, fg->param.smooth_batt_soc);
+			pr_debug("last_smooth_batt_soc:%d, smooth_batt_soc:%d\n", last_smooth_batt_soc, fg->param.smooth_batt_soc);
 
 			/*keep soc change with charging status*/
 			if ((fg->param.batt_ma < 0) && (fg->param.smooth_batt_soc < last_smooth_batt_soc)) {
-				pr_info("soc should not fall\n");
+				pr_debug("soc should not fall\n");
 				fg->param.smooth_batt_soc = last_smooth_batt_soc;
 			} else if ((fg->param.batt_ma > 0) && (fg->param.smooth_batt_soc > last_smooth_batt_soc)) {
-				pr_info("soc should not rise\n");
+				pr_debug("soc should not rise\n");
 				fg->param.smooth_batt_soc = last_smooth_batt_soc;
 			}
 		}
@@ -7153,7 +7153,7 @@ static void fg_battery_soc_smooth_tracking(struct fg_gen4_chip *chip)
 				&& (last_batt_soc >= 2)
 				&& (last_batt_soc <= 5)) {
 			fg->param.smooth_batt_soc = last_batt_soc;
-			pr_info("fix soc jump after reboot, smooth_batt_soc:%d\n", fg->param.smooth_batt_soc);
+			pr_debug("fix soc jump after reboot, smooth_batt_soc:%d\n", fg->param.smooth_batt_soc);
 		}
 	}
 	/* if battery temperature is above critical high threshold, report it */
@@ -7162,7 +7162,7 @@ static void fg_battery_soc_smooth_tracking(struct fg_gen4_chip *chip)
 			power_supply_changed(fg->batt_psy);
 	}
 
-	pr_info("soc:%d, last_soc:%d, raw_soc:%d, soc_changed:%d, batt_ma:%d, smooth_low_batt_soc:%d, smooth_soc: %d\n",
+	pr_debug("soc:%d, last_soc:%d, raw_soc:%d, soc_changed:%d, batt_ma:%d, smooth_low_batt_soc:%d, smooth_soc: %d\n",
 				fg->param.batt_soc, last_batt_soc,
 				fg->param.batt_raw_soc, soc_changed, fg->param.batt_ma, fg->param.smooth_low_batt_soc, fg->param.smooth_batt_soc);
 }
@@ -7271,7 +7271,7 @@ static void soc_monitor_work(struct work_struct *work)
 	if (fg->soc_reporting_ready)
 		fg_battery_soc_smooth_tracking(chip);
 
-	pr_info("soc:%d, raw_soc:%d, c:%d, s:%d\n",
+	pr_debug("soc:%d, raw_soc:%d, c:%d, s:%d\n",
 			fg->param.batt_soc, fg->param.batt_raw_soc,
 			fg->param.batt_ma, fg->charge_status);
 
