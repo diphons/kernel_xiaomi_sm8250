@@ -26,6 +26,9 @@
 #include <trace/events/sched.h>
 
 #include "walt.h"
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #ifdef CONFIG_SMP
 static inline bool task_fits_max(struct task_struct *p, int cpu);
@@ -6565,10 +6568,17 @@ stune_util(int cpu, unsigned long other_util,
 
 	trace_sched_boost_cpu(cpu, util, margin);
 
+#ifdef CONFIG_D8G_SERVICE
+	if (oprofile == 0 || oprofile == 4)
+		return util;
+	else
+		return util + margin;
+#else
 	if (sched_feat(SCHEDTUNE_BOOST_UTIL))
 		return util + margin;
 	else
 		return util;
+#endif
 }
 #endif
 
@@ -11109,7 +11119,12 @@ redo:
 		 * correctly treated as an imbalance.
 		 */
 		env.flags |= LBF_ALL_PINNED;
-		env.loop_max  = min(sysctl_sched_nr_migrate, busiest->nr_running);
+#ifdef CONFIG_D8G_SERVICE
+		if (oprofile == 1 || oprofile == 2 || oprofile == 3 )
+			env.loop_max  = min(32, busiest->nr_running);
+		else
+#endif
+			env.loop_max  = min(sysctl_sched_nr_migrate, busiest->nr_running);
 
 more_balance:
 		rq_lock_irqsave(busiest, &rf);
