@@ -25,6 +25,9 @@
 #include <trace/events/sched.h>
 
 #include "walt.h"
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #ifdef CONFIG_SMP
 static inline bool task_fits_max(struct task_struct *p, int cpu);
@@ -6308,7 +6311,12 @@ stune_util(int cpu, unsigned long other_util,
 
 	trace_sched_boost_cpu(cpu, util, margin);
 
-	return util + margin;
+#ifdef CONFIG_D8G_SERVICE
+	if (oprofile == 0 || oprofile == 4)
+		return util;
+	else
+#endif
+		return util + margin;
 }
 
 #else /* CONFIG_SCHED_TUNE */

@@ -9,6 +9,9 @@
 #include <linux/gpio.h>
 #include <linux/of_gpio.h>
 #include <linux/pwm.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include <video/mipi_display.h>
 
 #include "dsi_panel.h"
@@ -42,6 +45,9 @@
 
 extern struct frame_stat fm_stat;
 extern void sde_crtc_fod_ui_ready(struct dsi_display *display, int type, int value);
+#ifdef CONFIG_D8G_SERVICE
+static int oprofile_last = -1; // get last profile by oprofile
+#endif
 
 enum dsi_dsc_ratio_type {
 	DSC_8BPC_8BPP,
@@ -4725,6 +4731,11 @@ int dsi_panel_set_lp1(struct dsi_panel *panel)
 		panel->power_mode != SDE_MODE_DPMS_LP2)
 		dsi_pwr_panel_regulator_mode_set(&panel->power_info,
 			"ibb", REGULATOR_MODE_IDLE);
+#ifdef CONFIG_D8G_SERVICE
+	oplus_panel_status = 3; // DISPLAY_POWER_DOZE
+	oprofile_last = oprofile; // Get latest profile
+	oprofile = 4; // set oprofile to battery when display off
+#endif
 	rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_LP1);
 	if (rc)
 		DSI_ERR("[%s] failed to send DSI_CMD_SET_LP1 cmd, rc=%d\n",
@@ -4759,6 +4770,12 @@ int dsi_panel_set_lp2(struct dsi_panel *panel)
 	mutex_lock(&panel->panel_lock);
 	if (!panel->panel_initialized)
 		goto exit;
+
+#ifdef CONFIG_D8G_SERVICE
+	oplus_panel_status = 4; // DISPLAY_POWER_DOZE_SUSPEND
+	oprofile_last = oprofile; // Get latest profile
+	oprofile = 4; // set oprofile to battery when display off
+#endif
 
 	//It has been observed entering lp2 without first entering lp1 on doze.
 	//In this case regulator stays in NORMAL mode, which is a power regression.
@@ -4843,6 +4860,13 @@ exit_skip:
 	mi_cfg->fod_to_nolp = false;
 	fm_stat.idle_status = false;
 
+#ifdef CONFIG_D8G_SERVICE
+	oplus_panel_status = 2; // DISPLAY_POWER_ON
+	if (oprofile_last < 0) 
+		oprofile_last = oprofile;
+	oprofile = oprofile_last; // set oprofile to last profile setted
+	set_amoled_display();
+#endif
 
 
 
@@ -5274,7 +5298,13 @@ int dsi_panel_enable(struct dsi_panel *panel)
 	mi_cfg->cabc_current_status = 0;
 	fm_stat.idle_status = false;
 
-
+#ifdef CONFIG_D8G_SERVICE
+	oplus_panel_status = 2; // DISPLAY_POWER_ON
+	if (oprofile_last < 0) 
+		oprofile_last = oprofile;
+	oprofile = oprofile_last; // set oprofile to last profile setted
+	set_amoled_display();
+#endif
 
 	mutex_unlock(&panel->panel_lock);
 	display_utc_time_marker("DSI_CMD_SET_ON");
@@ -5498,6 +5528,11 @@ int dsi_panel_disable(struct dsi_panel *panel)
 	if (mi_cfg->dc_type)
 		mi_cfg->dc_enable = false;
 
+#ifdef CONFIG_D8G_SERVICE
+	oplus_panel_status = 0; // DISPLAY_POWER_OFF
+	oprofile_last = oprofile; // Get latest profile
+	oprofile = 4; // set oprofile to battery when display off
+#endif
 
 
 
