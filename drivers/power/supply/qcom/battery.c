@@ -21,6 +21,9 @@
 #include <linux/slab.h>
 #include <linux/pmic-voter.h>
 #include <linux/workqueue.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include "battery.h"
 
 #define DRV_MAJOR_VERSION	1
@@ -933,7 +936,12 @@ static int pl_fcc_main_vote_callback(struct votable *votable, void *data,
 	if (!is_main_available(chip))
 		return 0;
 
-	pval.intval = fcc_main_ua;
+#ifdef CONFIG_D8G_SERVICE
+	if (dynamic_charger && dynamic_chg_max > 0)
+		pval.intval = dynamic_chg_max;
+	else
+#endif
+		pval.intval = fcc_main_ua;
 	return  power_supply_set_property(chip->main_psy,
 			  POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX,
 			  &pval);
