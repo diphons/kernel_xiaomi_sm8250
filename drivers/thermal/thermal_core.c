@@ -24,6 +24,9 @@
 #include <linux/suspend.h>
 #include <linux/cpu_cooling.h>
 #include <linux/power_supply.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #ifdef CONFIG_DRM
 #include <drm/drm_notifier_mi.h>
@@ -79,7 +82,11 @@ struct usb_monitor usb_state;
 static atomic_t charger_mode = ATOMIC_INIT(-1);
 
 static struct device thermal_message_dev;
+#ifdef CONFIG_D8G_SERVICE
+atomic_t __read_mostly switch_mode = ATOMIC_INIT(-1);
+#else
 static atomic_t switch_mode = ATOMIC_INIT(10);
+#endif
 static atomic_t balance_mode = ATOMIC_INIT(0);
 static atomic_t temp_state = ATOMIC_INIT(0);
 static atomic_t modem_limit = ATOMIC_INIT(0);
