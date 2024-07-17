@@ -236,7 +236,7 @@ static int qc3_set_bms_fastcharge_mode(bool enable)
 /* get thermal level from battery power supply property */
 static int qc3_get_batt_current_thermal_level(int *level)
 {
-	int ret, rc;
+	int rc = 0;
 	struct power_supply *psy;
 	union power_supply_propval val = {0,};
 
@@ -244,12 +244,12 @@ static int qc3_get_batt_current_thermal_level(int *level)
 	if (!psy)
 		return 0;
 
-	ret = power_supply_get_property(psy,
+	rc = power_supply_get_property(psy,
 			POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT, &val);
 
 	if (rc < 0) {
 		pr_info("Couldn't get fastcharge mode:%d\n", rc);
-		return rc;
+		return 0;
 	}
 
 	pr_info("val.intval: %d\n", val.intval);
@@ -610,7 +610,7 @@ static int cp_get_qc_pulse_cnt(void)
 
 static int cp_reset_vbus_volt(void)
 {
-	int ret;
+	int ret = 0;
 	int qc3p5_reset_vbus_retry = 0;
 	struct power_supply *psy;
 	union power_supply_propval val = {0,};
