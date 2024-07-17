@@ -257,7 +257,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 		fts,fod-ly = <1788>;
 		fts,fod-x-size = <238>;
 		fts,fod-y-size = <238>;
-		fts,default-fw-name = "st_fts_j2.ftb";
+		fts,default-fw-name = "st_fts_j2s_default.ftb";
 		fts,config-array-size = <1>;
 		fts,dump-click-count;
 		fts,support-fod;
@@ -541,6 +541,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 		mi,pd-battery-warm-th = <450>;
 		mi,use-qcom-gauge;
 		//mi,cp-sec-enable;
+		mi,pd-power-max = <33>; /*charge power max : 33W */
 	};
 
 	wc_dc {
@@ -633,6 +634,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 &pm8150b_pdphy {
 	vbus-supply = <&ext_5v_boost>;
 	mi,non-qcom-pps-ctrl;
+	mi,pd-power-max = <33>; /*charge power max : 33W */
 };
 
 &smb1390 {
@@ -855,7 +857,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	wireless_therm {//place close to wireless charge RX
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-governor = "user_space";
+		thermal-governor = "step_wise";
 		thermal-sensors = <&pm8150b_adc_tm ADC_AMUX_THM1_PU2>;
 		trips {
 			active-config0 {
@@ -869,7 +871,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	conn_therm {//place close to type-c connector
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-governor = "user_space";
+		thermal-governor = "step_wise";
 		thermal-sensors = <&pm8150b_adc_tm ADC_AMUX_THM3_PU2>;
 		wake-capable-sensor;
 		trips {
@@ -884,7 +886,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	xo-therm-adc {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-governor = "user_space";
+		thermal-governor = "step_wise";
 		thermal-sensors = <&pm8150_adc_tm ADC_XO_THERM_PU2>;
 		wake-capable-sensor;
 		trips {
@@ -899,7 +901,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	quiet_therm {//place close to a cool place
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-governor = "user_space";
+		thermal-governor = "step_wise";
 		thermal-sensors = <&pm8150_adc_tm ADC_AMUX_THM1_PU2>;
 		wake-capable-sensor;
 		trips {
@@ -914,7 +916,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	flash_therm {//place close to flash fpc
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-governor = "user_space";
+		thermal-governor = "step_wise";
 		thermal-sensors = <&pm8150_adc_tm ADC_AMUX_THM2_PU2>;
 		wake-capable-sensor;
 		trips {
@@ -929,7 +931,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	cam_therm1 {//place close to rear camera
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-governor = "user_space";
+		thermal-governor = "step_wise";
 		thermal-sensors = <&pm8150l_adc_tm ADC_AMUX_THM1_PU2>;
 		wake-capable-sensor;
 		trips {
@@ -944,7 +946,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	xo_therm {//place close to sm8250 hot place
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-governor = "user_space";
+		thermal-governor = "step_wise";
 		thermal-sensors = <&pm8150l_adc_tm ADC_AMUX_THM2_PU2>;
 		wake-capable-sensor;
 		trips {
@@ -959,7 +961,7 @@ And public attribution of xiaomi platforms(like J2S and so and)
 	mmw-pa2-usr {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-governor = "user_space";
+		thermal-governor = "step_wise";
 		thermal-sensors = <&pm8150l_adc_tm ADC_AMUX_THM3_PU2>;
 		wake-capable-sensor;
 		trips {
