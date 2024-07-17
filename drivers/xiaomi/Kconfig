@@ -2,7 +2,7 @@ menu "Xiaomi MIUI additions"
 
 config XIAOMI_MIUI
 	bool "Enable Xiaomi MIUI modifications"
-	depends on BOARD_XIAOMI
+	default y
 	help
 	  Enables compilation of Xiaomi MIUI specific vendor additions
 
@@ -13,24 +13,28 @@ if XIAOMI_MIUI
 
 config PACKAGE_RUNTIME_INFO
 	bool "Show package runtime info on cluster"
+	default y
 	help
 	  This option can show package runtime info in sup/big/little core.
 
 config MIGT
 	bool "Boost cpufreq during high load"
 	depends on PACKAGE_RUNTIME_INFO
+	default y
 	help
 	  Boost cpufreq when current frame drawing time too long
 
 config MILLET
 	bool "MIUI frozen framework"
 	depends on PACKAGE_RUNTIME_INFO
+	default y
 	help
 	  MIUI frozen function
 
 config MIGT_ENERGY_MODEL
 	bool "DT-based Energy Model for CPU and GPU"
 	depends on MIGT
+	default y
 	help
 	  This mod rely on Energy Models (EMs) statically defined in
 	  the Device Tree. Since EAS now uses only the active costs of CPUs,
@@ -38,17 +42,20 @@ config MIGT_ENERGY_MODEL
 
 config PERF_HUMANTASK
 	bool "Enable MIUI humantask performance feature"
+	default y
 	help
 	  This option adds support to switch on/off the sched humantask.
 
 config PERF_CRITICAL_RT_TASK
 	bool "Enable set rt binder thread" if EXPERT
+	default y
 	help
 	  This option speeds ui feature by setting BlastBufferQueue binder
 	  thread to FIFO.
 
 config SF_BINDER
 	bool "Enable surfaceflinger binder thread" if EXPERT
+	default y
 	help
 	  Xiaomi restore surfaceflinger binder priority FIFO
 
