@@ -2095,7 +2095,7 @@ static void rx_set_charging_param(struct rx1619_chg *chip)
 
 		if (chip->is_train_tx) {
 			dev_info(chip->dev, "enter train work\n");
-			schedule_delayed_work(&chip->train_tx_work, msecs_to_jiffies(0));
+			queue_delayed_work(system_power_efficient_wq, &chip->train_tx_work, msecs_to_jiffies(0));
 			goto out;
 		}
 
