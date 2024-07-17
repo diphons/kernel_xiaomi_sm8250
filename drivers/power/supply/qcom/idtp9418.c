@@ -321,7 +321,7 @@ void pen_charge_state_notifier_call_chain(unsigned long val, void *v)
 							pen_notifier_work);
 	di->pen_val = val;
 	di->pen_v = v;
-	schedule_delayed_work(&di->pen_notifier_work, msecs_to_jiffies(0));
+	queue_delayed_work(system_power_efficient_wq, &di->pen_notifier_work, msecs_to_jiffies(0));
 }
 EXPORT_SYMBOL(pen_charge_state_notifier_call_chain);
 
@@ -4372,7 +4372,7 @@ static void idtp9220_fw_download_work(struct work_struct *work)
 		if ((!di->fw_check_flag) && (di->retry_num < 2)) {
 			di->retry_num++;
 			dev_info(di->dev, "Retry fw_download_work, cnt:%d.\n", di->retry_num);
-			schedule_delayed_work(&di->fw_download_work, msecs_to_jiffies(1000));
+			queue_delayed_work(system_power_efficient_wq, &di->fw_download_work, msecs_to_jiffies(1000));
 			return;
 		}
 
@@ -4384,9 +4384,9 @@ static void idtp9220_fw_download_work(struct work_struct *work)
 	}
 
 	if (di->hall3_online)
-		schedule_delayed_work(&di->hall3_irq_work, msecs_to_jiffies(2000));
+		queue_delayed_work(system_power_efficient_wq, &di->hall3_irq_work, msecs_to_jiffies(2000));
 	else if (di->hall4_online)
-		schedule_delayed_work(&di->hall4_irq_work, msecs_to_jiffies(2000));
+		queue_delayed_work(system_power_efficient_wq, &di->hall4_irq_work, msecs_to_jiffies(2000));
 	else
 		return;
 }
