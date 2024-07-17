@@ -256,7 +256,7 @@
 			next-level-cache = <&L2_7>;
 			qcom,freq-domain = <&cpufreq_hw 2 4>;
 			capacity-dmips-mhz = <1024>;
-			dynamic-power-coefficient = <386>;
+			dynamic-power-coefficient = <409>;
 			#cooling-cells = <2>;
 			L2_7: l2-cache {
 			      compatible = "arm,arch-cache";
@@ -396,7 +396,7 @@
 			no-map;
 		};
 
-		reserved_xbl_uefi_log: res_xbl_uefi_log_region {
+		reserved_xbl_uefi_log: res_xbl_uefi_log_region@80880000 {
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x80880000 0x0 0x14000>;
@@ -589,7 +589,7 @@
 			alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
 			reusable;
 			alignment = <0x0 0x400000>;
-			size = <0x0 0x2000000>;
+			size = <0x0 0x8000000>;
 			linux,cma-default;
 		};
 
@@ -700,7 +700,6 @@
 				 <0 1 IRQ_TYPE_LEVEL_HIGH>;
 		qcom,bark-time = <11000>;
 		qcom,pet-time = <9360>;
-		qcom,wakeup-enable;
 		qcom,ipi-ping;
 	};
 
@@ -2433,6 +2432,7 @@
 		qcom,support-shutdown;
 		qcom,pil-force-shutdown;
 		qcom,esoc-skip-restart-for-mdm-crash;
+		qcom,ignore-ssr-failure;
 		pinctrl-names = "mdm_active", "mdm_suspend";
 		pinctrl-0 = <&ap2mdm_active &mdm2ap_active>;
 		pinctrl-1 = <&ap2mdm_sleep &mdm2ap_sleep>;
@@ -2611,6 +2611,7 @@
 		reg = <0x177004 0x4>;
 		regulator-name = "ufs_phy_gdsc";
 		qcom,retain-regs;
+		qcom,gds-timeout = <500>;
 	};
 
 	usb30_prim_gdsc: qcom,gdsc@10f004 {
@@ -3039,6 +3040,29 @@
 			#size-cells = <0>;
 			qcom,can-sleep;
 		};
+	};
+
+	ufs_ice: ufsice@1d90000 {
+		compatible = "qcom,ice";
+		reg = <0x1d90000 0x8000>;
+		qcom,enable-ice-clk;
+		clock-names = "ufs_core_clk", "bus_clk",
+				"iface_clk", "ice_core_clk";
+		clocks = <&clock_gcc GCC_UFS_PHY_AXI_CLK>,
+			<&clock_gcc GCC_UFS_1X_CLKREF_EN>,
+			<&clock_gcc GCC_UFS_PHY_AHB_CLK>,
+			<&clock_gcc GCC_UFS_PHY_ICE_CORE_CLK>;
+		qcom,op-freq-hz = <0>, <0>, <0>, <300000000>;
+		vdd-hba-supply = <&ufs_phy_gdsc>;
+		qcom,msm-bus,name = "ufs_ice_noc";
+		qcom,msm-bus,num-cases = <2>;
+		qcom,msm-bus,num-paths = <1>;
+		qcom,msm-bus,vectors-KBps =
+				<1 650 0 0>,    /* No vote */
+				<1 650 1000 0>; /* Max. bandwidth */
+		qcom,bus-vector-names = "MIN",
+					"MAX";
+		qcom,instance-type = "ufs";
 	};
 
 	ufsphy_mem: ufsphy_mem@1d87000 {
@@ -5194,7 +5218,6 @@
 #include "kona-pinctrl.dtsi"
 #include "kona-smp2p.dtsi"
 #include "kona-usb.dtsi"
-#include "kona-coresight.dtsi"
 #include "kona-sde.dtsi"
 #include "kona-sde-pll.dtsi"
 #include "msm-rdbg.dtsi"
