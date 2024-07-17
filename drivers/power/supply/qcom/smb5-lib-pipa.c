@@ -11176,7 +11176,7 @@ static void smblib_six_pin_batt_step_chg_work(struct work_struct *work)
 		return;
 	}
 	main_charge_type = pval.intval;
-	pr_info("main_charge_type: %d\n", main_charge_type);
+	pr_debug("main_charge_type: %d\n", main_charge_type);
 
 	/*
 	 * Add capacity compare to optimize cool charge  switch to
@@ -11190,7 +11190,7 @@ static void smblib_six_pin_batt_step_chg_work(struct work_struct *work)
 	}
 	capacity = pval.intval;
 	step_soc_th = chg->step_soc_threshold;
-	pr_info("step_soc_threshold: %d\n", step_soc_th);
+	pr_debug("step_soc_threshold: %d\n", step_soc_th);
 
 	rc = smblib_get_prop_batt_health(chg, &pval);
 	if (rc < 0)
@@ -11256,7 +11256,7 @@ out:
 	}
 
 	ibat_ua = - pval.intval;
-	pr_info("ibat_ua:%d, ti_battery_voltage:%d.\n",
+	pr_debug("ibat_ua:%d, ti_battery_voltage:%d.\n",
 			ibat_ua, ti_battery_voltage);
 
 	if (main_charge_type == POWER_SUPPLY_CHARGE_TYPE_TAPER
@@ -11285,7 +11285,7 @@ out:
 	fcc_ua = get_effective_result(chg->fcc_votable);
 
 	if (chg->chg_enable_k11a) {
-		pr_info("fv_uv:%d, fcc_ua:%d, index_vfloat:%d.\n", fv_uv, fcc_ua, chg->index_vfloat);
+		pr_debug("fv_uv:%d, fcc_ua:%d, index_vfloat:%d.\n", fv_uv, fcc_ua, chg->index_vfloat);
 		if (batt_temp < chg->chg_cool_threshold
 				&& ti_battery_voltage > (fv_uv / 1000)
 				&& (fv_uv == 4450000)) {
