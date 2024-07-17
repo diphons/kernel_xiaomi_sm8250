@@ -2804,9 +2804,9 @@ static void idt_train_tx_work(struct work_struct *work)
 			di->disable_bq = false;
 			idtp9220_set_vout(di, adapter_vol);
 			msleep(110);
-			schedule_delayed_work(&di->load_fod_param_work,
+			queue_delayed_work(system_power_efficient_wq, &di->load_fod_param_work,
 					msecs_to_jiffies(500));
-			schedule_delayed_work(&di->vout_regulator_work,
+			queue_delayed_work(system_power_efficient_wq, &di->vout_regulator_work,
 					msecs_to_jiffies(400));
 		} else if (adapter_vol == ADAPTER_EPP_QC3_VOL) {
 			di->disable_bq = true;
@@ -2829,7 +2829,7 @@ static void idt_train_tx_work(struct work_struct *work)
 				msleep(200);
 			}
 			idtp9220_set_vout(di, ADAPTER_EPP_QC3_VOL);
-			schedule_delayed_work(&di->load_fod_param_work,
+			queue_delayed_work(system_power_efficient_wq, &di->load_fod_param_work,
 					msecs_to_jiffies(500));
 		}
 		vout_change = true;
@@ -3669,7 +3669,7 @@ static void idtp9220_set_charging_param(struct idtp9220_device_info *di)
 
 	if (adapter_vol == ADAPTER_EPP_MI_VOL && di->is_train_tx) {
 		dev_info(di->dev, "train logic\n");
-		schedule_delayed_work(&di->train_tx_work, msecs_to_jiffies(0));
+		queue_delayed_work(system_power_efficient_wq, &di->train_tx_work, msecs_to_jiffies(0));
 		goto out;
 	}
 
