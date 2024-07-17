@@ -332,6 +332,9 @@ extern bool ext4_fsync_protect;
 EXT4_ATTR(fsync_nobarrier, 0666, fsync_nobarrier);
 EXT4_ATTR(fsync_protect, 0666, fsync_protect);
 #endif
+#if defined(CONFIG_UNICODE) && defined(CONFIG_FS_ENCRYPTION)
+EXT4_ATTR_FEATURE(encrypted_casefold);
+#endif
 
 static struct attribute *ext4_feat_attrs[] = {
 	ATTR_LIST(lazy_itable_init),
@@ -350,6 +353,9 @@ static struct attribute *ext4_feat_attrs[] = {
 #ifdef CONFIG_OPLUS_FEATURE_EXT4_FSYNC
 	ATTR_LIST(fsync_nobarrier),
 	ATTR_LIST(fsync_protect),
+#endif
+#if defined(CONFIG_UNICODE) && defined(CONFIG_FS_ENCRYPTION)
+	ATTR_LIST(encrypted_casefold),
 #endif
 	NULL,
 };
