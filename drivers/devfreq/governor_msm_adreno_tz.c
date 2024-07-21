@@ -433,7 +433,6 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq)
 		else
 #endif
 			priv->bin.busy_time += stats->busy_time * (1 + (adrenoboost*3)/2);
-		priv->bin.busy_time += stats->busy_time * (1 + (adrenoboost*3)/2);
 	} else {
 		priv->bin.busy_time += stats->busy_time;
 	}
