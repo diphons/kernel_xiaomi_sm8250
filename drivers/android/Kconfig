@@ -56,6 +56,7 @@ config ANDROID_BINDER_IPC_SELFTEST
 
 config BINDER_OPT
 	bool "critical task opt of binder"
+	default y
 	help
 	  Mark important binder calls from ui thread.
 
