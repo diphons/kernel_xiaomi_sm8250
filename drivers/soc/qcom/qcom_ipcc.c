@@ -348,17 +348,6 @@ static void msm_ipcc_resume(void)
 		if (platform_id == KONA) {
 			wakeup_reasons_statics(IRQ_NAME_GLINK, WS_CNT_GLINK);
 			wakeup_reasons_statics(name, WS_CNT_WLAN|WS_CNT_ADSP|WS_CNT_CDSP|WS_CNT_SLPI);
-		} else if (platform_id == LITO) {
-			if (!strcmp(name, IRQ_NAME_MODEM_GLINK)) {
-				wakeup_reasons_statics(IRQ_NAME_MODEM_QMI, WS_CNT_MODEM);
-			}
-		} else if (platform_id == LAGOON) {
-			if (is_first_ipcc_msg == 1) {
-				do {
-					wakeup_reasons_statics(name, WS_CNT_MODEM|WS_CNT_WLAN|WS_CNT_ADSP|WS_CNT_CDSP|WS_CNT_SLPI);
-				} while(0);
-				is_first_ipcc_msg = 0;
-			}
 		}
 	} while(0);
 #endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
