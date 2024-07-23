@@ -430,14 +430,6 @@ static void gic_show_resume_irq(struct gic_chip_data *gic)
 					name = IRQ_NAME_WLAN_IPCC_DATA;
 					oplus_match_wlan_wakeup();
 				}
-			} else if (platform_id == LITO || platform_id == LAGOON) {
-				if (!strcmp(name, IRQ_NAME_MODEM_MODEM)) {
-					name = IRQ_NAME_MODEM_QMI;
-				}
-				if (strncmp(name, "ipcc_1", strlen("ipcc_1")) == 0) {
-                    is_first_ipcc_msg = 1;
-					oplus_match_modem_wakeup();
-				}
 			}
 			wakeup_reasons_statics(name, WS_CNT_MODEM|WS_CNT_WLAN|WS_CNT_ADSP|WS_CNT_CDSP|WS_CNT_SLPI);
 		} while(0);
