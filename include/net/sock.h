@@ -2064,6 +2064,9 @@ static inline void sk_dst_confirm(struct sock *sk)
 
 static inline void sock_confirm_neigh(struct sk_buff *skb, struct neighbour *n)
 {
+#ifdef CONFIG_OPLUS
+	return;
+#else
 	if (skb_get_dst_pending_confirm(skb)) {
 		struct sock *sk = skb->sk;
 		unsigned long now = jiffies;
@@ -2074,6 +2077,7 @@ static inline void sock_confirm_neigh(struct sk_buff *skb, struct neighbour *n)
 		if (sk && sk->sk_dst_pending_confirm)
 			sk->sk_dst_pending_confirm = 0;
 	}
+#endif /* CONFIG_OPLUS */
 }
 
 bool sk_mc_loop(struct sock *sk);
