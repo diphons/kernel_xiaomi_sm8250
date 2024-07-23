@@ -16,6 +16,7 @@
 #include <linux/console.h>
 #include <linux/cpu.h>
 #include <linux/cpuidle.h>
+#include <linux/syscalls.h>
 #include <linux/gfp.h>
 #include <linux/io.h>
 #include <linux/kernel.h>
@@ -605,6 +606,67 @@ static void suspend_finish(void)
 	pm_notifier_call_chain(PM_POST_SUSPEND);
 	pm_restore_console();
 }
+
+#ifdef CONFIG_OPLUS
+/**
+* Sync the filesystem in seperate workqueue.
+* Then check it finishing or not periodically and
+* abort if any wakeup source comes in. That can reduce
+* the wakeup latency
+*
+*/
+static bool sys_sync_completed = false;
+static void sys_sync_work_func(struct work_struct *work);
+static DECLARE_WORK(sys_sync_work, sys_sync_work_func);
+static DECLARE_WAIT_QUEUE_HEAD(sys_sync_wait);
+static void sys_sync_work_func(struct work_struct *work)
+{
+    trace_suspend_resume(TPS("sync_filesystems"), 0, true);
+    pr_info(KERN_INFO "PM: Syncing filesystems ... ");
+    ksys_sync();
+    pr_cont("done.\n");
+    trace_suspend_resume(TPS("sync_filesystems"), 0, false);
+    sys_sync_completed = true;
+    wake_up(&sys_sync_wait);
+}
+
+static int sys_sync_queue(void)
+{
+    int work_status = work_busy(&sys_sync_work);
+
+    /*maybe some irq coming here before pending check*/
+    pm_wakeup_clear(true);
+
+    /*Check if the previous work still running.*/
+    if (!(work_status & WORK_BUSY_PENDING)) {
+        if (work_status & WORK_BUSY_RUNNING) {
+            while (wait_event_timeout(sys_sync_wait, sys_sync_completed,
+                        msecs_to_jiffies(100)) == 0) {
+                if (pm_wakeup_pending()) {
+                    pr_info("PM: Pre-Syncing abort\n");
+                    goto abort;
+                }
+            }
+            pr_info("PM: Pre-Syncing done\n");
+        }
+        sys_sync_completed = false;
+        schedule_work(&sys_sync_work);
+    }
+
+    while (wait_event_timeout(sys_sync_wait, sys_sync_completed,
+                    msecs_to_jiffies(100)) == 0) {
+        if (pm_wakeup_pending()) {
+            pr_info("PM: Syncing abort\n");
+            goto abort;
+        }
+    }
+
+    pr_info("PM: Syncing done\n");
+    return 0;
+abort:
+    return -EAGAIN;
+}
+#endif /* CONFIG_OPLUS */
 
 /**
  * enter_state - Do common work needed to enter system sleep state.
