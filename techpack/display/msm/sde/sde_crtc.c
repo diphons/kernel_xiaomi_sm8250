@@ -27,6 +27,9 @@
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_flip_work.h>
 #include <linux/clk/qcom.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #include "sde_kms.h"
 #include "sde_hw_lm.h"
@@ -279,6 +282,14 @@ static ssize_t fps_periodicity_ms_show(struct device *device,
 		(sde_crtc->fps_info.fps_periodic_duration)/MILI_TO_MICRO);
 }
 
+#ifdef CONFIG_D8G_SERVICE
+static unsigned int cur_fps_count = 0;
+unsigned int get_fps_count(void)
+{
+	return READ_ONCE(cur_fps_count);
+}
+#endif
+
 static ssize_t measured_fps_show(struct device *device,
 		struct device_attribute *attr, char *buf)
 {
@@ -363,6 +374,9 @@ static ssize_t measured_fps_show(struct device *device,
 
 	fps_int = (uint64_t) sde_crtc->fps_info.measured_fps;
 	fps_decimal = do_div(fps_int, 10);
+#ifdef CONFIG_D8G_SERVICE
+	WRITE_ONCE(cur_fps_count, fps_int);
+#endif
 	return scnprintf(buf, PAGE_SIZE,
 	"fps: %d.%d duration:%d frame_count:%lld\n", fps_int, fps_decimal,
 			sde_crtc->fps_info.fps_periodic_duration, frame_count);
