@@ -204,9 +204,10 @@
 			enable-method = "psci";
 			cpu-release-addr = <0x0 0x90000000>;
 			next-level-cache = <&L2_5>;
-			qcom,freq-domain = <&cpufreq_hw 1 4>;
+			qcom,freq-domain = <&cpufreq_hw 2 4>;
 			capacity-dmips-mhz = <1023>;
 			dynamic-power-coefficient = <304>;
+			#cooling-cells = <2>;
 			L2_5: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-level = <2>;
@@ -229,9 +230,10 @@
 			enable-method = "psci";
 			cpu-release-addr = <0x0 0x90000000>;
 			next-level-cache = <&L2_6>;
-			qcom,freq-domain = <&cpufreq_hw 1 4>;
+			qcom,freq-domain = <&cpufreq_hw 2 4>;
 			capacity-dmips-mhz = <1023>;
 			dynamic-power-coefficient = <304>;
+			#cooling-cells = <2>;
 			L2_6: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-level = <2>;
@@ -296,18 +298,18 @@
 				core0 {
 					cpu = <&CPU4>;
 				};
-
-				core1 {
-					cpu = <&CPU5>;
-				};
-
-				core2 {
-					cpu = <&CPU6>;
-				};
 			};
 
 			cluster2 {
 				core0 {
+					cpu = <&CPU5>;
+				};
+
+				core1 {
+					cpu = <&CPU6>;
+				};
+
+				core2 {
 					cpu = <&CPU7>;
 				};
 			};
@@ -5303,6 +5305,5 @@
 			<2553600>,
 			<2649600>,
 			<2745600>,
-			<2841600>,
-			<3187200>;
+			<2841600>;
 };
