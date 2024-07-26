@@ -5355,10 +5355,10 @@ static bool throttle_cfs_rq(struct cfs_rq *cfs_rq)
 	/* At this point se is NULL and we are at root level*/
 	sub_nr_running(rq, task_delta);
 
-done:
 	/* Stop the fair server if throttling resulted in no runnable tasks */
 	if (rq_h_nr_running && !rq->cfs.h_nr_running)
 		dl_server_stop(&rq->fair_server);
+done:
 	/*
 	 * Note: distribution will already see us throttled via the
 	 * throttled-list.  rq->lock protects completion.
@@ -5445,15 +5445,15 @@ void unthrottle_cfs_rq(struct cfs_rq *cfs_rq)
 			goto unthrottle_throttle;
 	}
 
+	/* Start the fair server if un-throttling resulted in new runnable tasks */
+	if (!rq_h_nr_running && rq->cfs.h_nr_running)
+		dl_server_start(&rq->fair_server);
+
 	/* At this point se is NULL and we are at root level*/
 	add_nr_running(rq, task_delta);
 
 unthrottle_throttle:
 	assert_list_leaf_cfs_rq(rq);
-
-	/* Start the fair server if un-throttling resulted in new runnable tasks */
-	if (!rq_h_nr_running && rq->cfs.h_nr_running)
-		dl_server_start(&rq->fair_server);
 
 	/* Determine whether we need to wake up potentially idle CPU: */
 	if (rq->curr == rq->idle && rq->cfs.nr_running)
@@ -6077,6 +6077,7 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	int idle_h_nr_running = task_has_idle_policy(p);
 	int h_nr_delayed = 0;
 	int task_new = !(flags & ENQUEUE_WAKEUP);
+	int rq_h_nr_running = rq->cfs.h_nr_running;
 	bool prefer_idle = sched_feat(EAS_PREFER_IDLE) ?
 				(uclamp_latency_sensitive(p) > 0) : 0;
 	u64 slice = 0;
@@ -6107,13 +6108,6 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	if (flags & ENQUEUE_DELAYED) {
 		requeue_delayed_entity(se);
 		return;
-	}
-
-	if (!throttled_hierarchy(task_cfs_rq(p)) && !rq->cfs.h_nr_running) {
-		/* Account for idle runtime */
-		if (!rq->nr_running)
-			dl_server_update_idle_time(rq, rq->curr);
-		dl_server_start(&rq->fair_server);
 	}
 
 	/*
@@ -6177,6 +6171,13 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 		/* end evaluation on encountering a throttled cfs_rq */
 		if (cfs_rq_throttled(cfs_rq))
 			goto enqueue_throttle;
+	}
+
+	if (!rq_h_nr_running && rq->cfs.h_nr_running) {
+		/* Account for idle runtime */
+		if (!rq->nr_running)
+			dl_server_update_idle_time(rq, rq->curr);
+		dl_server_start(&rq->fair_server);
 	}
 
 	/* At this point se is NULL and we are at root level*/
@@ -6328,10 +6329,12 @@ static int dequeue_entities(struct rq *rq, struct sched_entity *se, int flags)
  */
 static bool dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 {
+	int rq_h_nr_running = rq->cfs.h_nr_running;
+
 	if (!(p->se.sched_delayed && (task_on_rq_migrating(p) || (flags & DEQUEUE_SAVE))))
 		util_est_dequeue(&rq->cfs, p);
 
-	if (!throttled_hierarchy(task_cfs_rq(p)) && !rq->cfs.h_nr_running)
+	if (rq_h_nr_running && !rq->cfs.h_nr_running)
 		dl_server_stop(&rq->fair_server);
 
 	util_est_update(&rq->cfs, p, flags & DEQUEUE_SLEEP);
