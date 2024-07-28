@@ -8,3 +8,4 @@ config OPLUS_FEATURE_OPROJECT
     define this config to define oplus project
 	  
 source "drivers/oplus/oplus_performance/oplus_nandswap/Kconfig"
+source "drivers/oplus/oplus_performance/uxio_first/Kconfig"
