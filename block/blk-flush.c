@@ -76,7 +76,7 @@
 #include "blk-mq-tag.h"
 #include "blk-mq-sched.h"
 
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 #include "uxio_first/uxio_first_opt.h"
 #endif
 
@@ -146,9 +146,9 @@ static bool blk_flush_queue_rq(struct request *rq, bool add_front)
 			list_add(&rq->queuelist, &rq->q->queue_head);
 		else
 			list_add_tail(&rq->queuelist, &rq->q->queue_head);
-	#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+	#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 		queue_throtl_add_request(rq->q, rq, add_front);
-	#endif /*OPLUS_FEATURE_SCHED_ASSIST*/
+	#endif /*CONFIG_OPLUS_FEATURE_UXIO_FIRST*/
 		return true;
 	}
 }
@@ -506,7 +506,7 @@ void blk_insert_flush(struct request *rq)
 		if (q->mq_ops)
 			blk_mq_request_bypass_insert(rq, false);
 		else
-		#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+		#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 		{
 			list_add_tail(&rq->queuelist, &q->queue_head);
 			queue_throtl_add_request(q, rq, false);

@@ -394,7 +394,7 @@ static ssize_t queue_poll_delay_store(struct request_queue *q, const char *page,
 	return count;
 }
 
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 static ssize_t queue_bg_max_depth_show(struct request_queue *q, char *page)
 {
 	ssize_t ret;
@@ -770,7 +770,7 @@ static struct attribute *default_attrs[] = {
 	&queue_nomerges_entry.attr,
 	&queue_rq_affinity_entry.attr,
 	&queue_iostats_entry.attr,
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 	&queue_bg_max_depth_entry.attr,
 #endif
 	&queue_random_entry.attr,

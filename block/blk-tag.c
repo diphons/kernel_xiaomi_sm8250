@@ -10,7 +10,7 @@
 
 #include "blk.h"
 
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 #include "uxio_first/uxio_first_opt.h"
 #endif
 
@@ -114,7 +114,7 @@ init_tag_map(struct request_queue *q, struct blk_queue_tag *tags, int depth)
 
 	tags->real_max_depth = depth;
 	tags->max_depth = depth;
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 	tags->bg_max_depth = BLK_MAX_BG_DEPTH;
 #endif
 	tags->tag_index = tag_index;

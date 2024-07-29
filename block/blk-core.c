@@ -38,7 +38,7 @@
 #include <linux/psi.h>
 #include <linux/blk-crypto.h>
 
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 #include "uxio_first/uxio_first_opt.h"
 #endif
 
@@ -194,7 +194,7 @@ void blk_rq_init(struct request_queue *q, struct request *rq)
 	memset(rq, 0, sizeof(*rq));
 
 	INIT_LIST_HEAD(&rq->queuelist);
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 	INIT_LIST_HEAD(&rq->ux_fg_bg_list);
 #endif
 	INIT_LIST_HEAD(&rq->timeout_list);
@@ -1025,7 +1025,7 @@ struct request_queue *blk_alloc_queue_node(gfp_t gfp_mask, int node_id,
 		return NULL;
 
 	INIT_LIST_HEAD(&q->queue_head);
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 	INIT_LIST_HEAD(&q->ux_head);
 	INIT_LIST_HEAD(&q->fg_head);
 	INIT_LIST_HEAD(&q->bg_head);
@@ -1731,7 +1731,7 @@ void __blk_put_request(struct request_queue *q, struct request *req)
 	/* this is a bio leak */
 	WARN_ON(req->bio != NULL);
 
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 	rq_qos_done(q, req, (bool)((req->cmd_flags & REQ_FG)||(req->cmd_flags & REQ_UX)));
 #else
 	rq_qos_done(q, req);
@@ -1951,7 +1951,7 @@ void blk_init_request_from_bio(struct request *req, struct bio *bio)
 	if (bio->bi_opf & REQ_RAHEAD)
 		req->cmd_flags |= REQ_FAILFAST_MASK;
 
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 	if (bio->bi_opf & REQ_UX)
 		req->cmd_flags |= REQ_UX;
 	else if (bio->bi_opf & REQ_FG)
@@ -2563,7 +2563,7 @@ blk_qc_t submit_bio(struct bio *bio)
 		}
 	}
 
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 		bio->bi_opf |= REQ_UX;
 #endif
 
@@ -2774,7 +2774,7 @@ void blk_account_io_done(struct request *req, u64 now)
  * Don't process normal requests when queue is suspended
  * or in the process of suspending/resuming
  */
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 bool blk_pm_allow_request(struct request *rq)
 #else
 static bool blk_pm_allow_request(struct request *rq)
@@ -2791,7 +2791,7 @@ static bool blk_pm_allow_request(struct request *rq)
 	}
 }
 #else
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
  bool blk_pm_allow_request(struct request *rq)
 #else
 static bool blk_pm_allow_request(struct request *rq)
@@ -2846,14 +2846,6 @@ static struct request *elv_next_request(struct request_queue *q)
 	WARN_ON_ONCE(q->mq_ops);
 
 	while (1) {
-	#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
-		if (likely(sysctl_uxio_io_opt)){
-			rq = smart_peek_request(q);
-			if (rq)
-				return rq;
-		} else
-		{
-	#endif
 			list_for_each_entry(rq, &q->queue_head, queuelist) {
 			if (blk_pm_allow_request(rq))
 				return rq;
@@ -2861,9 +2853,6 @@ static struct request *elv_next_request(struct request_queue *q)
 			if (rq->rq_flags & RQF_SOFTBARRIER)
 				break;
 		}
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
-	}
-#endif
 
 		/*
 		 * Flush request is running and flush request isn't queueable
@@ -3000,7 +2989,7 @@ static void blk_dequeue_request(struct request *rq)
 	BUG_ON(ELV_ON_HASH(rq));
 
 	list_del_init(&rq->queuelist);
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 	list_del_init(&rq->ux_fg_bg_list);
 #endif
 
@@ -3258,7 +3247,7 @@ void blk_finish_request(struct request *req, blk_status_t error)
 	blk_account_io_done(req, now);
 
 	if (req->end_io) {
-	#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+	#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 		rq_qos_done(q, req, (bool)((req->cmd_flags & REQ_FG)||(req->cmd_flags & REQ_UX)));
 	#else
 		rq_qos_done(q, req);

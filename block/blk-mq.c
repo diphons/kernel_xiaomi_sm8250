@@ -506,7 +506,7 @@ void blk_mq_free_request(struct request *rq)
 	if (unlikely(laptop_mode && !blk_rq_is_passthrough(rq)))
 		laptop_io_completion(q->backing_dev_info);
 
-#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 	rq_qos_done(q, rq,(bool)((rq->cmd_flags & REQ_FG)||(rq->cmd_flags & REQ_UX)));
 #else
 	rq_qos_done(q, rq);
@@ -533,7 +533,7 @@ inline void __blk_mq_end_request(struct request *rq, blk_status_t error)
 	blk_account_io_done(rq, now);
 
 	if (rq->end_io) {
-	#if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
+	#if defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
 		rq_qos_done(rq->q, rq,(bool)((rq->cmd_flags & REQ_FG)||(rq->cmd_flags & REQ_UX)));
 	#else
 		rq_qos_done(rq->q, rq);
