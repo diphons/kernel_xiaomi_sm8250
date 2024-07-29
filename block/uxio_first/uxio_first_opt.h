@@ -19,5 +19,5 @@ extern void queue_throtl_add_request(struct request_queue *q,
 						    struct request *rq, bool front);
 extern bool high_prio_for_task(struct task_struct *t);
 extern bool test_ux_task_cpu(int cpu);
-extern bool test_task_ux(struct task_struct *task);
+// extern bool test_task_ux(struct task_struct *task);
 #endif /*_OPLUS_UXIO_FIRST_H*/

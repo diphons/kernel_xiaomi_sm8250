@@ -2564,10 +2564,7 @@ blk_qc_t submit_bio(struct bio *bio)
 	}
 
 #if defined(OPLUS_FEATURE_SCHED_ASSIST) && defined(CONFIG_OPLUS_FEATURE_UXIO_FIRST)
-	if (test_task_ux(current))
 		bio->bi_opf |= REQ_UX;
-	else if (high_prio_for_task(current))
-		bio->bi_opf |= REQ_FG;
 #endif
 
 	/*

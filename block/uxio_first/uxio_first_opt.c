@@ -129,7 +129,7 @@ void queue_throtl_add_request(struct request_queue *q,
 		list_add_tail(&rq->ux_fg_bg_list, head);
 }
 
-void ohm_ioqueue_add_inflight(struct request_queue *q,
+static inline void ohm_ioqueue_add_inflight(struct request_queue *q,
                                             struct request *rq)
 {
        if (rq->cmd_flags & REQ_UX)
