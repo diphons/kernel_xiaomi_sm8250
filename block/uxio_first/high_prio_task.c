@@ -85,8 +85,8 @@ static inline bool is_fg_task_without_sysuid(struct task_struct *t)
 
 bool high_prio_for_task(struct task_struct *t)
 {
-	if (likely(!sysctl_uxio_io_opt))
-		return false;
+	/* if (likely(!sysctl_uxio_io_opt))
+		return false; */
 
 	if ((is_fg_task_without_sysuid(t) && !is_filter_process(t))
 		|| is_critial_process(t))

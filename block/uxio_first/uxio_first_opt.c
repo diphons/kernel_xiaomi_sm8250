@@ -54,8 +54,8 @@ static struct request * get_request_from_queue(struct request_queue *q, struct l
 
 	if (!list_empty(list_head)) {
 		list_for_each_entry(rq, list_head, ux_fg_bg_list) {
-			if (blk_pm_allow_request(rq))
-			   return rq;
+			/* if (blk_pm_allow_request(rq))
+			   return rq; */
 
 		if (rq->rq_flags & RQF_SOFTBARRIER)
 		   break;
@@ -113,8 +113,8 @@ void queue_throtl_add_request(struct request_queue *q,
 {
 	struct list_head *head;
 
-	if (unlikely(!sysctl_uxio_io_opt))
-		return;
+	/* if (unlikely(!sysctl_uxio_io_opt))
+		return; */
 
 	if (rq->cmd_flags & REQ_UX)
 		head = &q->ux_head;
