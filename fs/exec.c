@@ -94,6 +94,8 @@ static DEFINE_RWLOCK(binfmt_lock);
 
 #define ZYGOTE32_BIN "/system/bin/app_process32"
 #define ZYGOTE64_BIN "/system/bin/app_process64"
+#define CAMERA "com.android.camera"
+#define SYSTEMUI "com.android.systemui"
 static struct task_struct *zygote32_task;
 static struct task_struct *zygote64_task;
 
@@ -1904,6 +1906,17 @@ static int __do_execve_file(int fd, struct filename *filename,
                         zygote64_task = current;
 		else if (unlikely(!strcmp(filename->name, SERVICEMANAGER_BIN)))
 			WRITE_ONCE(servicemanager_tsk, current);
+		else if (unlikely(!strncmp(filename->name,
+					   CAMERA,
+					   strlen(CAMERA)))) {
+			current->flags |= PF_PERF_CRITICAL;
+			set_cpus_allowed_ptr(current, cpu_perf_mask);
+		} else if (unlikely(!strncmp(filename->name,
+					   SYSTEMUI,
+					   strlen(SYSTEMUI)))) {
+			current->flags |= PF_PERF_CRITICAL;
+			set_cpus_allowed_ptr(current, cpu_perf_mask);
+		}
 	}
 
 	/* execve succeeded */
