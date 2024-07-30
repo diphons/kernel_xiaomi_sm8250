@@ -236,6 +236,7 @@ header_install(){
 	ui_print "• Model   : $getmodel ";
 	ui_print "• Ram     : $ram ";
 	ui_print "$install_av"
+	ui_print "$install_vnd"
 	ui_print "$install_ocd"
 	ui_print "$install_dhz"
 	ui_print "$install_pk"
@@ -734,7 +735,7 @@ else
 			fi
 		}
 		miui_vendor(){
-			install_ocd="• ROM : MIUI"
+			install_vnd="• Vendor  : MIUI | HyperOS"
 			install_dhz="• Display : Stock";
 			vendor_mode=0
 			nine_set=0
@@ -746,20 +747,22 @@ else
 				ui_print " "
 				ui_print "Choose Vendor Rom installed.."
 				ui_print " "
-				ui_print "MIUI or AOSP ?"
+				ui_print "Port ROM users, generally Port Rom use vendor stock, MIUI or HyperOS. You can see the description from developer"
+				ui_print " "
+				ui_print "MIUI-HyperOS or AOSP-A ?"
 				ui_print " "
 				ui_print "   Vol+ = Yes, Vol- = No"
 				ui_print ""
-				ui_print "   Yes.. MIUI | OxygenOS"
-				ui_print "   No!!... AOSP"
+				ui_print "   Yes.. MIUI | HyperOS"
+				ui_print "   No!!... AOSP | AOSPA"
 				ui_print " "
 				if $FUNCTION; then
-					ui_print "-> MIUI selected.."
-					install_ocd="• ROM : MIUI"
+					ui_print "-> MIUI | HyperOS selected.."
+					install_vnd="• Vendor  : MIUI | HyperOS"
 					vendor_mode=0
 				else
-					ui_print "-> AOSP selected.."
-					install_ocd="• ROM : AOSP"
+					ui_print "-> AOSP | AOSPA selected.."
+					install_vnd="• Vendor  : AOSP | AOSPA"
 					vendor_mode=1
 				fi
 				select_ocd;
