@@ -4590,29 +4590,6 @@ place_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 		lag = div_s64(lag, load);
 	}
 
-#ifdef CONFIG_SCHED_WALT
-	if (!initial) {
-		unsigned long thresh;
-
-		if (se_is_idle(se))
-			thresh = sysctl_sched_min_granularity;
-		else
-			thresh = sysctl_sched_latency;
-
-		if (entity_is_task(se)) {
-			if ((per_task_boost(task_of(se)) ==
-					TASK_BOOST_STRICT_MAX) ||
-					walt_low_latency_task(task_of(se)) ||
-					task_rtg_high_prio(task_of(se))) {
-				vruntime -= sysctl_sched_latency;
-				vruntime -= thresh;
-				se->vruntime = vruntime;
-				return;
-			}
-		}
-	}
-#endif
-
 	se->vruntime = vruntime - lag;
 
 	/*
