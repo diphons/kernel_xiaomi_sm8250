@@ -67,6 +67,9 @@
 #include <linux/pkg_stat.h>
 #endif
 #include <linux/binfmts.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 DEFINE_STATIC_KEY_FALSE(cpusets_pre_enable_key);
 DEFINE_STATIC_KEY_FALSE(cpusets_enabled_key);
@@ -1805,17 +1808,43 @@ static ssize_t cpuset_write_resmask_wrapper(struct kernfs_open_file *of,
 		{ "system-background",	CONFIG_CPUSET_SYSTEM_BG },
 		{ "top-app",		CONFIG_CPUSET_TOP_APP },
 	};
+#ifdef CONFIG_D8G_SERVICE
+	static struct cs_target cs_targets_game[] = {
+		{ "audio-app",		"0-7" },
+		{ "background",		"0-7" },
+		{ "camera-daemon",	"0-7" },
+		{ "display",		"0-7" },
+		{ "foreground",		"0-7" },
+		{ "restricted",		"0-7" },
+		{ "system-background",	"0-7" },
+		{ "top-app",		"0-7" },
+	};
+#endif
 	struct cpuset *cs = css_cs(of_css(of));
 	int i;
 
 	if (task_is_booster(current)) {
-		for (i = 0; i < ARRAY_SIZE(cs_targets); i++) {
-			struct cs_target tgt = cs_targets[i];
+#ifdef CONFIG_D8G_SERVICE
+		if (game_ai_enable && ongame) {
+			for (i = 0; i < ARRAY_SIZE(cs_targets_game); i++) {
+				struct cs_target tgt = cs_targets_game[i];
 
-			if (!strcmp(cs->css.cgroup->kn->name, tgt.name))
-				return cpuset_write_resmask_assist(of, tgt,
-								   nbytes, off);
+				if (!strcmp(cs->css.cgroup->kn->name, tgt.name))
+					return cpuset_write_resmask_assist(of, tgt,
+									   nbytes, off);
+			}
+		} else {
+#endif
+			for (i = 0; i < ARRAY_SIZE(cs_targets); i++) {
+				struct cs_target tgt = cs_targets[i];
+
+				if (!strcmp(cs->css.cgroup->kn->name, tgt.name))
+					return cpuset_write_resmask_assist(of, tgt,
+									   nbytes, off);
+			}
+#ifdef CONFIG_D8G_SERVICE
 		}
+#endif
 	}
 #endif
 
