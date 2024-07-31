@@ -1476,4 +1476,4 @@ static int __init sugov_register(void)
 {
 	return cpufreq_register_governor(&schedutil_gov);
 }
-core_initcall(sugov_register);
+fs_initcall(sugov_register);
