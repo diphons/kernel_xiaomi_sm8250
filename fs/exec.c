@@ -1903,15 +1903,12 @@ static int __do_execve_file(int fd, struct filename *filename,
 	if (retval < 0)
 		goto out;
 
-	if (capable(CAP_SYS_ADMIN)) {
+	if (capable(CAP_SYS_ADMIN) || is_global_init(current->parent)) {
 		if (unlikely(!strcmp(filename->name, ZYGOTE32_BIN)))
 			zygote32_task = current;
 		else if (unlikely(!strcmp(filename->name, ZYGOTE64_BIN)))
                         zygote64_task = current;
-	}
-
-	if (is_global_init(current->parent)) {
-		if (unlikely(!strcmp(filename->name, SERVICEMANAGER_BIN)))
+		else if (unlikely(!strcmp(filename->name, SERVICEMANAGER_BIN)))
 			WRITE_ONCE(servicemanager_tsk, current);
 	}
 
