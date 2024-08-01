@@ -165,7 +165,7 @@ short Read_RomID_slave(unsigned char *RomID)
 	for (i = 0; i < 8; i++)
 		RomID[i] = read_byte_slave();
 
-	ds_info("RomID = %02x,%02x,%02x,%02x,%02x,%02x,%02x,%02x\n",
+	ds_dbg("RomID = %02x,%02x,%02x,%02x,%02x,%02x,%02x,%02x\n",
 	RomID[0], RomID[1], RomID[2], RomID[3],
 	RomID[4], RomID[5], RomID[6], RomID[7]);
 
@@ -1678,16 +1678,16 @@ static void battery_verify(struct work_struct *work)
 
 	if (result == DS_TRUE) {
 		data->batt_verified = 1;
-		ds_info("%s batt_verified = 1 \n", __func__);
+		ds_dbg("%s batt_verified = 1 \n", __func__);
 	} else {
 		data->batt_verified = 0;
 		if (count < VERIFY_MAX_COUNT) {
 			schedule_delayed_work(&data->battery_verify_work,
 						msecs_to_jiffies(VERIFY_PERIOD_S));
-			ds_info("%s battery verify failed times[%d]", __func__, count);
+			ds_dbg("%s battery verify failed times[%d]", __func__, count);
 			count++;
 		} else {
-			ds_info("%s battery verify failed[%d]", __func__, result);
+			ds_dbg("%s battery verify failed[%d]", __func__, result);
 		}
 	}
 }
