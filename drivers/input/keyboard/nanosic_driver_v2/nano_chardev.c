@@ -437,10 +437,13 @@ Nanosic_chardev_fops_write(
     } else if ((data[0]==0x32) && (data[2]==0x4F) && (data[3]==0x30) && (data[4]==0x80) && (data[5]==0x18) && (data[6]==0x1D)) {
         ret = Nanosic_GPIO_recovery(gI2c_client,data,copy);
     } else if (data[0] == 0x32 && data[1] == 0xFF && data[2] == 0x00) {
-        if (!prev_conn_status)
-		    ret = Nanosic_input_release();
-    } else if (data[0] == 0x32 && data[1] == 0xFF && data[2] == 0x01) {
         if (prev_conn_status) {
+		    prev_conn_status = false;
+		    ret = Nanosic_input_release();
+        }
+    } else if (data[0] == 0x32 && data[1] == 0xFF && data[2] == 0x01) {
+        if (!prev_conn_status) {
+		    prev_conn_status = true;
 		    Nanosic_set_caps_led(0);
 		    ret = Nanosic_input_register();
         }

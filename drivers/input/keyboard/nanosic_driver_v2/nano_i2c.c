@@ -81,13 +81,13 @@ Nanosic_i2c_specified_packets_detect(char* data)
         conn_status = (gHallStatus >> 0) & 0x1;
 		conn_power = (gHallStatus >> 1) & 0x1;
 
-        if (conn_status != prev_conn_status) {
-            prev_conn_status = conn_status;
-            if (conn_status && conn_power) {
-                Nanosic_set_caps_led(0);
-                Nanosic_input_register();
-            } else
-                Nanosic_input_release();
+        if (conn_status && conn_power && !prev_conn_status) {
+            prev_conn_status = true;
+            Nanosic_set_caps_led(0);
+            Nanosic_input_register();
+        } else if (!conn_status && prev_conn_status) {
+            prev_conn_status = false;
+            Nanosic_input_release();
         }
 
     }
