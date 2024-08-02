@@ -272,6 +272,7 @@ extern void Nanosic_GPIO_set(bool status);
 
 
 extern void Nanosic_GPIO_sleep(bool sleep);
+extern bool __read_mostly prev_conn_status;
 
 struct xiaomi_keyboard_data {
     struct notifier_block drm_notif;

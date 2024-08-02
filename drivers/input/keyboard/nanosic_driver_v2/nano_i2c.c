@@ -39,7 +39,7 @@ char gVers803x[21]={0};
 char gVers176x[21]={0};
 
 short gHallStatus = 0;
-bool prev_conn_status = 1;
+bool __read_mostly prev_conn_status = 1;
 
 /** **************************************************************************
  * @brief
