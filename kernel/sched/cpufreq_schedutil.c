@@ -1305,8 +1305,8 @@ static int sugov_init(struct cpufreq_policy *policy)
 		goto stop_kthread;
 	}
 
-	tunables->up_rate_limit_us = cpufreq_policy_transition_delay_us(policy);
-	tunables->down_rate_limit_us = cpufreq_policy_transition_delay_us(policy);
+	tunables->up_rate_limit_us = 500;
+	tunables->down_rate_limit_us = 1000;
 	tunables->hispeed_load = DEFAULT_HISPEED_LOAD;
 	tunables->hispeed_freq = 0;
 
@@ -1321,48 +1321,6 @@ static int sugov_init(struct cpufreq_policy *policy)
 	case 7:
 		tunables->rtg_boost_freq = DEFAULT_CPU7_RTG_BOOST_FREQ;
 		break;
-	}
-
-	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask)) {
-#ifdef CONFIG_D8G_SERVICE
-		if (oprofile == 0 || oprofile == 4) {
-			tunables->up_rate_limit_us = 500;
-			tunables->down_rate_limit_us = 1000;
-		} else {
-#endif
-			tunables->up_rate_limit_us = 5000;
-			tunables->down_rate_limit_us = 5000;
-#ifdef CONFIG_D8G_SERVICE
-		}
-#endif
-	}
-
-	if (cpumask_test_cpu(policy->cpu, cpu_perf_mask)) {
-#ifdef CONFIG_D8G_SERVICE
-		if (oprofile == 0 || oprofile == 4) {
-			tunables->up_rate_limit_us = 500;
-			tunables->down_rate_limit_us = 1000;
-		} else {
-#endif
-			tunables->up_rate_limit_us = 16000;
-			tunables->down_rate_limit_us = 4000;
-#ifdef CONFIG_D8G_SERVICE
-		}
-#endif
-	}
-
-	if (cpumask_test_cpu(policy->cpu, cpu_prime_mask)) {
-#ifdef CONFIG_D8G_SERVICE
-		if (oprofile == 0 || oprofile == 4) {
-			tunables->up_rate_limit_us = 500;
-			tunables->down_rate_limit_us = 1000;
-		} else {
-#endif
-			tunables->up_rate_limit_us = 16000;
-			tunables->down_rate_limit_us = 4000;
-#ifdef CONFIG_D8G_SERVICE
-		}
-#endif
 	}
 
 	policy->governor_data = sg_policy;
