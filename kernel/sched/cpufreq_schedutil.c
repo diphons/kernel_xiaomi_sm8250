@@ -1016,50 +1016,8 @@ static int sugov_init(struct cpufreq_policy *policy)
 		goto stop_kthread;
 	}
 
-	tunables->up_rate_limit_us = cpufreq_policy_transition_delay_us(policy);
-	tunables->down_rate_limit_us = cpufreq_policy_transition_delay_us(policy);
-
-	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask)) {
-#ifdef CONFIG_D8G_SERVICE
-		if (oprofile == 0 || oprofile == 4) {
-			tunables->up_rate_limit_us = 500;
-			tunables->down_rate_limit_us = 1000;
-		} else {
-#endif
-			tunables->up_rate_limit_us = 5000;
-			tunables->down_rate_limit_us = 5000;
-#ifdef CONFIG_D8G_SERVICE
-		}
-#endif
-	}
-
-	if (cpumask_test_cpu(policy->cpu, cpu_perf_mask)) {
-#ifdef CONFIG_D8G_SERVICE
-		if (oprofile == 0 || oprofile == 4) {
-			tunables->up_rate_limit_us = 500;
-			tunables->down_rate_limit_us = 1000;
-		} else {
-#endif
-			tunables->up_rate_limit_us = 16000;
-			tunables->down_rate_limit_us = 4000;
-#ifdef CONFIG_D8G_SERVICE
-		}
-#endif
-	}
-
-	if (cpumask_test_cpu(policy->cpu, cpu_prime_mask)) {
-#ifdef CONFIG_D8G_SERVICE
-		if (oprofile == 0 || oprofile == 4) {
-			tunables->up_rate_limit_us = 500;
-			tunables->down_rate_limit_us = 1000;
-		} else {
-#endif
-			tunables->up_rate_limit_us = 16000;
-			tunables->down_rate_limit_us = 4000;
-#ifdef CONFIG_D8G_SERVICE
-		}
-#endif
-	}
+	tunables->up_rate_limit_us = 500;
+	tunables->down_rate_limit_us = 1000;
 
 	policy->governor_data = sg_policy;
 	sg_policy->tunables = tunables;
