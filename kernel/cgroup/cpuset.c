@@ -67,6 +67,9 @@
 #include <linux/pkg_stat.h>
 #endif
 #include <linux/binfmts.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 DEFINE_STATIC_KEY_FALSE(cpusets_pre_enable_key);
 DEFINE_STATIC_KEY_FALSE(cpusets_enabled_key);
@@ -1787,6 +1790,14 @@ static ssize_t cpuset_write_resmask_assist(struct kernfs_open_file *of,
 					   struct cs_target tgt, size_t nbytes,
 					   loff_t off)
 {
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+	if (strstr(tgt.name, "top-app")) {
+		if (ongame)
+			tgt.cpus = CONFIG_CPUSET_TOP_APP;
+		else
+			tgt.cpus = "0-6";
+	}
+#endif
 	pr_info("cpuset_assist: setting %s to %s\n", tgt.name, tgt.cpus);
 	return cpuset_write_resmask(of, tgt.cpus, nbytes, off);
 }
