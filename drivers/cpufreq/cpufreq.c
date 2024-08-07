@@ -773,7 +773,8 @@ static ssize_t show_scaling_governor(struct cpufreq_policy *policy, char *buf)
 	else if (policy->governor) {
 #ifdef CONFIG_D8G_SERVICE
 		if (ongame)
-			return sprintf(buf, game_ai_gov_main);
+			return scnprintf(buf, CPUFREQ_NAME_PLEN, "%s\n",
+					game_ai_gov_main);
 		else
 #endif
 			return scnprintf(buf, CPUFREQ_NAME_PLEN, "%s\n",
