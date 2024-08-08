@@ -1819,7 +1819,11 @@ static ssize_t cpuset_write_resmask_wrapper(struct kernfs_open_file *of,
 	struct cpuset *cs = css_cs(of_css(of));
 	int i;
 
+#ifdef CONFIG_D8G_SERVICE
+	if (cpuassist_mode && task_is_booster(current)) {
+#else
 	if (task_is_booster(current)) {
+#endif
 		for (i = 0; i < ARRAY_SIZE(cs_targets); i++) {
 			struct cs_target tgt = cs_targets[i];
 

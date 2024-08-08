@@ -176,7 +176,8 @@ static void __cpu_input_boost_kick(struct boost_drv *b)
 		return;
 
 #ifdef CONFIG_D8G_SERVICE
-	if (!gamer || oprofile == 4 || oplus_panel_status != 2)
+	if (!gamer || oprofile == 4 || oplus_panel_status != 2 ||
+		cpuassist_mode == 1)
 		return;
 #endif
 
@@ -204,7 +205,8 @@ static void __cpu_input_boost_kick_max(struct boost_drv *b,
 		return;
 
 #ifdef CONFIG_D8G_SERVICE
-	if (!gamer || oprofile == 4 || oplus_panel_status != 2)
+	if (!gamer || oprofile == 4 || oplus_panel_status != 2 ||
+		cpuassist_mode == 1)
 		return;
 #endif
 
