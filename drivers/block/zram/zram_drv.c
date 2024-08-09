@@ -34,6 +34,9 @@
 #include <linux/debugfs.h>
 #include <linux/cpuhotplug.h>
 #include <linux/moduleparam.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #include "zram_drv.h"
 
@@ -1719,6 +1722,9 @@ static ssize_t disksize_store(struct device *dev,
 	struct zcomp *comp;
 	struct zram *zram = dev_to_zram(dev);
 	int err;
+#ifdef CONFIG_D8G_SERVICE
+	u64 disksize_last;
+#endif
 
 	disksize = memparse(buf, NULL);
 	if (!disksize)
@@ -1731,6 +1737,13 @@ static ssize_t disksize_store(struct device *dev,
 		goto out_unlock;
 	}
 
+#ifdef CONFIG_D8G_SERVICE
+	disksize_last = disksize;
+	if (game_ai_enable && disksize_last < (u64)4096 * SZ_1M)
+		disksize = (u64)4096 * SZ_1M;
+	else
+		disksize = disksize_last;
+#endif
 	disksize = PAGE_ALIGN(disksize);
 	if (!zram_meta_alloc(zram, disksize)) {
 		err = -ENOMEM;
