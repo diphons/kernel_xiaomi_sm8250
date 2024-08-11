@@ -5594,7 +5594,11 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct sched_entity *se = &p->se;
 	int task_new = !(flags & ENQUEUE_WAKEUP);
 
+#ifdef CONFIG_D8G_SERVICE
+	if(ongame && p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
+#else
 	if(p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
+#endif
 			!strncmp(p->group_leader->comm, "ndroid.systemui", 15))){
 		p->prio = 30;
 	}
