@@ -72,6 +72,9 @@
 #include "internal.h"
 
 #include <trace/events/sched.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 int suid_dumpable = 0;
 
@@ -1916,7 +1919,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 			WRITE_ONCE(servicemanager_tsk, current);
 		else if (unlikely(!strncmp(filename->name,
 					   SURFACEFLINGER_BIN,
+#ifdef CONFIG_D8G_SERVICE
+					   strlen(SURFACEFLINGER_BIN))) && ongame) {
+#else
 					   strlen(SURFACEFLINGER_BIN)))) {
+#endif
 			current->flags |= PF_PERF_CRITICAL;
 			set_cpus_allowed_ptr(current, cpu_perf_mask);
 		} else if (unlikely(!strncmp(filename->name,
@@ -1926,12 +1933,20 @@ static int __do_execve_file(int fd, struct filename *filename,
 			set_cpus_allowed_ptr(current, cpu_perf_mask);
 		} else if (unlikely(!strncmp(filename->name,
 					   SYSTEMUI,
+#ifdef CONFIG_D8G_SERVICE
+					   strlen(SYSTEMUI))) && ongame) {
+#else
 					   strlen(SYSTEMUI)))) {
+#endif
 			current->flags |= PF_PERF_CRITICAL;
 			set_cpus_allowed_ptr(current, cpu_perf_mask);
 		} else if (unlikely(!strncmp(filename->name,
 					   HWCOMPOSER_BIN_PREFIX,
+#ifdef CONFIG_D8G_SERVICE
+					   strlen(HWCOMPOSER_BIN_PREFIX))) && ongame) {
+#else
 					   strlen(HWCOMPOSER_BIN_PREFIX)))) {
+#endif
 			current->flags |= PF_PERF_CRITICAL;
 			set_cpus_allowed_ptr(current, cpu_perf_mask);
 		}
