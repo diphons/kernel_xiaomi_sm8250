@@ -315,6 +315,7 @@ schedtune_cpu_margin_with(unsigned long util, int cpu, struct task_struct *p);
  * based on the task model parameters and gives the minimal utilization
  * required to meet deadlines.
  */
+#ifndef CONFIG_SCHED_WALT
 unsigned long schedutil_cpu_util(int cpu, unsigned long util_cfs,
 				 unsigned long *min,
 				 unsigned long *max)
@@ -389,6 +390,7 @@ unsigned long schedutil_cpu_util(int cpu, unsigned long util_cfs,
 
 	return min(scale, util);
 }
+#endif
 
 static __always_inline
 unsigned long apply_dvfs_headroom(int cpu, unsigned long util, unsigned long max_cap)
@@ -425,13 +427,17 @@ unsigned long sugov_effective_cpu_perf(int cpu, unsigned long actual,
 }
 
 #ifdef CONFIG_SCHED_WALT
-static void sugov_get_util(struct sugov_cpu *sg_cpu)
+static void sugov_get_util(struct sugov_cpu *sg_cpu, unsigned long boost)
 {
 	struct rq *rq = cpu_rq(sg_cpu->cpu);
+	unsigned long min, max, util = cpu_util_cfs(rq);
 
+	min = arch_scale_cpu_capacity(cpu_bw_dl(rq));
+	max = arch_scale_cpu_capacity(sg_cpu->cpu);
+	util = stune_util(sg_cpu->cpu, 0, &sg_cpu->walt_load);
+	util = max(util, boost);
 	sg_cpu->bw_min = cpu_bw_dl(rq);
-
-	sg_cpu->util = stune_util(sg_cpu->cpu, 0, &sg_cpu->walt_load);
+	sg_cpu->util = sugov_effective_cpu_perf(sg_cpu->cpu, util, min, max);
 }
 #else
 static void sugov_get_util(struct sugov_cpu *sg_cpu, unsigned long boost)
