@@ -5185,7 +5185,7 @@ static inline void schedule_debug(struct task_struct *prev)
 	schedstat_inc(this_rq()->sched_count);
 }
 
-static void put_prev_task_balance(struct rq *rq, struct task_struct *prev,
+static void prev_balance(struct rq *rq, struct task_struct *prev,
 				  struct rq_flags *rf)
 {
 #ifdef CONFIG_SMP
@@ -5203,8 +5203,6 @@ static void put_prev_task_balance(struct rq *rq, struct task_struct *prev,
 			break;
 	}
 #endif
-
-	put_prev_task(rq, prev);
 
 	/*
 	 * We've updated @prev and no longer need the server link, clear it.
@@ -5262,7 +5260,8 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 	}
 
 restart:
-	put_prev_task_balance(rq, prev, rf);
+	prev_balance(rq, prev, rf);
+	put_prev_task(rq, prev);
 
 	for_each_class(class) {
 		p = class->pick_next_task(rq);
