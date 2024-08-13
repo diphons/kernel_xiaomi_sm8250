@@ -5110,7 +5110,7 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 		next = rq->core_pick;
 		if (next != prev) {
 			put_prev_task(rq, prev);
-			set_next_task(rq, next);
+			set_next_task_first(rq, next);
 		}
 
 		rq->core_pick = NULL;
@@ -5294,7 +5294,7 @@ again:
 	}
 
 done:
-	set_next_task(rq, next);
+	set_next_task_first(rq, next);
 	return next;
 }
 
