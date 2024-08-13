@@ -3024,8 +3024,6 @@ static void ttwu_do_wakeup(struct rq *rq, struct task_struct *p, int wake_flags,
 		rq->idle_stamp = 0;
 	}
 #endif
-
-	p->dl_server = NULL;
 }
 
 static void
@@ -4932,14 +4930,6 @@ static void prev_balance(struct rq *rq, struct task_struct *prev,
 			break;
 	}
 #endif
-
-	/*
-	 * We've updated @prev and no longer need the server link, clear it.
-	 * Must be done before ->pick_next_task() because that can (re)set
-	 * ->dl_server.
-	 */
-	if (prev->dl_server)
-		prev->dl_server = NULL;
 }
 
 /*
@@ -4950,6 +4940,8 @@ __pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 {
 	const struct sched_class *class;
 	struct task_struct *p;
+
+	rq->dl_server = NULL;
 
 	/*
 	 * Optimization: we know that if all tasks are in the fair class we can
@@ -4970,20 +4962,6 @@ __pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 			p = pick_task_idle(rq);
 			put_prev_set_next_task(rq, prev, p);
 		}
-
-		/*
-		 * This is a normal CFS pick, but the previous could be a DL pick.
-		 * Clear it as previous is no longer picked.
-		 */
-		if (prev->dl_server)
-			prev->dl_server = NULL;
-
-		/*
-		 * This is the fast path; it cannot be a DL server pick;
-		 * therefore even if @p == @prev, ->dl_server must be NULL.
-		 */
-		if (p->dl_server)
-			p->dl_server = NULL;
 
 		return p;
 	}
@@ -5041,6 +5019,8 @@ pick_task(struct rq *rq, const struct sched_class *class, struct task_struct *ma
 {
 	struct task_struct *class_pick, *cookie_pick;
 	unsigned long cookie = rq->core->core_cookie;
+
+	rq->dl_server = NULL;
 
 	class_pick = class->pick_task(rq);
 	if (!class_pick)
@@ -5103,6 +5083,7 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 		 * another cpu during offline.
 		 */
 		rq->core_pick = NULL;
+		rq->core_dl_server = NULL;
 		return __pick_next_task(rq, prev, rf);
 	}
 
@@ -5121,7 +5102,9 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 		WRITE_ONCE(rq->core_sched_seq, rq->core->core_pick_seq);
 
 		next = rq->core_pick;
+		rq->dl_server = rq->core_dl_server;
 		rq->core_pick = NULL;
+		rq->core_dl_server = NULL;
 		goto done;
 	}
 
@@ -5163,6 +5146,7 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 
 		if (!next->core_cookie) {
 			rq->core_pick = NULL;
+			rq->core_dl_server = NULL;
 			/*
 			 * For robustness, update the min_vruntime_fi for
 			 * unconstrained picks as well.
@@ -5209,6 +5193,7 @@ again:
 				occ++;
 
 			rq_i->core_pick = p;
+			rq_i->core_dl_server = NULL;
 			if (rq_i->idle == p && rq_i->nr_running) {
 				rq->core->core_forceidle = true;
 				if (!fi_before)
@@ -5289,6 +5274,7 @@ again:
 
 		if (i == cpu) {
 			rq_i->core_pick = NULL;
+			rq_i->core_dl_server = NULL;
 			continue;
 		}
 
@@ -5297,6 +5283,7 @@ again:
 
 		if (rq_i->curr == rq_i->core_pick) {
 			rq_i->core_pick = NULL;
+			rq_i->core_dl_server = NULL;
 			continue;
 		}
 
@@ -8798,6 +8785,7 @@ void __init sched_init(void)
 #ifdef CONFIG_SCHED_CORE
 		rq->core = NULL;
 		rq->core_pick = NULL;
+		rq->core_dl_server = NULL;
 		rq->core_enabled = 0;
 		rq->core_tree = RB_ROOT;
 		rq->core_forceidle = false;
