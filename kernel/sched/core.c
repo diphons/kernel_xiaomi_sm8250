@@ -4967,8 +4967,9 @@ __pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 
 		/* Assumes fair_sched_class->next == idle_sched_class */
 		if (!p) {
+			p = pick_task_idle(rq);
 			put_prev_task(rq, prev);
-			p = pick_next_task_idle(rq);
+			set_next_task_first(rq, p);
 		}
 
 		/*
@@ -4990,12 +4991,20 @@ __pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 
 restart:
 	prev_balance(rq, prev, rf);
-	put_prev_task(rq, prev);
 
 	for_each_class(class) {
-		p = class->pick_next_task(rq);
-		if (p)
-			return p;
+		if (class->pick_next_task) {
+			p = class->pick_next_task(rq, prev);
+			if (p)
+				return p;
+		} else {
+			p = class->pick_task(rq);
+			if (p) {
+				put_prev_task(rq, prev);
+				set_next_task_first(rq, p);
+				return p;
+			}
+		}
 	}
 
 	/* The idle class should always have a runnable task: */
@@ -5124,7 +5133,6 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 	}
 
 	prev_balance(rq, prev, rf);
-	put_prev_task(rq, prev);
 
 	smt_mask = cpu_smt_mask(cpu);
 	need_sync = !!rq->core->core_cookie;
@@ -5303,6 +5311,7 @@ again:
 	}
 
 done:
+	put_prev_task(rq, prev);
 	set_next_task_first(rq, next);
 	return next;
 }
@@ -7980,7 +7989,7 @@ static struct task_struct *__pick_migrate_task(struct rq *rq)
 	struct task_struct *next;
 
 	for_each_class(class) {
-		next = class->pick_next_task(rq);
+		next = class->pick_next_task(rq, rq->curr);
 		if (next) {
 			next->sched_class->put_prev_task(rq, next);
 			return next;
