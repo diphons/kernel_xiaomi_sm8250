@@ -4914,8 +4914,8 @@ static inline void schedule_debug(struct task_struct *prev)
 	schedstat_inc(this_rq()->sched_count);
 }
 
-static void put_prev_task_balance(struct rq *rq, struct task_struct *prev,
-				  struct rq_flags *rf)
+static void prev_balance(struct rq *rq, struct task_struct *prev,
+			 struct rq_flags *rf)
 {
 #ifdef CONFIG_SMP
 	const struct sched_class *class;
@@ -4932,8 +4932,6 @@ static void put_prev_task_balance(struct rq *rq, struct task_struct *prev,
 			break;
 	}
 #endif
-
-	put_prev_task(rq, prev);
 
 	/*
 	 * We've updated @prev and no longer need the server link, clear it.
@@ -4991,7 +4989,8 @@ __pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 	}
 
 restart:
-	put_prev_task_balance(rq, prev, rf);
+	prev_balance(rq, prev, rf);
+	put_prev_task(rq, prev);
 
 	for_each_class(class) {
 		p = class->pick_next_task(rq);
@@ -5123,6 +5122,9 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 		rq->core_pick = NULL;
 		return next;
 	}
+
+	prev_balance(rq, prev, rf);
+	put_prev_task(rq, prev);
 
 	smt_mask = cpu_smt_mask(cpu);
 	need_sync = !!rq->core->core_cookie;
