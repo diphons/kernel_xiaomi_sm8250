@@ -2018,7 +2018,17 @@ struct sched_class {
 
 	void (*wakeup_preempt)(struct rq *rq, struct task_struct *p, int flags);
 
-	struct task_struct *(*pick_next_task)(struct rq *rq);
+	struct task_struct *(*pick_task)(struct rq *rq);
+	/*
+	 * Optional! When implemented pick_next_task() should be equivalent to:
+	 *
+	 *   next = pick_task();
+	 *   if (next) {
+	 *       put_prev_task(prev);
+	 *       set_next_task_first(next);
+	 *   }
+	 */
+	struct task_struct *(*pick_next_task)(struct rq *rq, struct task_struct *prev);
 
 	void (*put_prev_task)(struct rq *rq, struct task_struct *p);
 	void (*set_next_task)(struct rq *rq, struct task_struct *p, bool first);
@@ -2026,7 +2036,6 @@ struct sched_class {
 #ifdef CONFIG_SMP
 	int (*balance)(struct rq *rq, struct task_struct *prev, struct rq_flags *rf);
 	int  (*select_task_rq)(struct task_struct *p, int task_cpu, int flags);
-	struct task_struct * (*pick_task)(struct rq *rq);
 
 	void (*migrate_task_rq)(struct task_struct *p, int new_cpu);
 
@@ -2076,6 +2085,11 @@ static inline void set_next_task(struct rq *rq, struct task_struct *next)
 	next->sched_class->set_next_task(rq, next, false);
 }
 
+static inline void set_next_task_first(struct rq *rq, struct task_struct *next)
+{
+	next->sched_class->set_next_task(rq, next, true);
+}
+
 #ifdef CONFIG_SMP
 #define sched_class_highest (&stop_sched_class)
 #else
@@ -2115,7 +2129,7 @@ static inline bool sched_fair_runnable(struct rq *rq)
 }
 
 extern struct task_struct *pick_next_task_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf);
-extern struct task_struct *pick_next_task_idle(struct rq *rq);
+extern struct task_struct *pick_task_idle(struct rq *rq);
 
 #define SCA_CHECK		0x01
 #define SCA_MIGRATE_DISABLE	0x02
