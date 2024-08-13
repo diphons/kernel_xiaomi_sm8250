@@ -2450,7 +2450,7 @@ again:
 			}
 			goto again;
 		}
-		p->dl_server = dl_se;
+		rq->dl_server = dl_se;
 	} else {
 		p = dl_task_of(dl_se);
 	}
