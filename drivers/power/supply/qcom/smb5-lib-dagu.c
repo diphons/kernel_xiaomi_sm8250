@@ -912,6 +912,9 @@ int smblib_set_fastcharge_mode(struct smb_charger *chg, bool enable)
 	int rc = 0;
 	int termi = -220, batt_temp;
 	int effective_fv = 0;
+#ifdef CONFIG_D8G_SERVICE
+	int start_limit;
+#endif
 
 	if (!chg->bms_psy)
 		return 0;
@@ -934,9 +937,20 @@ int smblib_set_fastcharge_mode(struct smb_charger *chg, bool enable)
 		smblib_err(chg, "Couldn't get bms capacity:%d\n", rc);
 		return rc;
 	}
+#ifdef CONFIG_D8G_SERVICE
+	if (dynamic_charger)
+		start_limit = 99;
+	else
+		start_limit = 95;
+
+	if (enable && pval.intval >= start_limit) {
+		smblib_dbg(chg, PR_MISC, "soc:%d is more than %d"
+				"do not setfastcharge mode\n", pval.intval, start_limit);
+#else
 	if (enable && pval.intval >= 95) {
 		smblib_dbg(chg, PR_MISC, "soc:%d is more than 95"
 				"do not setfastcharge mode\n", pval.intval);
+#endif
 		enable = false;
 	}
 
