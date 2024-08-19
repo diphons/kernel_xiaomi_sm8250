@@ -30,6 +30,9 @@
 #include <linux/suspend.h>
 #include <linux/syscore_ops.h>
 #include <linux/tick.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include <linux/sched/topology.h>
 #include <linux/sched/sysctl.h>
 
@@ -583,7 +586,10 @@ static ssize_t store_boost(struct kobject *kobj, struct kobj_attribute *attr,
 }
 define_one_global_rw(boost);
 
-static struct cpufreq_governor *find_governor(const char *str_governor)
+#ifndef CONFIG_D8G_SERVICE
+static
+#endif
+struct cpufreq_governor *find_governor(const char *str_governor)
 {
 	struct cpufreq_governor *t;
 
@@ -764,9 +770,15 @@ static ssize_t show_scaling_governor(struct cpufreq_policy *policy, char *buf)
 		return sprintf(buf, "powersave\n");
 	else if (policy->policy == CPUFREQ_POLICY_PERFORMANCE)
 		return sprintf(buf, "performance\n");
-	else if (policy->governor)
-		return scnprintf(buf, CPUFREQ_NAME_PLEN, "%s\n",
-				policy->governor->name);
+	else if (policy->governor) {
+#ifdef CONFIG_D8G_SERVICE
+		if (ongame)
+			return sprintf(buf, game_ai_gov_main);
+		else
+#endif
+			return scnprintf(buf, CPUFREQ_NAME_PLEN, "%s\n",
+					policy->governor->name);
+	}
 	return -EINVAL;
 }
 
@@ -779,6 +791,11 @@ static ssize_t store_scaling_governor(struct cpufreq_policy *policy,
 	int ret;
 	char	str_governor[16];
 	struct cpufreq_policy new_policy;
+
+#ifdef CONFIG_D8G_SERVICE
+	if (ongame)
+		buf = game_ai_gov_main;
+#endif
 
 	memcpy(&new_policy, policy, sizeof(*policy));
 
