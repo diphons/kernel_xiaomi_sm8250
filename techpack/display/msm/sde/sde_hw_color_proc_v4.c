@@ -7,7 +7,17 @@
 #include <drm/msm_drm_pp.h>
 #include "sde_hw_color_proc_common_v4.h"
 #include "sde_hw_color_proc_v4.h"
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
 
+unsigned short __read_mostly kcal_red = 256;
+unsigned short __read_mostly kcal_green = 256;
+unsigned short __read_mostly kcal_blue = 256;
+unsigned short __read_mostly kcal_hue = 0;
+unsigned short __read_mostly kcal_sat = 255;
+unsigned short __read_mostly kcal_val = 255;
+unsigned short __read_mostly kcal_cont = 255;
+#else
 static unsigned short kcal_red = 256;
 static unsigned short kcal_green = 256;
 static unsigned short kcal_blue = 256;
@@ -15,6 +25,7 @@ static unsigned short kcal_hue = 0;
 static unsigned short kcal_sat = 255;
 static unsigned short kcal_val = 255;
 static unsigned short kcal_cont = 255;
+#endif
 
 module_param(kcal_red, short, 0644);
 module_param(kcal_green, short, 0644);
