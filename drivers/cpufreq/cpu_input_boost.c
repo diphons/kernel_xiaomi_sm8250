@@ -13,6 +13,9 @@
 #include <drm/drm_notifier_mi.h>
 #include <linux/slab.h>
 #include <linux/version.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 /* The sched_param struct is located elsewhere in newer kernels */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
@@ -172,6 +175,11 @@ static void __cpu_input_boost_kick(struct boost_drv *b)
 	if (!input_boost_duration)
 		return;
 
+#ifdef CONFIG_D8G_SERVICE
+	if (!gamer || oprofile == 4 || oplus_panel_status != 2)
+		return;
+#endif
+
 	set_bit(INPUT_BOOST, &b->state);
 	if (!mod_delayed_work(system_unbound_wq, &b->input_unboost,
 			      msecs_to_jiffies(input_boost_duration))) {
@@ -194,6 +202,11 @@ static void __cpu_input_boost_kick_max(struct boost_drv *b,
 
 	if (test_bit(SCREEN_OFF, &b->state))
 		return;
+
+#ifdef CONFIG_D8G_SERVICE
+	if (!gamer || oprofile == 4 || oplus_panel_status != 2)
+		return;
+#endif
 
 	boost_jiffies = msecs_to_jiffies(duration_ms);
 	do {
