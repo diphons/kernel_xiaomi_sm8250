@@ -68,6 +68,9 @@
 #include <linux/pkg_stat.h>
 #endif
 #include <linux/binfmts.h>
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+#include <misc/d8g_helper.h>
+#endif
 
 DEFINE_STATIC_KEY_FALSE(cpusets_pre_enable_key);
 DEFINE_STATIC_KEY_FALSE(cpusets_enabled_key);
@@ -141,6 +144,12 @@ struct cpuset {
 	/* for custom sched domain */
 	int relax_domain_level;
 };
+
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+char __read_mostly *cpus_val;
+static struct cpuset *ongame_cpuset;
+static struct work_struct dynamic_cpuset_work;
+#endif
 
 #ifdef CONFIG_CPUSET_ASSIST
 struct cs_target {
@@ -2064,6 +2073,9 @@ static int cpuset_css_online(struct cgroup_subsys_state *css)
 	struct cpuset *parent = parent_cs(cs);
 	struct cpuset *tmp_cs;
 	struct cgroup_subsys_state *pos_css;
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+	char name_buf[NAME_MAX + 1];
+#endif
 
 	if (!parent)
 		return 0;
@@ -2119,6 +2131,11 @@ static int cpuset_css_online(struct cgroup_subsys_state *css)
 	cpumask_copy(cs->effective_cpus, parent->cpus_allowed);
 	spin_unlock_irq(&callback_lock);
 out_unlock:
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+	cgroup_name(css->cgroup, name_buf, sizeof(name_buf));
+	if (!strcmp(name_buf, "top-app"))
+		ongame_cpuset = cs;
+#endif
 	mutex_unlock(&cpuset_mutex);
 	put_online_cpus();
 	return 0;
@@ -2211,6 +2228,10 @@ struct cgroup_subsys cpuset_cgrp_subsys = {
 	.legacy_cftypes	= files,
 	.early_init	= true,
 };
+
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+static void dynamic_cpuset_worker(struct work_struct *work);
+#endif
 
 /**
  * cpuset_init - initialize cpusets at system boot
@@ -2516,6 +2537,10 @@ void __init cpuset_init_smp(void)
 
 	cpuset_migrate_mm_wq = alloc_ordered_workqueue("cpuset_migrate_mm", 0);
 	BUG_ON(!cpuset_migrate_mm_wq);
+
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+	INIT_WORK(&dynamic_cpuset_work, dynamic_cpuset_worker);
+#endif
 }
 
 /**
@@ -2891,3 +2916,44 @@ void cpuset_task_status_allowed(struct seq_file *m, struct task_struct *task)
 	seq_printf(m, "Mems_allowed_list:\t%*pbl\n",
 		   nodemask_pr_args(&task->mems_allowed));
 }
+
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+static void dynamic_cpuset_worker(struct work_struct *work)
+{
+	struct cpuset *cs = ongame_cpuset;
+	struct cpuset *trialcs;
+
+	if(!cs)
+		return;
+
+	css_get(&cs->css);
+	flush_work(&cpuset_hotplug_work);
+
+	get_online_cpus();
+	mutex_lock(&cpuset_mutex);
+	if (!is_cpuset_online(cs))
+		goto out_unlock;
+
+	trialcs = alloc_trial_cpuset(cs);
+	if (!trialcs)
+		goto out_unlock;
+
+	if (cpus_val == NULL)
+		cpus_val = CONFIG_CPUSET_TOP_APP;
+
+	update_cpumask(cs, trialcs, cpus_val);
+
+	free_trial_cpuset(trialcs);
+out_unlock:
+	mutex_unlock(&cpuset_mutex);
+	put_online_cpus();
+	css_put(&cs->css);
+	flush_workqueue(cpuset_migrate_mm_wq);
+}
+
+void ongame_cpuset_main(char *value)
+{
+	cpus_val = value;
+	schedule_work(&dynamic_cpuset_work);
+}
+#endif
