@@ -29,6 +29,9 @@
 #include <linux/power_supply.h>
 #include <linux/vmalloc.h>
 #include <linux/pm_qos.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include <sound/core.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
@@ -751,6 +754,45 @@ static int aw86907_haptic_set_bst_peak_cur(struct aw86907 *aw86907,
 	return 0;
 }
 
+#ifndef CONFIG_D8G_SERVICE
+static int haptic_gain = 80;
+module_param(haptic_gain, int, 0644);
+int haptic_gain_show = 0;
+module_param(haptic_gain_show, int, 0444);
+#endif
+static unsigned char haptic_set_level(int gain)
+{
+    int val = 128;
+	int max_val = 160;
+
+	/*
+	* Max level default is 255
+	* Guard max level of haptic
+	*/
+    if (max_val > 255)
+        max_val = 255;
+
+	// Set gain to use max_val
+	if (gain < max_val || gain > max_val)
+		gain = max_val;
+
+	// haptic_gain in percent
+	if (haptic_gain > 100 )
+		haptic_gain = 100;
+	if (haptic_gain < 20 )
+		haptic_gain = 20;
+
+	val = haptic_gain * gain / 100;
+
+    if (val > max_val)
+        val = max_val;
+	// don't change value on min level
+    if (val < 30)
+        val = 30;
+
+    return val;
+}
+
 static int aw86907_haptic_set_gain(struct aw86907 *aw86907, unsigned char gain)
 {
 	unsigned char temp_gain = 0;
@@ -764,9 +806,11 @@ static int aw86907_haptic_set_gain(struct aw86907 *aw86907, unsigned char gain)
 			    128 * AW_VBAT_REFER / AW_VBAT_MIN;
 			aw_info("%s gain limit=%d\n", __func__, temp_gain);
 		}
-		aw86907_i2c_write(aw86907, AW86907_REG_PLAYCFG2, temp_gain);
+		aw86907_i2c_write(aw86907, AW86907_REG_PLAYCFG2, haptic_set_level(temp_gain));
+		haptic_gain_show = haptic_set_level(temp_gain);
 	} else {
-		aw86907_i2c_write(aw86907, AW86907_REG_PLAYCFG2, gain);
+		aw86907_i2c_write(aw86907, AW86907_REG_PLAYCFG2, haptic_set_level(gain));
+		haptic_gain_show = haptic_set_level(gain);
 	}
 	return 0;
 }
