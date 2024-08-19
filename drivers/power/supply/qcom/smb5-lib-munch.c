@@ -14,6 +14,9 @@
 #include <linux/pmic-voter.h>
 #include <linux/of_batterydata.h>
 #include <linux/ktime.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include "smb5-lib-munch.h"
 #include "smb5-reg.h"
 #include "schgm-flash.h"
@@ -33,14 +36,7 @@
 		__func__, ##__VA_ARGS__)	\
 
 #define smblib_dbg(chg, reason, fmt, ...)			\
-	do {							\
-		if (*chg->debug_mask & (reason))		\
-			pr_err("%s: %s: " fmt, chg->name,	\
-				__func__, ##__VA_ARGS__);	\
-		else						\
-			pr_debug("%s: %s: " fmt, chg->name,	\
-				__func__, ##__VA_ARGS__);	\
-	} while (0)
+		do { } while (0)
 
 #define typec_rp_med_high(chg, typec_mode)			\
 	((typec_mode == POWER_SUPPLY_TYPEC_SOURCE_MEDIUM	\
@@ -3501,6 +3497,11 @@ static int smblib_therm_charging(struct smb_charger *chg)
 	int thermal_icl_ua = 0;
 	int thermal_fcc_ua = 0;
 	int rc;
+
+#ifdef CONFIG_D8G_SERVICE
+	if (skip_thermal)
+		chg->system_temp_level = 0;
+#endif
 
 	if (chg->thermal_remove)
 			chg->system_temp_level = 0;
