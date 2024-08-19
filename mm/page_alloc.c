@@ -70,6 +70,13 @@
 #include <linux/khugepaged.h>
 #include <linux/psi.h>
 #include <linux/delayacct.h>
+#ifdef CONFIG_CPU_INPUT_BOOST
+#include <linux/cpu_input_boost.h>
+#endif
+#include <linux/devfreq_boost.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #include <asm/sections.h>
 #include <asm/tlbflush.h>
@@ -4824,6 +4831,27 @@ retry:
 	/* Do not loop if specifically requested */
 	if (gfp_mask & __GFP_NORETRY)
 		goto nopage;
+
+#ifdef CONFIG_D8G_SERVICE
+	/* Boost when memory is low so allocation latency doesn't get too bad */
+	if (gamer && oplus_panel_status == 2) {
+		if (oprofile != 4) {
+			if (oprofile == 0) {
+#ifdef CONFIG_CPU_INPUT_BOOST
+				cpu_input_boost_kick_max(50);
+#endif
+				devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 50);
+			} else {
+#endif
+#ifdef CONFIG_CPU_INPUT_BOOST
+				cpu_input_boost_kick_max(100);
+#endif
+				devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 100);
+#ifdef CONFIG_D8G_SERVICE
+			}
+		}
+	}
+#endif
 
 	/*
 	 * Do not retry costly high order allocations unless they are
