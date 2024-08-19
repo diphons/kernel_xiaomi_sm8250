@@ -31,6 +31,9 @@
 #include <linux/ima.h>
 #include <linux/dnotify.h>
 #include <linux/compat.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #include "internal.h"
 
@@ -1108,6 +1111,11 @@ long do_sys_open(int dfd, const char __user *filename, int flags, umode_t mode)
 	tmp = getname(filename);
 	if (IS_ERR(tmp))
 		return PTR_ERR(tmp);
+
+#ifdef CONFIG_D8G_SERVICE
+	if (unlikely(game_ai_check(tmp->name)))
+		game_ai();
+#endif
 
 	fd = get_unused_fd_flags(flags);
 	if (fd >= 0) {
