@@ -17,6 +17,9 @@
 #include <trace/events/power.h>
 #include <linux/sched/sysctl.h>
 #include <linux/binfmts.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 struct sugov_tunables {
 	struct gov_attr_set	attr_set;
@@ -1321,18 +1324,45 @@ static int sugov_init(struct cpufreq_policy *policy)
 	}
 
 	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask)) {
-		tunables->up_rate_limit_us = 500;
-		tunables->down_rate_limit_us = 1000;
+#ifdef CONFIG_D8G_SERVICE
+		if (oprofile == 0 || oprofile == 4) {
+			tunables->up_rate_limit_us = 500;
+			tunables->down_rate_limit_us = 1000;
+		} else {
+#endif
+			tunables->up_rate_limit_us = 5000;
+			tunables->down_rate_limit_us = 5000;
+#ifdef CONFIG_D8G_SERVICE
+		}
+#endif
 	}
 
 	if (cpumask_test_cpu(policy->cpu, cpu_perf_mask)) {
-		tunables->up_rate_limit_us = 500;
-		tunables->down_rate_limit_us = 1000;
+#ifdef CONFIG_D8G_SERVICE
+		if (oprofile == 0 || oprofile == 4) {
+			tunables->up_rate_limit_us = 500;
+			tunables->down_rate_limit_us = 1000;
+		} else {
+#endif
+			tunables->up_rate_limit_us = 16000;
+			tunables->down_rate_limit_us = 4000;
+#ifdef CONFIG_D8G_SERVICE
+		}
+#endif
 	}
 
 	if (cpumask_test_cpu(policy->cpu, cpu_prime_mask)) {
-		tunables->up_rate_limit_us = 500;
-		tunables->down_rate_limit_us = 1000;
+#ifdef CONFIG_D8G_SERVICE
+		if (oprofile == 0 || oprofile == 4) {
+			tunables->up_rate_limit_us = 500;
+			tunables->down_rate_limit_us = 1000;
+		} else {
+#endif
+			tunables->up_rate_limit_us = 16000;
+			tunables->down_rate_limit_us = 4000;
+#ifdef CONFIG_D8G_SERVICE
+		}
+#endif
 	}
 
 	policy->governor_data = sg_policy;
