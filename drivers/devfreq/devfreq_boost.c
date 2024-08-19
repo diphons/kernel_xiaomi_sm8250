@@ -12,6 +12,9 @@
 #include <linux/slab.h>
 #include <uapi/linux/sched/types.h>
 #include <drm/drm_panel.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 enum {
 	SCREEN_OFF,
@@ -56,12 +59,36 @@ static struct df_boost_drv df_boost_drv_g __read_mostly = {
 
 static void __devfreq_boost_kick(struct boost_dev *b)
 {
+#ifdef CONFIG_D8G_SERVICE
+	unsigned int period = CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS;
+#endif
 	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state))
 		return;
 
+#ifdef CONFIG_D8G_SERVICE
+	if (!gamer || oprofile == 4 || oplus_panel_status != 2)
+		return;
+
+	switch (oprofile) {
+	case 1:
+		period = CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS * 2;
+		break;
+	case 2:
+		period = CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS * 1.5;
+		break;
+	case 3:
+		period = CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS * 2;
+		break;
+	}
+#endif
+
 	set_bit(INPUT_BOOST, &b->state);
 	if (!mod_delayed_work(system_unbound_wq, &b->input_unboost,
+#ifdef CONFIG_D8G_SERVICE
+		msecs_to_jiffies(period))) {
+#else
 		msecs_to_jiffies(CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS))) {
+#endif
 		/* Set the bit again in case we raced with the unboost worker */
 		set_bit(INPUT_BOOST, &b->state);
 		wake_up(&b->boost_waitq);
@@ -82,6 +109,11 @@ static void __devfreq_boost_kick_max(struct boost_dev *b,
 
 	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state))
 		return;
+
+#ifdef CONFIG_D8G_SERVICE
+	if (!gamer || oprofile == 4 || oplus_panel_status != 2)
+		return;
+#endif
 
 	boost_jiffies = msecs_to_jiffies(duration_ms);
 	do {
