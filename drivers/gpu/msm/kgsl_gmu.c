@@ -13,6 +13,9 @@
 #include <linux/of_platform.h>
 #include <linux/regulator/consumer.h>
 #include <linux/slab.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include <soc/qcom/cmd-db.h>
 
 #include "adreno.h"
@@ -1418,14 +1421,30 @@ static int gmu_enable_clks(struct kgsl_device *device)
 {
 	struct gmu_device *gmu = KGSL_GMU_DEVICE(device);
 	int ret, j = 0;
+#ifdef CONFIG_D8G_SERVICE
+	int gmu_set;
+#endif
 
 	if (IS_ERR_OR_NULL(gmu->clks[0]))
 		return -EINVAL;
 
+#ifdef CONFIG_D8G_SERVICE
+	if (oprofile != 4 && oprofile != 0 && oplus_panel_status == 2)
+		gmu_set = GMU_FREQUENCY_OC;
+	else
+		gmu_set = GMU_FREQUENCY;
+
+	ret = clk_set_rate(gmu->clks[0], gmu_set);
+#else
 	ret = clk_set_rate(gmu->clks[0], GMU_FREQUENCY);
+#endif
 	if (ret) {
 		dev_err(&gmu->pdev->dev, "fail to set default GMU clk freq %d\n",
+#ifdef CONFIG_D8G_SERVICE
+				gmu_set);
+#else
 				GMU_FREQUENCY);
+#endif
 		return ret;
 	}
 
