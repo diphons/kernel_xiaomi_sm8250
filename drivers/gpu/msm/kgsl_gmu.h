@@ -10,6 +10,9 @@
 
 #define GMU_PWR_LEVELS  2
 #define GMU_FREQUENCY   200000000
+#ifdef CONFIG_D8G_SERVICE
+#define GMU_FREQUENCY_OC   500000000
+#endif
 #define MAX_GMUFW_SIZE	0x8000	/* in bytes */
 
 #define BWMEM_SIZE	(12 + (4 * NUM_BW_LEVELS))	/*in bytes*/
