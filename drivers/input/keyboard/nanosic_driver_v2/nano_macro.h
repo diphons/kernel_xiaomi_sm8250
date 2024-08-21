@@ -195,8 +195,8 @@ static inline void rawdata_show(const char* descp,char* buf , size_t size)
 	int i=0;
 	char display[300]={0};
 
-    if(!descp)
-        return;
+	if(!descp)
+		return;
 
 	strcat(display,"[[[");
 	for (i = 0; i < (size>15?15:size); i++){
