@@ -23,6 +23,9 @@
 #include <linux/platform_device.h>
 #include <linux/poll.h>
 #include <linux/pmic-voter.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #include "wireless_bq_dc_charge.h"
 
@@ -1219,6 +1222,12 @@ static int wldc_pm_fc2_charge_algo(struct wireless_dc_device_info *pm)
 	pm->is_temp_out_fc2_range = wl_disable_cp_by_jeita_status(pm);
 	pr_info("wl is_temp_out_fc2_range:%d\n", pm->is_temp_out_fc2_range);
 
+#ifdef CONFIG_D8G_SERVICE
+	/* Dynamic charging */
+	if (oplus_panel_status != 2 && dynamic_charger)
+		dynamic_charger_main(thermal_level);
+#endif
+
 	if ( thermal_level >= MAX_THERMAL_LEVEL || pm->is_temp_out_fc2_range ) {
 		pr_info("cp.is_temp_out_fc2_range:%d thermal_level:%d\n",
 			pm->is_temp_out_fc2_range, thermal_level);
@@ -1569,6 +1578,12 @@ static int wldc_pm_sm(struct wireless_dc_device_info *pm)
 		wldc_pm_move_state(pm, CP_PM_STATE_ENTRY);
 		break;
 	}
+
+#ifdef CONFIG_D8G_SERVICE
+	/* Dynamic charging */
+	if (oplus_panel_status != 2 && dynamic_charger)
+		dynamic_charger_main(thermal_level);
+#endif
 
 	return rc;
 }

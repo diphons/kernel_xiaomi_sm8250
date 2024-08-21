@@ -24,6 +24,9 @@
 #include <linux/platform_device.h>
 #include <linux/poll.h>
 #include <linux/pmic-voter.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #include "pd_policy_manager.h"
 
@@ -1110,6 +1113,12 @@ static int usbpd_pm_fc2_charge_algo(struct usbpd_pm *pdpm)
 	pdpm->is_temp_out_fc2_range = pd_disable_cp_by_jeita_status(pdpm);
 	/*pr_info("is_temp_out_fc2_range:%d\n", pdpm->is_temp_out_fc2_range);*/
 
+#ifdef CONFIG_D8G_SERVICE
+	/* Dynamic charging */
+	if (oplus_panel_status != 2 && dynamic_charger)
+		dynamic_charger_main(thermal_level);
+#endif
+
 	if (pdpm->pd_active == POWER_SUPPLY_PPS_NON_VERIFIED &&
 		pdpm->cp.ibat_curr > MAX_UNSUPPORT_PPS_CURRENT_MA) {
 		pdpm->unsupport_pps_ta_check_count++;
@@ -1528,6 +1537,12 @@ static int usbpd_pm_sm(struct usbpd_pm *pdpm)
 		usbpd_pm_move_state(pdpm, PD_PM_STATE_ENTRY);
 		break;
 	}
+
+#ifdef CONFIG_D8G_SERVICE
+	/* Dynamic charging */
+	if (oplus_panel_status != 2 && dynamic_charger)
+		dynamic_charger_main(thermal_level);
+#endif
 
 	return rc;
 }
