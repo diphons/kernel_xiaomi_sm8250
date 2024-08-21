@@ -43,15 +43,23 @@ EXPORT_SYMBOL_GPL(init_uts_ns);
 
 /* FIXED STRINGS! Don't touch! */
 const char linux_banner[] =
+#ifdef CONFIG_D8G_SERVICE
+	"Linux version " UTS_RELEASE " (" LINUX_COMPILE_BY ") (" LINUX_COMPILER ") " UTS_VERSION "\n";
+#else
 	"Linux version " UTS_RELEASE " (" LINUX_COMPILE_BY "@"
 	LINUX_COMPILE_HOST ") (" LINUX_COMPILER ") " UTS_VERSION "\n";
+#endif
 
 const char *linux_banner_ptr = linux_banner;
 EXPORT_SYMBOL_GPL(linux_banner_ptr);
 
 const char linux_proc_banner[] =
 	"%s version %s"
+#ifdef CONFIG_D8G_SERVICE
+	" (" LINUX_COMPILE_BY ")"
+#else
 	" (" LINUX_COMPILE_BY "@" LINUX_COMPILE_HOST ")"
+#endif
 	" (" LINUX_COMPILER ") %s\n";
 
 BUILD_SALT;
