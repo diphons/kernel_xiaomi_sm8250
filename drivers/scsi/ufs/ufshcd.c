@@ -2243,11 +2243,11 @@ start:
 			}
 
 			ufs_spin_unlock_irqrestore(hba->host->host_lock, flags);
-			if (!oops_in_progress)
+			if (!oops_in_progress) {
 				flush_result = flush_work(&hba->clk_gating.ungate_work);
 				if (hba->clk_gating.is_suspended && !flush_result)
 					goto out;
-			else
+			} else
 				ufshcd_panic_ungate_work(hba);
 
 			ufs_spin_lock_irqsave(hba->host->host_lock, flags);
