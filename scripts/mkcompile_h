@@ -85,6 +85,7 @@ UTS_TRUNCATE="cut -b -$UTS_LEN"
    LD_VERSION="$KBUILD_LINKER_STRING"
  fi
   printf '#define LINUX_COMPILER "%s"\n' "$CC_VERSION, $LD_VERSION"
+  printf '#define LAST_COMMIT "%s"\n' "$KBUILD_LAST_COMMIT"
 ) > .tmpcompile
 
 # Only replace the real compile.h if the new one is different,
