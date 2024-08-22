@@ -210,6 +210,10 @@ struct backing_dev_info {
 enum {
 	BLK_RW_ASYNC	= 0,
 	BLK_RW_SYNC	= 1,
+	// Add for ioqueue
+	BLK_RW_UX	= 2,
+	BLK_RW_FG	= 3,
+	BLK_RW_BG	= 4,
 };
 
 void clear_wb_congested(struct bdi_writeback_congested *congested, int sync);
