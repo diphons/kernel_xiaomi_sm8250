@@ -23,6 +23,7 @@
 #include <net/genetlink.h>
 #include <linux/suspend.h>
 #include <linux/cpu_cooling.h>
+#include <linux/power_supply.h>
 #ifdef CONFIG_D8G_SERVICE
 #include <misc/d8g_helper.h>
 #endif
@@ -70,6 +71,13 @@ struct screen_monitor {
 
 struct screen_monitor sm;
 #endif
+
+struct usb_monitor {
+	struct notifier_block psy_notifier;
+	int usb_online;
+};
+
+struct usb_monitor usb_state;
 
 static struct device thermal_message_dev;
 #ifdef CONFIG_D8G_SERVICE
@@ -1724,6 +1732,16 @@ static DEVICE_ATTR(screen_state, 0644,
 #endif
 
 static ssize_t
+thermal_usb_online_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%d\n", usb_state.usb_online);
+}
+
+static DEVICE_ATTR(usb_online, 0444,
+		thermal_usb_online_show, NULL);
+
+static ssize_t
 thermal_sconfig_show(struct device *dev,
 				      struct device_attribute *attr, char *buf)
 {
@@ -1893,6 +1911,10 @@ static int create_thermal_message_node(void)
 		if (ret < 0)
 			pr_warn("Thermal: create batt message node failed\n");
 #endif
+		ret = sysfs_create_file(&thermal_message_dev.kobj, &dev_attr_usb_online.attr);
+		if (ret < 0)
+			pr_warn("Thermal: create usb online node failed\n");
+
 		ret = sysfs_create_file(&thermal_message_dev.kobj, &dev_attr_sconfig.attr);
 		if (ret < 0)
 			pr_warn("Thermal: create sconfig node failed\n");
@@ -1936,6 +1958,7 @@ static void destroy_thermal_message_node(void)
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_temp_state.attr);
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_boost.attr);
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_sconfig.attr);
+	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_usb_online.attr);
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_ambient_sensor_temp.attr);
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_ambient_sensor.attr);
 #ifdef CONFIG_DRM
@@ -1992,6 +2015,35 @@ static int screen_state_for_thermal_callback(struct notifier_block *nb,
 }
 #endif
 
+static int usb_online_for_thermal_callback(struct notifier_block *nb,
+		unsigned long val, void *data)
+{
+	static struct power_supply *usb_psy;
+	struct power_supply *psy = data;
+	union power_supply_propval ret = {0,};
+	int err = 0;
+
+	if (strcmp(psy->desc->name, "usb"))
+		return NOTIFY_OK;
+
+	if (!usb_psy)
+		usb_psy = power_supply_get_by_name("usb");
+
+	if (usb_psy) {
+		err = power_supply_get_property(usb_psy,
+				POWER_SUPPLY_PROP_ONLINE, &ret);
+		if (err) {
+			pr_err("usb online read error:%d\n",err);
+			return err;
+		}
+		usb_state.usb_online = ret.intval;
+
+		sysfs_notify(&thermal_message_dev.kobj, NULL, "usb_online");
+	}
+
+	return NOTIFY_OK;
+}
+
 static int __init thermal_init(void)
 {
 	int result;
@@ -2038,6 +2090,14 @@ static int __init thermal_init(void)
 		pr_warn("Thermal: register screen state callback failed\n");
 	}
 #endif
+
+	usb_state.psy_notifier.notifier_call = usb_online_for_thermal_callback;
+	result = power_supply_reg_notifier(&usb_state.psy_notifier);
+	if (result < 0) {
+		pr_err("usb online notifier registration error. defer. err:%d\n",
+			result);
+		result = -EPROBE_DEFER;
+	}
 
 	return 0;
 
