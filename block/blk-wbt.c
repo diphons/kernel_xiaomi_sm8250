@@ -182,7 +182,11 @@ static void __wbt_done(struct rq_qos *rqos, enum wbt_flags wb_acct)
  * Called on completion of a request. Note that it's also called when
  * a request is merged, when the request gets freed.
  */
+#ifdef CONFIG_OPLUS_FEATURE_UXIO_FIRST
+static void wbt_done(struct rq_qos *rqos, struct request *rq, bool fgux)
+#else
 static void wbt_done(struct rq_qos *rqos, struct request *rq)
+#endif
 {
 	struct rq_wb *rwb = RQWB(rqos);
 
@@ -192,7 +196,11 @@ static void wbt_done(struct rq_qos *rqos, struct request *rq)
 			rwb->sync_cookie = NULL;
 		}
 
+#ifdef CONFIG_OPLUS_FEATURE_UXIO_FIRST
+		if (wbt_is_read(rq) || fgux)
+#else
 		if (wbt_is_read(rq))
+#endif
 			wb_timestamp(rwb, &rwb->last_comp);
 	} else {
 		WARN_ON_ONCE(rq == rwb->sync_cookie);
