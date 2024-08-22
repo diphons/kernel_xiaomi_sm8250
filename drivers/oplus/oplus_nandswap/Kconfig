@@ -1,0 +1,13 @@
+config NANDSWAP
+	bool "nandswap feature"
+	depends on OPLUS
+	default n
+	help
+	 nandswap feature
+
+config NANDSWAP_DEBUG
+	bool "nandswap debug"
+	depends on F2FS_FS
+	default n
+	help
+	 nandswap debug
