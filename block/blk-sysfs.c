@@ -394,6 +394,46 @@ static ssize_t queue_poll_delay_store(struct request_queue *q, const char *page,
 	return count;
 }
 
+#ifdef CONFIG_OPLUS_FEATURE_UXIO_FIRST
+static ssize_t queue_bg_max_depth_show(struct request_queue *q, char *page)
+{
+	ssize_t ret;
+
+	if (!q->queue_tags)
+		return -EINVAL;
+
+	ret = sprintf(page, "%d\n", q->queue_tags->bg_max_depth);
+
+	return ret;
+}
+
+static ssize_t queue_bg_max_depth_store(struct request_queue *q,
+					const char *page, size_t count)
+{
+	unsigned long val;
+	int ret;
+
+	if (!q->queue_tags)
+		return -EINVAL;
+
+	ret = queue_var_store(&val, page, count);
+	if (ret < 0)
+		return ret;
+
+	if (val > q->queue_tags->max_depth)
+		return -EINVAL;
+
+	q->queue_tags->bg_max_depth = val;
+	return (ssize_t)count;
+}
+
+static struct queue_sysfs_entry queue_bg_max_depth_entry = {
+	.attr = {.name = "bg_max_depth", .mode = S_IRUGO | S_IWUSR },
+	.show = queue_bg_max_depth_show,
+	.store = queue_bg_max_depth_store,
+};
+#endif
+
 static ssize_t queue_poll_show(struct request_queue *q, char *page)
 {
 	return queue_var_show(test_bit(QUEUE_FLAG_POLL, &q->queue_flags), page);
@@ -730,6 +770,9 @@ static struct attribute *default_attrs[] = {
 	&queue_nomerges_entry.attr,
 	&queue_rq_affinity_entry.attr,
 	&queue_iostats_entry.attr,
+#ifdef CONFIG_OPLUS_FEATURE_UXIO_FIRST
+	&queue_bg_max_depth_entry.attr,
+#endif
 	&queue_random_entry.attr,
 	&queue_poll_entry.attr,
 	&queue_wc_entry.attr,
