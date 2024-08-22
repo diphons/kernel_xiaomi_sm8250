@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2018-2020 Oplus. All rights reserved.
+
+config OPLUS
+	tristate "config oplus drivers info for kernel"
+	default y
+	help
+	  define this config to support oplus drivers
+
+config OPLUS_SUBSYS_SLEEP_MONITOR
+	tristate "monitor Qualcomm subsystem sleep"
+	depends on OPLUS
+	default y
+	help
+	  This selects to get sleep info for Qualcomm subsystem
+
+config OPLUS_WAKELOCK_PROFILER 
+	tristate "config oplus wakelock profiler"
+	depends on OPLUS
+	default y
+	help
+	  Select this config to enable oplus wakelock profiler
+
+source "drivers/oplus/oplus_nandswap/Kconfig"
+source "drivers/oplus/uxio_first/Kconfig"
