@@ -80,6 +80,10 @@
 #include <linux/static_key.h>
 #include <net/busy_poll.h>
 
+#ifdef CONFIG_OPLUS
+#include <oplus/oplus_nwpower.h>
+#endif /* CONFIG_OPLUS */
+
 int sysctl_tcp_max_orphans __read_mostly = NR_FILE;
 
 #define FLAG_DATA		0x01 /* Incoming frame contained data.		*/
@@ -4849,6 +4853,10 @@ queue_and_out:
 
 	if (!after(TCP_SKB_CB(skb)->end_seq, tp->rcv_nxt)) {
 		/* A retransmit, 2nd most common case.  Force an immediate ack. */
+#ifdef CONFIG_OPLUS
+		oplus_match_tcp_input_retrans(sk);
+#endif /* CONFIG_OPLUS */
+
 		NET_INC_STATS(sock_net(sk), LINUX_MIB_DELAYEDACKLOST);
 		tcp_dsack_set(sk, TCP_SKB_CB(skb)->seq, TCP_SKB_CB(skb)->end_seq);
 

@@ -43,7 +43,15 @@
 
 #include <linux/syscore_ops.h>
 
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
+#include <oplus/oplus_wakelock_profiler.h>
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
+
 #include "irq-gic-common.h"
+
+#ifdef CONFIG_OPLUS
+#include <oplus/oplus_nwpower.h>
+#endif /* OPLUS_DRIVERS */
 
 struct redist_region {
 	void __iomem		*redist_base;
@@ -69,6 +77,9 @@ static DEFINE_STATIC_KEY_TRUE(supports_deactivate_key);
 
 static struct gic_kvm_info gic_v3_kvm_info;
 static DEFINE_PER_CPU(bool, has_rss);
+#ifdef CONFIG_OPLUS
+extern int is_first_ipcc_msg;
+#endif
 
 #define MPIDR_RS(mpidr)			(((mpidr) & 0xF0UL) >> 4)
 #define gic_data_rdist()		(this_cpu_ptr(gic_data.rdists.rdist))
@@ -384,6 +395,10 @@ static void gic_show_resume_irq(struct gic_chip_data *gic)
 	if (!msm_show_resume_irq_mask)
 		return;
 
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
+	wakeup_reasons_statics(IRQ_NAME_WAKE_SUM, WS_CNT_SUM);
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
+
 	for (i = 0; i * 32 < gic->irq_nr; i++) {
 		enabled = readl_relaxed(base + GICD_ICENABLER + i * 4);
 		pending[i] = readl_relaxed(base + GICD_ISPENDR + i * 4);
@@ -403,6 +418,29 @@ static void gic_show_resume_irq(struct gic_chip_data *gic)
 			name = desc->action->name;
 
 		pr_warn("%s: %d triggered %s\n", __func__, irq, name);
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
+		do {
+			int platform_id = get_cached_platform_id();
+			if (platform_id == KONA) {
+				if (irq >= 154 && irq <= 185) { /*pcie2 is modem*/
+					name = IRQ_NAME_MODEM_QMI;
+					oplus_match_modem_wakeup();
+				} else if (irq >= 85 && irq <= 116) {/*pcie0 is wlan*/
+					name = IRQ_NAME_WLAN_IPCC_DATA;
+					oplus_match_wlan_wakeup();
+				}
+			} else if (platform_id == LITO || platform_id == LAGOON) {
+				if (!strcmp(name, IRQ_NAME_MODEM_MODEM)) {
+					name = IRQ_NAME_MODEM_QMI;
+				}
+				if (strncmp(name, "ipcc_1", strlen("ipcc_1")) == 0) {
+                    is_first_ipcc_msg = 1;
+					oplus_match_modem_wakeup();
+				}
+			}
+			wakeup_reasons_statics(name, WS_CNT_MODEM|WS_CNT_WLAN|WS_CNT_ADSP|WS_CNT_CDSP|WS_CNT_SLPI);
+		} while(0);
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
 	}
 }
 
