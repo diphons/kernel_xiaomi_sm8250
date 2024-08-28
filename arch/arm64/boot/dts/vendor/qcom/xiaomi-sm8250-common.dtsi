@@ -247,6 +247,13 @@
 		board-sensor = "VIRTUAL-SENSOR";
 		ambient-sensor = "ABT-SENSOR";
 	};
+
+#ifndef CONFIG_IR_SPI_MI
+	irda_regulator: irda-regulator {
+		compatible = "regulator-dummy";
+		regulator-name = "irda_regulator";
+	};
+#endif
 };
 
 &vendor {
@@ -925,9 +932,16 @@
 &qupv3_se2_spi {
 	status = "ok";
 	ir-spi@0 {
+#ifdef CONFIG_IR_SPI_MI
 		compatible = "ir-spi";
+#else
+		compatible = "ir-spi-led";
+#endif
 		reg = <0>;
 		spi-max-frequency = <19200000>;
+#ifndef CONFIG_IR_SPI_MI
+		power-supply = <&irda_regulator>;
+#endif
 		status = "ok";
 	};
 };
