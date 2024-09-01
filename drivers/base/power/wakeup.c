@@ -599,9 +599,9 @@ static bool check_for_block(struct wakeup_source *ws)
 			return false;
 
 		// check if wakelock is in wake lock list to be blocked
-		sprintf(wakelock_name, ";%s;", ws->name);
+		sprintf(wakelock_name, "%s", ws->name);
 
-		if(strstr(list_wl_search, wakelock_name) == NULL)
+		if (!strstr(list_wl_search, wakelock_name))
 			return false;
 
 		// wake lock is in list, print it if debug mode on
@@ -954,8 +954,6 @@ void pm_print_active_wakeup_sources(void)
 #else
 			pr_debug("active wakeup source: %s\n", ws->name);
 #endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
-			active = 1;
-			pr_info("active wakeup source: %s\n", ws->name);
 #ifdef CONFIG_BOEFFLA_WL_BLOCKER
 			if (!check_for_block(ws))	// AP: check if wakelock is on wakelock blocker list
 #endif
