@@ -605,8 +605,11 @@ static bool check_for_block(struct wakeup_source *ws)
 		sprintf(wakelock_name, "%s", ws->name);
 
 #ifdef CONFIG_D8G_SERVICE
-		if (wl_blocker_usb_unplugged(wakelock_name))
+		if (wl_blocker_usb_unplugged(wakelock_name)) {
+			if (!ws->active)
+				wakeup_source_activate(ws);
 			return false;
+		}
 #endif
 
 		if (!strstr(list_wl_search, wakelock_name))
