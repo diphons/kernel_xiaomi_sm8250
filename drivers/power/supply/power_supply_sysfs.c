@@ -16,6 +16,9 @@
 #include <linux/power_supply.h>
 #include <linux/slab.h>
 #include <linux/stat.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #include "power_supply.h"
 
@@ -165,6 +168,9 @@ static ssize_t power_supply_show_property(struct device *dev,
 	case POWER_SUPPLY_PROP_STATUS:
 		ret = sprintf(buf, "%s\n",
 			      power_supply_status_text[value.intval]);
+#ifdef CONFIG_D8G_SERVICE
+		get_usb_plugged(power_supply_status_text[value.intval]);
+#endif
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_TYPE:
 		ret = sprintf(buf, "%s\n",

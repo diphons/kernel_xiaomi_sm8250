@@ -22,6 +22,9 @@
 #include <linux/irq.h>
 #include <linux/interrupt.h>
 #include <linux/irqdesc.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 
 #ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
 #include <oplus/oplus_wakelock_profiler.h>
@@ -600,6 +603,11 @@ static bool check_for_block(struct wakeup_source *ws)
 
 		// check if wakelock is in wake lock list to be blocked
 		sprintf(wakelock_name, "%s", ws->name);
+
+#ifdef CONFIG_D8G_SERVICE
+		if (wl_blocker_usb_unplugged(wakelock_name))
+			return false;
+#endif
 
 		if (!strstr(list_wl_search, wakelock_name))
 			return false;
