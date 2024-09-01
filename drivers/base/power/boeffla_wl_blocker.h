@@ -25,7 +25,15 @@
 									"IPA_CLIENT_APPS_WAN_CONS;wlan_pno_wl;wlan_deauth_rec_wl;" \
 									"wlan_auth_req_wl;wlan_ap_assoc_lost_wl;event1;event2;eventpoll;" \
 									"elliptic_wake_source;event5;bq2597x-standalone;wlan_roam_ho_wl;" \
-									"wlan_fw_rsp_wakelock;CHG_PLCY_MAIN_WL"
+									"wlan_fw_rsp_wakelock;battery;qcom-step-chg;bq2597x-standalone;" \
+									"c440000.qcom,spmi:qcom,pm8150b@2:qcom,qpnp-smb5;usb;usbpd0;bms;" \
+									"c440000.qcom,spmi:qcom,pm8150b@2:qcom,sdam-qnovo@b000;" \
+									"c440000.qcom,spmi:qcom,pm8150b@2:qpnp,fg;qcom-battery;" \
+									"c440000.qcom,spmi:qcom,pmi8998@2:qcom,qpnp-smb2;" \
+									"c440000.qcom,spmi:qcom,pm8998@0:qcom,pm8998_rtc;" \
+									"c440000.qcom,spmi:qcom,pmi8998@2:qpnp,fg;" \
+									"CHG_PLCY_STD_PD_WL;CHG_PLCY_MAIN_WL;CHG_PLCY_THERM_BAL_WL;" \
+									"CHG_PLCY_CTM_WL;CHG_PLCY_HVDCP2_WL;CHG_PLCY_SOH_WL;"
 
 #define LENGTH_LIST_WL				1024
 #define LENGTH_LIST_WL_DEFAULT		(strlen(LIST_WL_DEFAULT) + 1)
