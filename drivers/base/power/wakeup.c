@@ -43,7 +43,9 @@ suspend_state_t pm_suspend_target_state;
 char list_wl_search[LENGTH_LIST_WL_SEARCH] = {0};
 bool wl_blocker_active = false;
 bool wl_blocker_debug = false;
+#endif
 
+#if defined(CONFIG_BOEFFLA_WL_BLOCKER) || defined(CONFIG_D8G_SERVICE)
 static void wakeup_source_deactivate(struct wakeup_source *ws);
 #endif
 
@@ -635,6 +637,32 @@ static bool check_for_block(struct wakeup_source *ws)
 	// there was no valid ws structure, do not block by default
 	return false;
 }
+#else
+#ifdef CONFIG_D8G_SERVICE
+static bool wl_blocker_main(struct wakeup_source *ws)
+{
+	char wakelock_name[52] = {0};
+	int length;
+
+	// only if ws structure is valid
+	if (ws) {
+		// wake lock names handled have maximum length=50 and minimum=1
+		length = strlen(ws->name);
+		if ((length > 50) || (length < 1))
+			return 0;
+
+		// check if wakelock is in wake lock list to be blocked
+		sprintf(wakelock_name, "%s", ws->name);
+
+		if (wl_blocker(wakelock_name)) {
+			if (ws->active)
+				wakeup_source_deactivate(ws);
+			return 1;
+		}
+	}
+	return 0;
+}
+#endif
 #endif
 
 /**
@@ -657,6 +685,10 @@ static void wakeup_source_report_event(struct wakeup_source *ws, bool hard)
 #ifdef CONFIG_BOEFFLA_WL_BLOCKER
 	if (!check_for_block(ws))	// AP: check if wakelock is on wakelock blocker list
 	{
+#else
+#ifdef CONFIG_D8G_SERVICE
+	if (!wl_blocker_main(ws)) {
+#endif
 #endif
 		ws->event_count++;
 		/* This is racy, but the counter is approximate anyway. */
@@ -665,7 +697,7 @@ static void wakeup_source_report_event(struct wakeup_source *ws, bool hard)
 
 		if (!ws->active)
 			wakeup_source_activate(ws);
-#ifdef CONFIG_BOEFFLA_WL_BLOCKER
+#if defined(CONFIG_BOEFFLA_WL_BLOCKER) || defined(CONFIG_D8G_SERVICE)
 	}
 #endif
 }
@@ -967,6 +999,10 @@ void pm_print_active_wakeup_sources(void)
 #endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
 #ifdef CONFIG_BOEFFLA_WL_BLOCKER
 			if (!check_for_block(ws))	// AP: check if wakelock is on wakelock blocker list
+#else
+#ifdef CONFIG_D8G_SERVICE
+			if (!wl_blocker_main(ws))
+#endif
 #endif
 				active = 1;
 		} else if (!active &&
