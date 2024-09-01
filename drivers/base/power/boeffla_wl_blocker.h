@@ -25,6 +25,7 @@
 									"IPA_CLIENT_APPS_WAN_CONS;wlan_pno_wl;wlan_deauth_rec_wl;" \
 									"wlan_auth_req_wl;wlan_ap_assoc_lost_wl;event1;event2;eventpoll;" \
 									"elliptic_wake_source;event5;bq2597x-standalone;wlan_roam_ho_wl;" \
+									"998000.qcom,qup_uart;" \
 									"wlan_fw_rsp_wakelock;battery;qcom-step-chg;bq2597x-standalone;" \
 									"c440000.qcom,spmi:qcom,pm8150b@2:qcom,qpnp-smb5;usb;usbpd0;bms;" \
 									"c440000.qcom,spmi:qcom,pm8150b@2:qcom,sdam-qnovo@b000;" \
