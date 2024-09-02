@@ -20,7 +20,7 @@
 #include <linux/wakeup_reason.h>
 #include <linux/alarmtimer.h>
 #include <linux/suspend.h>
-#include <linux/msm_drm_notify.h>
+#include <drm/drm_notifier_mi.h>
 
 
 #define WS_CNT_MASK 0xffff
@@ -107,8 +107,7 @@ struct wakeup_count_desc_t {
 	struct ws_desc_t ws_desc[7]; /*shouldn't less than 7*/
 };
 
-#if defined(CONFIG_OPLUS_WAKELOCK_PROFILER) || defined(CONFIG_OPLUS_WAKELOCK_PROFILER)
-
+#if defined(CONFIG_OPLUS_WAKELOCK_PROFILER) 
 int wakeup_reasons_statics(const char *irq_name, int choose_flag);
 void wakeup_reasons_clear(int choose_flag);
 void wakeup_reasons_print(int choose_flag, int datil);
