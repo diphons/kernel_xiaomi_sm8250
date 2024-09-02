@@ -266,7 +266,12 @@ static void qg_notify_charger(struct qpnp_qg *chip)
 		return;
 	}
 
-	prop.intval = chip->bp.fastchg_curr_ma * 1000;
+#ifdef CONFIG_D8G_SERVICE
+	if (dynamic_charger && dynamic_chg_max > 0)
+		prop.intval = dynamic_chg_max;
+	else
+#endif
+		prop.intval = chip->bp.fastchg_curr_ma * 1000;
 	rc = power_supply_set_property(chip->batt_psy,
 			POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX, &prop);
 	if (rc < 0) {
