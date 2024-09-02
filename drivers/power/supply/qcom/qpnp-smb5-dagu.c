@@ -20,6 +20,9 @@
 #include <linux/iio/consumer.h>
 #include <linux/pmic-voter.h>
 #include <linux/usb/typec.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include "smb5-reg.h"
 #include "smb5-lib.h"
 #include "step-chg-jeita.h"
@@ -3121,8 +3124,13 @@ static int smb5_batt_get_prop(struct power_supply *psy,
 				QNOVO_VOTER);
 		break;
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX:
-		val->intval = get_client_vote(chg->fcc_votable,
-					      BATT_PROFILE_VOTER);
+#ifdef CONFIG_D8G_SERVICE
+		if (dynamic_charger && dynamic_chg_max > 0)
+			val->intval = dynamic_chg_max;
+		else
+#endif
+			val->intval = get_client_vote(chg->fcc_votable,
+						BATT_PROFILE_VOTER);
 		break;
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
 		val->intval = get_effective_result(chg->fcc_votable);
@@ -3288,8 +3296,17 @@ static int smb5_batt_set_prop(struct power_supply *psy,
 		chg->sw_jeita_enabled = !!val->intval;
 		break;
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX:
-		chg->batt_profile_fcc_ua = val->intval;
-		vote(chg->fcc_votable, BATT_PROFILE_VOTER, true, val->intval);
+#ifdef CONFIG_D8G_SERVICE
+		if (dynamic_charger && dynamic_chg_max > 0) {
+			chg->batt_profile_fcc_ua = dynamic_chg_max;
+			vote(chg->fcc_votable, BATT_PROFILE_VOTER, true, dynamic_chg_max);
+		} else {
+#endif
+			chg->batt_profile_fcc_ua = val->intval;
+			vote(chg->fcc_votable, BATT_PROFILE_VOTER, true, val->intval);
+#ifdef CONFIG_D8G_SERVICE
+		}
+#endif
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_QNOVO:
 		vote(chg->pl_disable_votable, PL_QNOVO_VOTER,
