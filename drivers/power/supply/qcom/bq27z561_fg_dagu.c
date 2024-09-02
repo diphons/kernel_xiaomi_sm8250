@@ -30,6 +30,9 @@
 #include <linux/random.h>
 #include <linux/ktime.h>
 #include <linux/pmic-voter.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include "step-chg-jeita.h"
 
 enum print_reason {
@@ -1726,7 +1729,12 @@ static int fg_set_property(struct power_supply *psy,
 		bq->fake_chip_ok = !!val->intval;
 		break;
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX:
-		bq->constant_charge_current_max = val->intval;
+#ifdef CONFIG_D8G_SERVICE
+		if (dynamic_charger && dynamic_chg_max > 0)
+			bq->constant_charge_current_max = dynamic_chg_max;
+		else
+#endif
+			bq->constant_charge_current_max = val->intval;
 		break;
 	case POWER_SUPPLY_PROP_FASTCHARGE_MODE:
 		fg_set_fastcharge_mode(bq, !!val->intval);
