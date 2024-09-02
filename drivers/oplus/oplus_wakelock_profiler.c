@@ -555,29 +555,29 @@ static struct attribute_group ws_attr_group = {
 
 static int ws_fb_notify_callback(struct notifier_block *nb, unsigned long event, void *data)
 {
-	struct msm_drm_notifier *evdata = data;
+	struct mi_drm_notifier *evdata = data;
 	int *blank;
 
 	if (evdata && evdata->data) {
 		blank = evdata->data;
 		pr_info("[%s], val=%ld, blank=%d\n", __func__, event, *blank);
 
-		if (*blank == MSM_DRM_BLANK_POWERDOWN) { /*suspend*/
-			if (event == MSM_DRM_EARLY_EVENT_BLANK) { /*early event*/
+		if (*blank == MI_DRM_BLANK_POWERDOWN) { /*suspend*/
+			if (event == MI_DRM_EARLY_EVENT_BLANK) { /*early event*/
 				pr_info("[%s], POWERDOWN.\n", __func__);
 			}
-		} else if (*blank == MSM_DRM_BLANK_UNBLANK) { /*resume*/
-			if (event == MSM_DRM_EVENT_BLANK) { /*event*/
+		} else if (*blank == MI_DRM_BLANK_UNBLANK) { /*resume*/
+			if (event == MI_DRM_EVENT_BLANK) { /*event*/
 				pr_info("[%s], UNBLANK\n", __func__);
 			}
 		}
 
-		if (event == MSM_DRM_EVENT_BLANK) {
-			if (*blank == MSM_DRM_BLANK_UNBLANK) {
+		if (event == MI_DRM_EVENT_BLANK) {
+			if (*blank == MI_DRM_BLANK_UNBLANK) {
 				wakeup_reasons_print(WS_CNT_ALL, MODULE_DETAIL_PRINT);/*print all wakeup source*/
 			}
-		} else if (event == MSM_DRM_EARLY_EVENT_BLANK) {
-			if (*blank == MSM_DRM_BLANK_POWERDOWN) {
+		} else if (event == MI_DRM_EARLY_EVENT_BLANK) {
+			if (*blank == MI_DRM_BLANK_POWERDOWN) {
 				/* But the real clean up operation is done by the upper layer */
 				pr_info("[%s] clean all wakeup counts.\n", __func__);
 			}
@@ -609,7 +609,7 @@ static int __init wakelock_statistics_function_init(void)
 		pr_info("[%s] failed to create a sysfs group %d\n", __func__, retval);
 	}
 
-	retval = msm_drm_register_client(&ws_fb_notify_block);
+	retval = mi_drm_register_client(&ws_fb_notify_block);
 	if (retval) {
 		pr_info("[%s] register drm notifier failed.\n", __func__);
 	}
