@@ -18,6 +18,9 @@
 #include <linux/iio/consumer.h>
 #include <linux/pmic-voter.h>
 #include <linux/usb/typec.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include "smblite-reg.h"
 #include "smblite-lib.h"
 #include "schgm-flashlite.h"
@@ -798,7 +801,7 @@ static int smblite_batt_get_prop(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX:
 		val->intval = get_client_vote(chg->fcc_votable,
-					      BATT_PROFILE_VOTER);
+						  BATT_PROFILE_VOTER);
 		break;
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
 		val->intval = get_effective_result(chg->fcc_votable);
