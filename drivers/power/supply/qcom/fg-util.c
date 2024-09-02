@@ -6,6 +6,9 @@
 #include <linux/of.h>
 #include <linux/of_irq.h>
 #include <linux/sort.h>
+#ifdef CONFIG_D8G_SERVICE
+#include <misc/d8g_helper.h>
+#endif
 #include "fg-core.h"
 #include "fg-reg.h"
 
@@ -401,7 +404,12 @@ void fg_notify_charger(struct fg_dev *fg)
 	}
 
 	if (fg->bp.fastchg_curr_ma > 0) {
-		prop.intval = fg->bp.fastchg_curr_ma * 1000;
+#ifdef CONFIG_D8G_SERVICE
+		if (dynamic_charger && dynamic_chg_max > 0)
+			prop.intval = dynamic_chg_max;
+		else
+#endif
+			prop.intval = fg->bp.fastchg_curr_ma * 1000;
 		rc = power_supply_set_property(fg->batt_psy,
 				POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX,
 				&prop);
