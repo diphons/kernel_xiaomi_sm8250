@@ -658,6 +658,10 @@ static bool wl_blocker_main(struct wakeup_source *ws)
 			if (ws->active)
 				wakeup_source_deactivate(ws);
 			return 1;
+		} else if (strstr(list_wl_blocker_seconds, wakelock_name)) {
+			if (ws->active)
+				wakeup_source_deactivate(ws);
+			return 1;
 		}
 	}
 	return 0;
@@ -672,23 +676,11 @@ static bool wl_blocker_main(struct wakeup_source *ws)
  */
 static void wakeup_source_report_event(struct wakeup_source *ws, bool hard)
 {
-	ws->event_count++;
-	/* This is racy, but the counter is approximate anyway. */
-	if (events_check_enabled)
-		ws->wakeup_count++;
-
-	if (!ws->active)
-		wakeup_source_activate(ws);
-
-	if (hard)
-		pm_system_wakeup();
-#ifdef CONFIG_BOEFFLA_WL_BLOCKER
-	if (!check_for_block(ws))	// AP: check if wakelock is on wakelock blocker list
-	{
-#else
-#ifdef CONFIG_D8G_SERVICE
-	if (!wl_blocker_main(ws)) {
-#endif
+#if !defined(CONFIG_BOEFFLA_WL_BLOCKER) && defined(CONFIG_D8G_SERVICE)
+	if (wl_blocker_main(ws)) {
+		if (ws->active)
+			wakeup_source_deactivate(ws);
+	} else {
 #endif
 		ws->event_count++;
 		/* This is racy, but the counter is approximate anyway. */
@@ -697,7 +689,22 @@ static void wakeup_source_report_event(struct wakeup_source *ws, bool hard)
 
 		if (!ws->active)
 			wakeup_source_activate(ws);
-#if defined(CONFIG_BOEFFLA_WL_BLOCKER) || defined(CONFIG_D8G_SERVICE)
+
+		if (hard)
+			pm_system_wakeup();
+#if !defined(CONFIG_BOEFFLA_WL_BLOCKER) && defined(CONFIG_D8G_SERVICE)
+	}
+#endif
+#ifdef CONFIG_BOEFFLA_WL_BLOCKER
+	if (!check_for_block(ws))	// AP: check if wakelock is on wakelock blocker list
+	{
+		ws->event_count++;
+		/* This is racy, but the counter is approximate anyway. */
+		if (events_check_enabled)
+			ws->wakeup_count++;
+
+		if (!ws->active)
+			wakeup_source_activate(ws);
 	}
 #endif
 }
