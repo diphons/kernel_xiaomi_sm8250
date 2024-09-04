@@ -428,7 +428,7 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq)
 	// scale busy time up based on adrenoboost parameter, only if MIN_BUSY exceeded...
 	if ((unsigned int)(priv->bin.busy_time + stats->busy_time) >= MIN_BUSY) {
 #ifdef CONFIG_D8G_SERVICE
-		if (!gamer)
+		if (!gamer || (game_ai_enable && !ongame) || (!game_ai_enable && oprofile == 4))
 			priv->bin.busy_time += stats->busy_time;
 		else
 #endif
@@ -475,7 +475,12 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq)
 
 		scm_data[0] = level;
 		scm_data[1] = priv->bin.total_time;
+#ifdef CONFIG_D8G_SERVICE
+		if (refresh_rate > 60 && ((game_ai_enable && ongame) ||
+				(!game_ai_enable && oprofile != 4)))
+#else
 		if (refresh_rate > 60)
+#endif
 			scm_data[2] = priv->bin.busy_time * refresh_rate / 60;
 		else
 			scm_data[2] = priv->bin.busy_time;
