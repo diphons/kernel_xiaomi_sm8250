@@ -80,9 +80,9 @@
 #include <linux/static_key.h>
 #include <net/busy_poll.h>
 
-#ifdef CONFIG_OPLUS
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
 #include <oplus/oplus_nwpower.h>
-#endif /* CONFIG_OPLUS */
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
 
 int sysctl_tcp_max_orphans __read_mostly = NR_FILE;
 
@@ -4839,9 +4839,9 @@ queue_and_out:
 
 	if (!after(TCP_SKB_CB(skb)->end_seq, tp->rcv_nxt)) {
 		/* A retransmit, 2nd most common case.  Force an immediate ack. */
-#ifdef CONFIG_OPLUS
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
 		oplus_match_tcp_input_retrans(sk);
-#endif /* CONFIG_OPLUS */
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
 
 		NET_INC_STATS(sock_net(sk), LINUX_MIB_DELAYEDACKLOST);
 		tcp_dsack_set(sk, TCP_SKB_CB(skb)->seq, TCP_SKB_CB(skb)->end_seq);

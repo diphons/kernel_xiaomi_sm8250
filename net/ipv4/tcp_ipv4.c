@@ -87,9 +87,9 @@
 
 #include <trace/events/tcp.h>
 
-#ifdef CONFIG_OPLUS
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
 #include <oplus/oplus_nwpower.h>
-#endif /* CONFIG_OPLUS */
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
 
 #ifdef CONFIG_TCP_MD5SIG
 static int tcp_v4_md5_hash_hdr(char *md5_hash, const struct tcp_md5sig_key *key,
@@ -1731,9 +1731,9 @@ int tcp_v4_rcv(struct sk_buff *skb)
 	struct sock *sk;
 	int ret;
 
-#ifdef CONFIG_OPLUS
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
 	oplus_match_ipa_ip_wakeup(OPLUS_TCP_TYPE_V4, skb);
-#endif /* CONFIG_OPLUS */
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
 
 	if (skb->pkt_type != PACKET_HOST)
 		goto discard_it;
@@ -1767,9 +1767,9 @@ lookup:
 	if (!sk)
 		goto no_tcp_socket;
 
-#ifdef CONFIG_OPLUS
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
 	oplus_match_ipa_tcp_wakeup(OPLUS_TCP_TYPE_V4, sk);
-#endif /* CONFIG_OPLUS */
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
 
 process:
 	if (sk->sk_state == TCP_TIME_WAIT)
@@ -1891,9 +1891,9 @@ bad_packet:
 	}
 
 discard_it:
-#ifdef CONFIG_OPLUS
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
 	oplus_ipa_schedule_work();
-#endif /* CONFIG_OPLUS */
+#endif /* CONFIG_OPLUS_WAKELOCK_PROFILER */
 	/* Discard frame. */
 	kfree_skb(skb);
 	return 0;

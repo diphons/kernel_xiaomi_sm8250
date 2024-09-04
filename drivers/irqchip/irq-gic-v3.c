@@ -49,7 +49,7 @@
 
 #include "irq-gic-common.h"
 
-#ifdef CONFIG_OPLUS
+#ifdef CONFIG_OPLUS_WAKELOCK_PROFILER
 #include <oplus/oplus_nwpower.h>
 #endif /* OPLUS_DRIVERS */
 
