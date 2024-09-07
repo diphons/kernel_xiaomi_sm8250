@@ -175,6 +175,8 @@ static int wcd937x_init_reg(struct snd_soc_component *component)
 		snd_soc_component_update_bits(component,
 				WCD937X_BIAS_VBG_FINE_ADJ, 0xF0, 0xB0);
 		snd_soc_component_update_bits(component,
+				WCD937X_RX_BIAS_HPH_LOWPOWER, 0xF0, 0x90);
+		snd_soc_component_update_bits(component,
 				WCD937X_HPH_NEW_INT_RDAC_GAIN_CTL , 0xF0, 0x50);
 	}
 	return 0;
