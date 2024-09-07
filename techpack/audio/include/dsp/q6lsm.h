@@ -106,6 +106,9 @@ struct lsm_client {
 	struct lsm_stage_config	stage_cfg[LSM_MAX_STAGES_PER_SESSION];
 	uint64_t	fe_id;
 	uint16_t	unprocessed_data;
+#if defined(CONFIG_TARGET_PRODUCT_PIPA)
+	bool		model_reged;
+#endif
 	void		*get_param_payload;
 	size_t		param_size;
 };
