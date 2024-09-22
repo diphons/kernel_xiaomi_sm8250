@@ -933,6 +933,9 @@ int smblib_set_fastcharge_mode(struct smb_charger *chg, bool enable)
 	if (enable && pval.intval >= start_limit) {
 		smblib_dbg(chg, PR_MISC, "soc:%d is more than %d"
 				"do not setfastcharge mode\n", pval.intval, start_limit);
+		kill_skip_thermal = true;
+	} else {
+		kill_skip_thermal = false;
 #else
 	if (enable && pval.intval >= 95) {
 		smblib_dbg(chg, PR_MISC, "soc:%d is more than 95"
