@@ -13,6 +13,9 @@
 #include <linux/irq.h>
 #include <linux/delay.h>
 #include <linux/scs.h>
+#if defined(CONFIG_UCLAMP_ASSIST) && defined(CONFIG_D8G_SERVICE)
+#include <misc/d8g_helper.h>
+#endif
 
 #include <asm/switch_to.h>
 #include <asm/tlb.h>
@@ -8560,6 +8563,10 @@ struct uclamp_param {
 	u64  uclamp_boosted;
 };
 
+#ifdef CONFIG_D8G_SERVICE
+static struct cgroup_subsys_state *css_ongame;
+#endif
+
 static void uclamp_set(struct cgroup_subsys_state *css)
 {
 	int i;
@@ -8582,6 +8589,10 @@ static void uclamp_set(struct cgroup_subsys_state *css)
 	for (i = 0; i < ARRAY_SIZE(tgts); i++) {
 		struct uclamp_param tgt = tgts[i];
 
+#ifdef CONFIG_D8G_SERVICE
+		if (strstr(css->cgroup->kn->name, "top-app"))
+			css_ongame = css;
+#endif
 		if (!strcmp(css->cgroup->kn->name, tgt.name)) {
 			cpu_uclamp_write_wrapper(css, tgt.uclamp_min,
 						UCLAMP_MIN);
@@ -8599,6 +8610,23 @@ static void uclamp_set(struct cgroup_subsys_state *css)
 	}
 
 }
+
+#ifdef CONFIG_D8G_SERVICE
+u64 uclamp_boost;
+void uclamp_ongame(u64 boost)
+{
+	if(!css_ongame->cgroup->kn || boost == uclamp_boost)
+		return;
+
+	uclamp_boost = boost;
+
+	cpu_uclamp_boost_write_u64(css_ongame, NULL,
+					uclamp_boost);
+
+	if (game_ai_log)
+		pr_info("uclamp_assist: set boost top-app to %d", uclamp_boost);
+}
+#endif
 #endif /* CONFIG_UCLAMP_ASSIST */
 
 #endif /* CONFIG_UCLAMP_TASK_GROUP */

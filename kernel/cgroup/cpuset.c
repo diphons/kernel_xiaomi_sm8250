@@ -2943,6 +2943,13 @@ static void dynamic_cpuset_worker(struct work_struct *work)
 
 	update_cpumask(cs, trialcs, cpus_val);
 
+#ifdef CONFIG_UCLAMP_ASSIST
+	if (strstr(cpus_val, "0-7"))
+		uclamp_ongame(1);
+	else
+		uclamp_ongame(0);
+#endif
+
 	free_trial_cpuset(trialcs);
 out_unlock:
 	mutex_unlock(&cpuset_mutex);
