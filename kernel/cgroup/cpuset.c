@@ -2953,6 +2953,9 @@ out_unlock:
 
 void ongame_cpuset_main(char *value)
 {
+	if (cpus_val == value)
+		return;
+
 	cpus_val = value;
 	schedule_work(&dynamic_cpuset_work);
 }
