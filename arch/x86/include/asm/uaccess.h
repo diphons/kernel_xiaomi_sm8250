@@ -720,7 +720,7 @@ static __must_check inline bool user_access_begin(int type,
 	return 1;
 }
 
-#define user_access_begin(a, b, c)	user_access_begin(a, b, c)
+#define user_access_begin()	__uaccess_begin()
 #define user_access_end()	__uaccess_end()
 
 #define user_access_save()	smap_save()
