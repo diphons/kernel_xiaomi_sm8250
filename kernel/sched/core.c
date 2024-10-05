@@ -13,6 +13,9 @@
 #include <linux/irq.h>
 #include <linux/delay.h>
 #include <linux/scs.h>
+#if defined(CONFIG_UCLAMP_ASSIST) && defined(CONFIG_D8G_SERVICE)
+#include <misc/d8g_helper.h>
+#endif
 
 #include <asm/switch_to.h>
 #include <asm/tlb.h>
@@ -8535,6 +8538,10 @@ static int cpu_uclamp_boost_write_u64(struct cgroup_subsys_state *css,
 {
 	struct task_group *tg;
 
+#ifdef CONFIG_D8G_SERVICE
+	if (strstr(css->cgroup->kn->name, "top-app"))
+		boosted = (u64) game_ai_uclamp_boost;
+#endif
 	if (boosted > 1)
 		return -EINVAL;
 	tg = css_tg(css);
@@ -8548,7 +8555,12 @@ static u64 cpu_uclamp_boost_read_u64(struct cgroup_subsys_state *css,
 {
 	struct task_group *tg = css_tg(css);
 
-	return (u64) tg->boosted;
+#ifdef CONFIG_D8G_SERVICE
+	if (strstr(css->cgroup->kn->name, "top-app"))
+		return (u64) game_ai_uclamp_boost;
+	else
+#endif
+		return (u64) tg->boosted;
 }
 
 #ifdef CONFIG_UCLAMP_ASSIST
