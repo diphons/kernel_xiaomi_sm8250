@@ -133,7 +133,7 @@ bool swap_slot_has_sync_io(swp_entry_t entry)
 		return disk->fops->ioctl(sis->bdev, 0,
 			SWP_SYNCHRONOUS_IO, swp_offset(entry)) == 1;
 	}
-	return false;
+	return (sis->flags & SWP_SYNCHRONOUS_IO) == SWP_SYNCHRONOUS_IO;
 }
 
 static void end_swap_bio_read(struct bio *bio)
@@ -371,6 +371,7 @@ int swap_readpage(struct page *page, bool synchronous)
 	blk_qc_t qc;
 	struct gendisk *disk;
 	unsigned long pflags;
+	swp_entry_t entry;
 
 	VM_BUG_ON_PAGE(!PageSwapCache(page) && !synchronous, page);
 	VM_BUG_ON_PAGE(!PageLocked(page), page);
@@ -399,15 +400,18 @@ int swap_readpage(struct page *page, bool synchronous)
 		goto out;
 	}
 
-	ret = bdev_read_page(sis->bdev, map_swap_page(page, &sis->bdev), page);
-	if (!ret) {
-		if (trylock_page(page)) {
-			swap_slot_free_notify(page);
-			unlock_page(page);
-		}
+    entry.val = page_private(page);
+    if (swap_slot_has_sync_io(entry)) {
+		ret = bdev_read_page(sis->bdev, map_swap_page(page, &sis->bdev), page);
+		if (!ret) {
+			if (trylock_page(page)) {
+				swap_slot_free_notify(page);
+				unlock_page(page);
+			}
 
-		count_vm_event(PSWPIN);
-		goto out;
+			count_vm_event(PSWPIN);
+			goto out;
+		}
 	}
 
 	ret = 0;
