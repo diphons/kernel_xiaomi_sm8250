@@ -174,20 +174,6 @@ static void sugov_deferred_update(struct sugov_policy *sg_policy, u64 time,
 	irq_work_queue(&sg_policy->irq_work);
 }
 
-#ifdef CONFIG_PACKAGE_RUNTIME_INFO
-__weak unsigned int glk_freq_limit(struct cpufreq_policy *policy,
-		unsigned int *target_freq)
-{
-	return 0;
-}
-
-__weak unsigned long glk_cal_freq(struct cpufreq_policy *policy,
-		unsigned long util, unsigned long max)
-{
-	return 0;
-}
-#endif
-
 /**
  * get_next_freq - Compute a new frequency for a given cpufreq policy.
  * @sg_policy: schedutil policy object to compute the new frequency for.
@@ -214,9 +200,6 @@ static unsigned int get_next_freq(struct sugov_policy *sg_policy,
 				  unsigned long util, unsigned long max)
 {
 	struct cpufreq_policy *policy = sg_policy->policy;
-#ifdef CONFIG_PACKAGE_RUNTIME_INFO
-	unsigned int walt_freq;
-#endif
 	unsigned int freq;
 	unsigned int idx, l_freq, h_freq;
 
@@ -229,16 +212,7 @@ static unsigned int get_next_freq(struct sugov_policy *sg_policy,
 		 */
 		freq = policy->cur + (policy->cur >> 2);
 
-#ifdef CONFIG_PACKAGE_RUNTIME_INFO
-	walt_freq = map_util_freq(util, freq, max, sg_policy->tunables->exp_util);
-	freq = glk_cal_freq(policy, util, max);
-	if (!freq)
-		freq = glk_freq_limit(policy, &walt_freq);
-	else
-		sg_policy->need_freq_update = true;
-#else
 	freq = map_util_freq(util, freq, max, sg_policy->tunables->exp_util);
-#endif
 
 	if (freq == sg_policy->cached_raw_freq && !sg_policy->need_freq_update)
 		return sg_policy->next_freq;
@@ -541,9 +515,6 @@ static void sugov_update_single(struct update_util_data *hook, u64 time,
 	unsigned long max_cap, boost;
 	unsigned int next_f;
 
-	if (flags & SCHED_CPUFREQ_PL)
-		return;
-
 	max_cap = arch_scale_cpu_capacity(sg_cpu->cpu);
 
 	sugov_iowait_boost(sg_cpu, time, flags);
@@ -601,9 +572,6 @@ sugov_update_shared(struct update_util_data *hook, u64 time, unsigned int flags)
 	struct sugov_cpu *sg_cpu = container_of(hook, struct sugov_cpu, update_util);
 	struct sugov_policy *sg_policy = sg_cpu->sg_policy;
 	unsigned int next_f;
-
-	if (flags & SCHED_CPUFREQ_PL)
-		return;
 
 	raw_spin_lock(&sg_policy->update_lock);
 
