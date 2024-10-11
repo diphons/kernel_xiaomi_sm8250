@@ -5882,7 +5882,11 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 				(schedtune_prefer_idle(p) > 0) : 0;
 
 #ifdef CONFIG_D8G_SERVICE
+#ifdef CONFIG_KJSON
+	if(game_mode && p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
+#else
 	if(ongame && p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
+#endif
 #else
 	if(p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
 #endif
