@@ -1948,7 +1948,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 		else if (unlikely(!strncmp(filename->name,
 					   SURFACEFLINGER_BIN,
 #ifdef CONFIG_D8G_SERVICE
+#ifdef CONFIG_KJSON
+					   strlen(SURFACEFLINGER_BIN))) && game_mode) {
+#else
 					   strlen(SURFACEFLINGER_BIN))) && ongame) {
+#endif
 #else
 					   strlen(SURFACEFLINGER_BIN)))) {
 #endif
@@ -1962,7 +1966,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 		} else if (unlikely(!strncmp(filename->name,
 					   SYSTEMUI,
 #ifdef CONFIG_D8G_SERVICE
+#ifdef CONFIG_KJSON
+					   strlen(SYSTEMUI))) && game_mode) {
+#else
 					   strlen(SYSTEMUI))) && ongame) {
+#endif
 #else
 					   strlen(SYSTEMUI)))) {
 #endif
@@ -1971,7 +1979,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 		} else if (unlikely(!strncmp(filename->name,
 					   HWCOMPOSER_BIN_PREFIX,
 #ifdef CONFIG_D8G_SERVICE
+#ifdef CONFIG_KJSON
+					   strlen(HWCOMPOSER_BIN_PREFIX))) && game_mode) {
+#else
 					   strlen(HWCOMPOSER_BIN_PREFIX))) && ongame) {
+#endif
 #else
 					   strlen(HWCOMPOSER_BIN_PREFIX)))) {
 #endif
