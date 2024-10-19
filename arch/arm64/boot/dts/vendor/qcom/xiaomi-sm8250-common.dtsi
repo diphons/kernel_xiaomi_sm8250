@@ -631,6 +631,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j2_p2_1_38_0c_0a_dsc_cmd {
@@ -642,6 +643,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j2_42_02_0b_dsc_cmd {
@@ -653,6 +655,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j2_p1_42_02_0b_dsc_cmd {
@@ -664,6 +667,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j2_p2_1_42_02_0b_dsc_cmd {
@@ -675,6 +679,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j2_mp_42_02_0b_dsc_cmd {
@@ -686,6 +691,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j2_mp_42_02_0b_post_dsc_cmd {
@@ -697,6 +703,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j1s_42_02_0a_dsc_cmd {
@@ -708,6 +715,7 @@
         qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
+		qcom,ulps-enabled;
 };
 
 &dsi_j1s_42_02_0a_p1_1_dsc_cmd {
@@ -719,6 +727,7 @@
         qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
+		qcom,ulps-enabled;
 };
 
 &dsi_j1s_42_02_0a_mp_dsc_cmd {
@@ -730,6 +739,7 @@
         qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
+		qcom,ulps-enabled;
 };
 
 &dsi_k11a_38_08_0a_dsc_cmd {
@@ -741,6 +751,7 @@
         qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
+		qcom,ulps-enabled;
 };
 
 &dsi_l11r_38_08_0a_dsc_cmd {
@@ -752,6 +763,7 @@
         qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
+		qcom,ulps-enabled;
 };
 
 &dsi_j1u_42_02_0b_dsc_cmd {
@@ -763,6 +775,7 @@
         qcom,mdss-brightness-init-level = <307>;
         qcom,platform-te-gpio = <&tlmm 66 0>;
         qcom,platform-reset-gpio = <&tlmm 12 0>;
+		qcom,ulps-enabled;
 };
 
 &dsi_j11_38_08_0a_fhd_cmd {
@@ -778,6 +791,7 @@
 	*/
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 46 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j1t_38_0c_0a_dsc_cmd {
@@ -789,6 +803,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j3s_37_02_0a_dsc_video {
@@ -800,6 +815,7 @@
 	qcom,mdss-brightness-init-level = <410>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_k81_42_02_0a_dual_cphy_video {
@@ -811,6 +827,7 @@
 	qcom,mdss-brightness-init-level = <410>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 75 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_k81_35_02_0b_dual_cphy_video {
@@ -822,6 +839,7 @@
 	qcom,mdss-brightness-init-level = <410>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 75 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_l81a_42_04_0a_dual_dphy_video {
@@ -834,6 +852,7 @@
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 75 0>;
 	qcom,platform-tp-reset-gpio = <&tlmm 100 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_m82_36_02_0a_dual_dphy_video {
@@ -845,6 +864,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 75 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_m82_42_02_0b_dual_dphy_video {
@@ -856,6 +876,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 75 0>;
+	qcom,ulps-enabled;
 };
 
 
@@ -868,6 +889,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_j2s_mp_42_02_0b_dsc_cmd {
@@ -879,6 +901,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &dsi_l3a_mp_42_02_0a_dsc_cmd {
@@ -890,6 +913,7 @@
 	qcom,mdss-brightness-init-level = <307>;
 	qcom,platform-te-gpio = <&tlmm 66 0>;
 	qcom,platform-reset-gpio = <&tlmm 12 0>;
+	qcom,ulps-enabled;
 };
 
 &sdhc_2 {
