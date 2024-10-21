@@ -59,7 +59,7 @@ int blk_crypto_submit_bio(struct bio **bio_ptr)
 	struct bio *bio = *bio_ptr;
 	struct request_queue *q;
 	struct bio_crypt_ctx *bc = bio->bi_crypt_context;
-	int err;
+	int err = 0;
 
 	if (!bc || !bio_has_data(bio))
 		return 0;

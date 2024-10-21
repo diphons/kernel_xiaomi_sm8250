@@ -864,7 +864,7 @@ static int idtp9220_set_reverse_gpio_state(struct idtp9220_device_info *di,
 static int idtp9220_set_reverse_gpio(struct idtp9220_device_info *di,
 				     int enable)
 {
-	int ret;
+	int ret = 0;
 
 	if (gpio_is_valid(di->dt_props.reverse_gpio)) {
 		idtp9220_set_reverse_gpio_state(di, enable);

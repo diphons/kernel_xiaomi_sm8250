@@ -675,7 +675,7 @@ static int aw2015_led_err_handle(struct aw2015_led *led_array,
 static u8 aw2015_led_find_closest_time_idx(uint32_t time)
 {
 	const u8 cnt = sizeof(aw2015_ton_toff)/sizeof(uint32_t);
-	u8 idx;
+	u8 idx = 0;
 	if (time <= aw2015_ton_toff[0]) {
 		idx = 0;
 	} else if (time >= aw2015_ton_toff[cnt-1]) {

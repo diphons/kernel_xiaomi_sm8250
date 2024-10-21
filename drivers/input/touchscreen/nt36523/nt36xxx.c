@@ -1301,7 +1301,7 @@ static int32_t nvt_parse_dt(struct device *dev)
 
 static int nvt_get_panel_type(struct nvt_ts_data *ts_data)
 {
-	int i;
+	int i = 0;
 	int j;
 	u8 *lockdown = ts_data->lockdown_info;
 	struct nvt_config_info *panel_list = ts->config_array;
