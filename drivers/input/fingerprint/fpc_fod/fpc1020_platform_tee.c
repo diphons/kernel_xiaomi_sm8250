@@ -193,7 +193,7 @@ static int reset_gpio_res(struct fpc1020_data *fpc1020)
 
 static int request_vreg_gpio(struct fpc1020_data *fpc1020, bool enable)
 {
-	int rc;
+	int rc = 0;
 	struct device *dev = fpc1020->dev;
 
 	// 	dev_err(dev, "fpc %s: enter!\n", __func__);
