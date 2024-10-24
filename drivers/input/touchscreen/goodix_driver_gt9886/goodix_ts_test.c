@@ -1670,8 +1670,8 @@ static void gtx8_rawdata_test_spec(struct gtx8_ts_test *ts_test)
 	u8 frame_num = 16;
 	u16 data_len = 0;
 	u8 *p_beyond_max_limit_cnt;
-	u8 *p_beyond_min_limit_cnt;
-	u8 *p_beyond_accord_limit_cnt;
+	u8 *p_beyond_min_limit_cnt = NULL;
+	u8 *p_beyond_accord_limit_cnt = NULL;
 
 	data_len = MAX_DRV_NUM * MAX_SEN_NUM;
 	p_beyond_max_limit_cnt = kzalloc(data_len, GFP_KERNEL);
