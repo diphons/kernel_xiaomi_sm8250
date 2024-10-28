@@ -2591,7 +2591,12 @@ void cpuset_cpus_allowed_mi(struct task_struct *tsk)
 void cpuset_cpus_allowed_fallback(struct task_struct *tsk)
 {
 	rcu_read_lock();
+#if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
+	if(game_mode || (!game_ai_enable && oprofile != 0 && oprofile != 4) ||
+		!(tsk->flags & PF_PERF_CRITICAL))
+#else
 	if(!(tsk->flags & PF_PERF_CRITICAL))
+#endif
 		do_set_cpus_allowed(tsk, is_in_v2_mode() ?
 			task_cs(tsk)->cpus_allowed : cpu_possible_mask);
 	rcu_read_unlock();
