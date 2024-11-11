@@ -140,6 +140,9 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync, bool rt
 	unsigned long p_util, uc_min;
 	bool has_idle = false;
 	int cidx = 0, cpu;
+#ifdef CONFIG_D8G_SERVICE
+	unsigned long cap_main;
+#endif
 
 	/*
 	 * Get the utilization and uclamp minimum threshold for this task. Note
@@ -172,7 +175,12 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync, bool rt
 		curr->cap_orig = arch_scale_cpu_capacity(cpu);
 
 		/* Get the _current_, throttled maximum capacity of this CPU */
-		curr->cap_max = curr->cap_orig - thermal_load_avg(rq);
+#ifdef CONFIG_D8G_SERVICE
+		if (oprofile == 1 || oprofile == 3)
+			curr->cap_max = curr->cap_orig;
+		else
+#endif
+			curr->cap_max = curr->cap_orig - thermal_load_avg(rq);
 
 		/* Prefer the CPU that more closely meets the uclamp minimum */
 		if (curr->cap_max < uc_min && curr->cap_max < best->cap_max)
@@ -250,8 +258,18 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync, bool rt
 		 * that would reduce CASS's energy efficiency due to
 		 * disproportionate P-states.
 		 */
+#ifdef CONFIG_D8G_SERVICE
+		if (oprofile == 1 || oprofile == 3)
+			cap_main = curr->cap;
+		else
+			cap_main = curr->cap_no_therm;
+
+		curr->util =
+			curr->util * SCHED_CAPACITY_SCALE / cap_main;
+#else
 		curr->util =
 			curr->util * SCHED_CAPACITY_SCALE / curr->cap_no_therm;
+#endif
 
 		/*
 		 * Check if this CPU is better than the best CPU found so far.
