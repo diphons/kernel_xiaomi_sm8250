@@ -2380,7 +2380,13 @@ long _do_fork(unsigned long clone_flags,
 	long nr;
 
 #ifdef CONFIG_D8G_SERVICE
-	if (gamer && oplus_panel_status == 2) {
+	if ((!game_ai_enable ||
+#ifdef CONFIG_KJSON
+		game_mode) &&
+#else
+		ongame) &&
+#endif
+		gamer && oplus_panel_status == 2) {
 #endif
 	    if (task_is_zygote(current)) {
 #ifdef CONFIG_D8G_SERVICE
@@ -2389,7 +2395,7 @@ long _do_fork(unsigned long clone_flags,
 				cpu_input_boost_kick_max(150);
 #endif
 				devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 150);
-			} else if (oprofile != 4 ) { 
+			} else {
 #endif
 #ifdef CONFIG_CPU_INPUT_BOOST
 				cpu_input_boost_kick_max(50);
