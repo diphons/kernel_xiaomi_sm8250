@@ -428,10 +428,11 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq)
 	if ((unsigned int)(priv->bin.busy_time + stats->busy_time) >= MIN_BUSY) {
 #ifdef CONFIG_D8G_SERVICE
 #ifdef CONFIG_KJSON
-		if (!gamer || !game_mode || (!game_ai_enable && oprofile == 4))
+		if ((game_ai_enable && !game_mode) ||
 #else
-		if (!gamer || (game_ai_enable && !ongame) || (!game_ai_enable && oprofile == 4))
+		if ((game_ai_enable && !ongame) ||
 #endif
+			!gamer || oprofile == 4)
 			priv->bin.busy_time += stats->busy_time;
 		else
 #endif

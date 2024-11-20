@@ -553,29 +553,35 @@ static ssize_t __cgroup1_procs_write(struct kernfs_open_file *of,
 
 	/* This covers boosting for app launches and app transitions */
 #ifdef CONFIG_D8G_SERVICE
-	if (gamer && oplus_panel_status == 2) {
+	if ((!game_ai_enable ||
+#ifdef CONFIG_KJSON
+		game_mode) &&
+#else
+		ongame) &&
+#endif
+		gamer && oplus_panel_status == 2) {
 #endif
         if (!ret && !threadgroup &&
                !memcmp(of->kn->parent->name, "top-app", sizeof("top-app")) &&
                task_is_zygote(task->parent)) {
 #ifdef CONFIG_D8G_SERVICE
-			if (oprofile == 4) {
+			if (oprofile == 2) {
 #ifdef CONFIG_CPU_INPUT_BOOST
-                cpu_input_boost_kick_max(50);
+                cpu_input_boost_kick_max(500);
 #endif
-                devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 50);
-			} else if (oprofile == 0) {
-#ifdef CONFIG_CPU_INPUT_BOOST
-                cpu_input_boost_kick_max(250);
-#endif
-                devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 250);
-			} else {
+                devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 500);
+			} else if (oprofile == 1 || oprofile == 3) {
 #endif
 #ifdef CONFIG_CPU_INPUT_BOOST
                 cpu_input_boost_kick_max(1000);
 #endif
                 devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 1000);
 #ifdef CONFIG_D8G_SERVICE
+			} else {
+#ifdef CONFIG_CPU_INPUT_BOOST
+                cpu_input_boost_kick_max(250);
+#endif
+                devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 250);
 	        }
 #endif
         }

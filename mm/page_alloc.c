@@ -4847,7 +4847,13 @@ retry:
 
 #ifdef CONFIG_D8G_SERVICE
 	/* Boost when memory is low so allocation latency doesn't get too bad */
-	if (gamer && oplus_panel_status == 2) {
+	if ((!game_ai_enable ||
+#ifdef CONFIG_KJSON
+		game_mode) &&
+#else
+		ongame) &&
+#endif
+		gamer && oplus_panel_status == 2) {
 		if (oprofile != 4) {
 			if (oprofile == 0) {
 #ifdef CONFIG_CPU_INPUT_BOOST

@@ -5631,10 +5631,11 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 #ifdef CONFIG_D8G_SERVICE
 #ifdef CONFIG_KJSON
-	if(game_mode && p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
+	if(game_mode &&
 #else
-	if(ongame && p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
+	if(ongame &&
 #endif
+		p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
 #else
 	if(p->group_leader && (!strncmp(p->group_leader->comm, "surfaceflinger", 14) ||
 #endif
