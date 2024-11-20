@@ -1429,7 +1429,13 @@ static int gmu_enable_clks(struct kgsl_device *device)
 		return -EINVAL;
 
 #ifdef CONFIG_D8G_SERVICE
-	if (oprofile != 4 && oprofile != 0 && oplus_panel_status == 2)
+	if ((!game_ai_enable ||
+#ifdef CONFIG_KJSON
+		game_mode) &&
+#else
+		ongame) &&
+#endif
+		oprofile != 4 && oprofile != 0 && oplus_panel_status == 2)
 		gmu_set = GMU_FREQUENCY_OC;
 	else
 		gmu_set = GMU_FREQUENCY;

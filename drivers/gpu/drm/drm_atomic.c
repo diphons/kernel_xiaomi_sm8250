@@ -2617,7 +2617,13 @@ static int __drm_mode_atomic_ioctl(struct drm_device *dev, void *data,
 	/* Boost CPU and DDR when committing a new frame */
 	if (!(arg->flags & DRM_MODE_ATOMIC_TEST_ONLY)) {
 #ifdef CONFIG_D8G_SERVICE
-		if (oprofile != 4 && oplus_panel_status == 2) {
+		if ((!game_ai_enable ||
+#ifdef CONFIG_KJSON
+			game_mode) &&
+#else
+			ongame) &&
+#endif
+			oprofile != 4 && oplus_panel_status == 2) {
 #endif
 #ifdef CONFIG_CPU_INPUT_BOOST
 			cpu_input_boost_kick();
