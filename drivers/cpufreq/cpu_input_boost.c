@@ -176,7 +176,12 @@ static void __cpu_input_boost_kick(struct boost_drv *b)
 		return;
 
 #ifdef CONFIG_D8G_SERVICE
-	if (!gamer || oprofile == 4 || oplus_panel_status != 2 || !cib_mode)
+#ifdef CONFIG_KJSON
+	if ((game_ai_enable && !game_mode) ||
+#else
+	if ((game_ai_enable && !ongame) ||
+#endif
+		!gamer || oprofile == 4 || oplus_panel_status != 2 || !cib_mode)
 		return;
 #endif
 
@@ -204,7 +209,12 @@ static void __cpu_input_boost_kick_max(struct boost_drv *b,
 		return;
 
 #ifdef CONFIG_D8G_SERVICE
-	if (!gamer || oprofile == 4 || oplus_panel_status != 2 || !cib_mode)
+#ifdef CONFIG_KJSON
+	if ((game_ai_enable && !game_mode) ||
+#else
+	if ((game_ai_enable && !ongame) ||
+#endif
+		!gamer || oprofile == 4 || oplus_panel_status != 2 || !cib_mode)
 		return;
 #endif
 
