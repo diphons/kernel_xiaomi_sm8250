@@ -2592,7 +2592,12 @@ void cpuset_cpus_allowed_fallback(struct task_struct *tsk)
 {
 	rcu_read_lock();
 #if defined(CONFIG_CPUSET_ASSIST) && defined(CONFIG_D8G_SERVICE)
-	if(game_mode || (!game_ai_enable && oprofile != 0 && oprofile != 4) ||
+#ifdef CONFIG_KJSON
+	if(game_mode ||
+#else
+	if(ongame ||
+#endif
+		(!game_ai_enable && oprofile != 0 && oprofile != 4) ||
 		!(tsk->flags & PF_PERF_CRITICAL))
 #else
 	if(!(tsk->flags & PF_PERF_CRITICAL))
