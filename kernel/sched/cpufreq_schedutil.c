@@ -17,9 +17,6 @@
 #include <trace/events/power.h>
 #include <linux/sched/sysctl.h>
 #include <linux/binfmts.h>
-#ifdef CONFIG_D8G_SERVICE
-#include <misc/d8g_helper.h>
-#endif
 
 struct sugov_tunables {
 	struct gov_attr_set	attr_set;
