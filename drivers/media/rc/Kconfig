@@ -304,6 +304,16 @@ config IR_SPI
 	  To compile this driver as a module, choose M here: the module will be
 	  called ir-spi.
 
+config IR_SPI_MI
+	tristate "SPI connected Xiaomi IR LED"
+	select IR_SPI
+	default y
+	---help---
+	  Say Y if you want to use an Xiaomi IR LED connected through SPI bus.
+
+	  To compile this driver as a module, choose M here: the module will be
+	  called ir-spi.
+
 config IR_STREAMZAP
 	tristate "Streamzap PC Remote IR Receiver"
 	depends on USB_ARCH_HAS_HCD
