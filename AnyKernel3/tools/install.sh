@@ -241,6 +241,7 @@ header_install(){
 	ui_print "$install_dhz"
 	ui_print "$install_pk"
 	ui_print "$install_dfe"
+	ui_print "$install_ir"
 	START_FLASH=$(date +"%s")
 }
 header_abort(){
@@ -701,11 +702,17 @@ else
 		cd $home
 	fi;
 	if [[ -d $dt_dir ]]; then
-		if [[ -f $dt_dir/Image.gz ]]; then
-			cp $dt_dir/Image.gz $home/Image.gz
-		elif [[ -f $dt_dir/Image ]]; then
-			cp $dt_dir/Image $home/Image
-		fi
+		kernel_img(){
+			if [[ -f $dt_dir/$imgname.gz ]]; then
+				cp $dt_dir/$imgname.gz $home/Image.gz
+			elif [[ -f $dt_dir/$imgname ]]; then
+				cp $dt_dir/$imgname $home/Image
+			elif [[ -f $dt_dir/Image.gz ]]; then
+				cp $dt_dir/Image.gz $home/Image.gz
+			elif [[ -f $dt_dir/Image ]]; then
+				cp $dt_dir/Image $home/Image
+			fi
+		}
 		dtbo_aosp=$dt_dir/dtbo_aosp.img
 		dtbo_aosp_90=$dt_dir/dtbo_aosp_90.img
 		select_ocd(){
@@ -772,12 +779,40 @@ else
 		fi;
 
 		if [ $vendor_mode = 1 ]; then
+			if [[ -f $dt_dir/ImageAosp.gz ]] || [[ -f $dt_dir/ImageAosp ]]; then
+				ui_print " "
+				ui_print "Choose IR SPI drivers.."
+				ui_print " "
+				ui_print "New AOSP Like LineageOS used New IR SPI drivers"
+				ui_print " "
+				ui_print "Use New IR SPI driver or IR SPI MIUI-HyperOS ?"
+				ui_print " "
+				ui_print "   Vol+ = Yes, Vol- = No"
+				ui_print ""
+				ui_print "   Yes... IR SPI AOSP"
+				ui_print "   No!!.. IR SPI MIUI | HyperOS"
+				ui_print " "
+				if $FUNCTION; then
+					ui_print "-> IR SPI AOSP selected.."
+					install_ir="• IR SPI  : AOSP | AOSPA"
+					imgname=ImageAosp;
+				else
+					ui_print "-> IR SPI MIUI | HyperOS selected.."
+					install_ir="• IR SPI  : MIUI | HyperOS"
+					imgname=Image;
+				fi
+			else
+				imgname=Image;
+			fi;
+			kernel_img;
 			if [ $nine_set = 1 ]; then
 				cp $dtbo_aosp_90 $home/dtbo.img
 			else
 				cp $dtbo_aosp $home/dtbo.img
 			fi
 		else
+			imgname=Image;
+			kernel_img;
 			if [ $nine_set = 1 ]; then
 				cp $dt_dir/dtbo_90.img $home/dtbo.img
 			else
