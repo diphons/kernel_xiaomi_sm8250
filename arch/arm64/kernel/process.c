@@ -93,7 +93,7 @@ static void __cpu_do_idle(void)
 		/* Use TEO's estimated sleep duration with some slack added */
 		timer = this_cpu_ptr(&wfi_timer);
 		hrtimer_start(timer, ns_to_ktime(wfi_timeout_ns),
-			      HRTIMER_MODE_REL_PINNED_HARD);
+			      HRTIMER_MODE_REL_PINNED);
 	}
 
 	dsb(sy);
@@ -110,7 +110,7 @@ static int __init wfi_timer_init(void)
 	/* No function is needed; the timer is canceled while IRQs are off */
 	for_each_possible_cpu(cpu)
 		hrtimer_init(&per_cpu(wfi_timer, cpu), CLOCK_MONOTONIC,
-			     HRTIMER_MODE_REL_HARD);
+			     HRTIMER_MODE_REL);
 	return 0;
 }
 pure_initcall(wfi_timer_init);
