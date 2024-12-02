@@ -1864,7 +1864,7 @@ static void update_numa_stats(struct numa_stats *ns, int nid)
 	for_each_cpu(cpu, cpumask_of_node(nid)) {
 		struct rq *rq = cpu_rq(cpu);
 
-		ns->nr_running += rq->nr_running;
+		ns->nr_running += rq->cfs.h_nr_runnable;
 		ns->load += cpu_load(rq);
 		ns->compute_capacity += capacity_of(cpu);
 
@@ -9623,7 +9623,7 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 
 		sgs->group_load += cpu_load(rq);
 		sgs->group_util += cpu_util_cfs(i);
-		sgs->sum_h_nr_running += rq->nr_running;
+		sgs->sum_h_nr_running += rq->cfs.h_nr_runnable;
 
 		nr_running = rq->nr_running;
 		sgs->sum_nr_running += nr_running;
@@ -9847,7 +9847,7 @@ static inline void update_sg_wakeup_stats(struct sched_domain *sd,
 
 		sgs->group_load += cpu_load(rq);
 		sgs->group_util += cpu_util_without(i, p);
-		sgs->sum_h_nr_running += rq->nr_running;
+		sgs->sum_h_nr_running += rq->cfs.h_nr_runnable;
 
 		nr_running = rq->nr_running;
 		sgs->sum_nr_running += nr_running;
@@ -10534,7 +10534,7 @@ static struct rq *find_busiest_queue(struct lb_env *env,
 		 * Ignore cpu, which is undergoing active_balance and doesn't
 		 * have more than 2 tasks.
 		 */
-		if (rq->active_balance && rq->nr_running <= 2)
+		if (rq->active_balance && rq->cfs.h_nr_runnable <= 2)
 			continue;
 
 		capacity = capacity_of(i);
@@ -10647,7 +10647,7 @@ static int need_active_balance(struct lb_env *env)
 	 * available on dst_cpu.
 	 */
 	if ((env->idle != CPU_NOT_IDLE) &&
-	    (env->src_rq->cfs.h_nr_queued == 1)) {
+	    (env->src_rq->cfs.h_nr_runnable == 1)) {
 		if ((check_cpu_capacity(env->src_rq, sd)) &&
 		    (capacity_of(env->src_cpu)*sd->imbalance_pct < capacity_of(env->dst_cpu)*100))
 			return 1;
@@ -11493,7 +11493,7 @@ static void nohz_balancer_kick(struct rq *rq)
 		 * capacity; kick the ILB to see if there's a better CPU to run
 		 * on.
 		 */
-		if (rq->cfs.h_nr_queued >= 1 && check_cpu_capacity(rq, sd)) {
+		if (rq->cfs.h_nr_runnable >= 1 && check_cpu_capacity(rq, sd)) {
 			flags = NOHZ_KICK_MASK;
 			goto unlock;
 		}
