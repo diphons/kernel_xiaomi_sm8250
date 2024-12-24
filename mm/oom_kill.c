@@ -45,6 +45,7 @@
 #include <linux/show_mem_notifier.h>
 #include <linux/psi.h>
 #include <linux/cred.h>
+#include <linux/nmi.h>
 
 #include <asm/tlb.h>
 #include "internal.h"
@@ -583,6 +584,7 @@ void dump_tasks(struct mem_cgroup *memcg, const nodemask_t *nodemask)
 {
 	struct task_struct *p;
 	struct task_struct *task;
+	int i = 0;
 
 	pr_info("Tasks state (memory values in pages):\n");
 	pr_info("[  pid  ]   uid  tgid total_vm      rss pgtables_bytes swapents oom_score_adj name\n");
@@ -590,6 +592,10 @@ void dump_tasks(struct mem_cgroup *memcg, const nodemask_t *nodemask)
 	for_each_process(p) {
 		if (oom_unkillable_task(p, memcg, nodemask))
 			continue;
+
+		/* Avoid potential softlockup warning */
+		if ((++i & 1023) == 0)
+			touch_softlockup_watchdog();
 
 		task = find_lock_task_mm(p);
 		if (!task) {
