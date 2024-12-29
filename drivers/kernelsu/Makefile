@@ -31,6 +31,11 @@ ifeq ($(shell grep -q "strncpy_from_user_nofault" $(srctree)/include/linux/uacce
 ccflags-y += -DKSU_STRNCPY_FROM_USER_NOFAULT
 endif
 
+# This feature is introduced in linux 5.0-rc1
+ifeq ($(shell grep -q "get_cred_rcu" $(srctree)/include/linux/cred.h; echo $$?),0)
+ccflags-y += -DKSU_GET_CRED_RCU
+endif
+
 ifndef KSU_EXPECTED_SIZE
 KSU_EXPECTED_SIZE := 0x033b
 endif
