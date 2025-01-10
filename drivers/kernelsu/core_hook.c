@@ -114,6 +114,10 @@ static inline void susfs_on_post_fs_data(void) {
 }
 #endif // #ifdef CONFIG_KSU_SUSFS
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0) || defined(KSU_COMPAT_GET_CRED_RCU)
+#define KSU_GET_CRED_RCU
+#endif
+
 static bool ksu_module_mounted = false;
 
 extern int ksu_handle_sepolicy(unsigned long arg3, void __user *arg4);
