@@ -31,8 +31,16 @@ ifndef KSU_EXPECTED_SIZE
 KSU_EXPECTED_SIZE := 0x033b
 endif
 
+ifndef KSU_DKM_EXPECTED_SIZE
+KSU_DKM_EXPECTED_SIZE := 0x387
+endif
+
 ifndef KSU_EXPECTED_HASH
 KSU_EXPECTED_HASH := c371061b19d8c7d7d6133c6a9bafe198fa944e50c1b31c9d8daa8d7f1fc2d2d6
+endif
+
+ifndef KSU_DKM_EXPECTED_HASH
+KSU_DKM_EXPECTED_HASH := 97075159a623c0c072da0918f61656fb1c70500638790926020be2a10820869b
 endif
 
 ifdef KSU_MANAGER_PACKAGE
@@ -42,9 +50,13 @@ endif
 
 $(info -- KernelSU Manager signature size: $(KSU_EXPECTED_SIZE))
 $(info -- KernelSU Manager signature hash: $(KSU_EXPECTED_HASH))
+$(info -- DKM SU Manager signature size: $(KSU_DKM_EXPECTED_SIZE))
+$(info -- DKM SU Manager signature hash: $(KSU_DKM_EXPECTED_HASH))
 
 ccflags-y += -DEXPECTED_SIZE=$(KSU_EXPECTED_SIZE)
 ccflags-y += -DEXPECTED_HASH=\"$(KSU_EXPECTED_HASH)\"
+ccflags-y += -DEXPECTED_DKM_SIZE=$(KSU_DKM_EXPECTED_SIZE)
+ccflags-y += -DEXPECTED_DKM_HASH=\"$(KSU_DKM_EXPECTED_HASH)\"
 
 ccflags-y += -Wno-implicit-function-declaration -Wno-strict-prototypes -Wno-int-conversion -Wno-gcc-compat
 ccflags-y += -Wno-declaration-after-statement -Wno-unused-function
