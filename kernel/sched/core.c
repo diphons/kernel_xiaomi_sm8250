@@ -4136,7 +4136,7 @@ void scheduler_tick(void)
 		if (rq->misfit_task_load && curr->state == TASK_RUNNING &&
 		    cpumask_test_cpu(cpu, &min_cap_cpu_mask)) {
 			raw_spin_lock(&rotation_lock);
-			check_for_task_rotation(rq);
+			check_for_task_rotation(rq, cpu);
 			raw_spin_unlock(&rotation_lock);
 		}
 	}

@@ -29,7 +29,7 @@ static ktime_t ktime_last;
 static __read_mostly bool sched_ktime_suspended;
 
 /* core function */
-void check_for_task_rotation(struct rq *src_rq)
+void check_for_task_rotation(struct rq *src_rq, int cpu)
 {
 	int i, src_cpu = cpu_of(src_rq);
 	struct rq *dst_rq;
@@ -69,7 +69,7 @@ void check_for_task_rotation(struct rq *src_rq)
 		curr_task = cpu_rq(i)->curr;
 
 		if (curr_task->sched_class == &fair_sched_class &&
-		    !fits_capacity(task_util_est(curr_task), capacity_of(i))) {
+			capacity_of(i) * 1024 < task_util_est(curr_task) * sched_capacity_margin_up[cpu]) {
 			cpumask_set_cpu(i, &misfit_mask);
 		}
 	}
@@ -291,12 +291,14 @@ static int __init rotation_task_init(void)
 
 late_initcall(rotation_task_init);
 
+#ifndef CONFIG_SCHED_WALT
 u64 sched_ktime_clock(void)
 {
 	if (unlikely(sched_ktime_suspended))
 		return ktime_to_ns(ktime_last);
 	return ktime_get_ns();
 }
+#endif
 
 static void sched_resume(void)
 {
