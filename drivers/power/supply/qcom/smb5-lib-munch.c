@@ -5000,9 +5000,8 @@ static void smblib_report_soc_decimal_work(struct work_struct *work)
 	int quick_charge_type;
 
 	quick_charge_type = smblib_get_quick_charge_type(chg);
-	chg->quick_charge_type_info = quick_charge_type;
 
-	if (QUICK_CHARGE_TURBE <= quick_charge_type)
+	if (QUICK_CHARGE_TURBE == quick_charge_type)
 		power_supply_changed(chg->bms_psy);
 }
 
@@ -8974,7 +8973,7 @@ int smblib_get_quick_charge_type(struct smb_charger *chg)
 	int tx_adapter = 0, wls_online = 0;
 	int power_max = 0;
 	int quick_charge_type = 0;
-	bool update = false;
+	static bool update = false;
 	union power_supply_propval pval = {0, };
 
 	if (!chg) {
@@ -8998,16 +8997,9 @@ int smblib_get_quick_charge_type(struct smb_charger *chg)
 		else
 			quick_charge_type = QUICK_CHARGE_TURBE;
 
-		if (chg->quick_charge_type_info != quick_charge_type) {
-			pr_info("quick_charge_type update from: %d to %d.\n",
-					chg->quick_charge_type_info, quick_charge_type);
-			chg->quick_charge_type_info = quick_charge_type;
-			update = true;
-		}
-
-		if (chg->usb_psy && update) {
+		if (chg->usb_psy && !update) {
 			power_supply_changed(chg->usb_psy);
-			update = false;
+			update = true;
 		}
 
 		return quick_charge_type;

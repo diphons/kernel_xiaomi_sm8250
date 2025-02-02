@@ -5100,7 +5100,6 @@ static int smb5_probe(struct platform_device *pdev)
 	chg->pd_disabled = 0;
 	chg->enable_bypass = 1;
 	chg->apdo_max = 0;
-	chg->quick_charge_type_info = 0;
 	chg->weak_chg_icl_ua = 500000;
 	chg->mode = PARALLEL_MASTER;
 	chg->irq_info = smb5_irqs;
