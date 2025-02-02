@@ -45,6 +45,17 @@ config BQ2597X_CHARGE_PUMP_STANDALONE_MUNCH
 	  BQ2597X is a div2 charge pump capable of delivering 8A charge current
 	  with very high efficiency.
 
+config LN8282
+	tristate "LN8282 Charge Pump"
+	depends on I2C
+	help
+	  Say Y to include support for LN8282 charger pump.
+	  Lion Semiconductor Inc. LN8282 is a charger pump chip.
+	  The driver supports charger enable/disable.
+	  The driver reports the charger status via the power supply framework.
+	  The driver controls 8282 via I2C and
+	  supports device-tree interface.
+
 config CHARGER_LN8000
 	tristate "LionSemi LN8000 Battery Charger"
 	depends on I2C
