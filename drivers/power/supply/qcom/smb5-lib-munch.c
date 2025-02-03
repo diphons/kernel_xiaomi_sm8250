@@ -9005,21 +9005,14 @@ int smblib_get_quick_charge_type(struct smb_charger *chg)
 		wls_online = pval.intval;
 
 		if (wls_online) {
-			switch(tx_adapter)
-			{
-				case ADAPTER_NONE:
-					break;
-				case ADAPTER_XIAOMI_QC3_PWR_20W:
-				case ADAPTER_XIAOMI_PD_PWR_20W:
-				case ADAPTER_XIAOMI_CAR_PWR_20W:
-				case ADAPTER_XIAOMI_PD_PWR_30W:
-				case ADAPTER_VOICE_BOX_PWR_30W:
-				case ADAPTER_XIAOMI_PD_PWR_50W:
-				case ADAPTER_XIAOMI_PD_PWR_60W:
-					return QUICK_CHARGE_TURBE;
-				default:
-					return QUICK_CHARGE_NORMAL;
-			}
+			if (tx_adapter >= ADAPTER_XIAOMI_PD_PWR_30W)
+				return QUICK_CHARGE_SUPER;
+			if (tx_adapter >= ADAPTER_XIAOMI_QC3_PWR_20W)
+				return QUICK_CHARGE_TURBE;
+			else if (tx_adapter > ADAPTER_PWR_NONE)
+				return QUICK_CHARGE_NORMAL;
+			else
+				return 0;
 		}
 	}
 
@@ -9080,19 +9073,12 @@ int smblib_get_adapter_power_max(struct smb_charger *chg)
 		tx_adapter = pval.intval;
 		pr_info("tx_adapter:%d\n", tx_adapter);
 
-		switch (tx_adapter)
-		{
-			case ADAPTER_XIAOMI_PD_PWR_30W:
-			case ADAPTER_VOICE_BOX_PWR_30W:
-			case ADAPTER_XIAOMI_PD_PWR_50W:
-			case ADAPTER_XIAOMI_PD_PWR_60W:
-				return	WLS_POWER_30W;
-			case ADAPTER_XIAOMI_QC3_PWR_20W:
-			case ADAPTER_XIAOMI_PD_PWR_20W:
-				return WLS_POWER_20W;
-			default:
-				return 0;
-		}
+		if (tx_adapter >= ADAPTER_XIAOMI_PD_PWR_30W)
+			return WLS_POWER_30W;
+		else if (tx_adapter >= ADAPTER_XIAOMI_QC3_PWR_20W)
+			return WLS_POWER_20W;
+		else
+			return 0;
 	}
 
 	return 0;
