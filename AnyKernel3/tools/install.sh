@@ -11,7 +11,14 @@ START_DUMP=$(date +"%s")
 # import functions/variables and setup patching - see for reference (DO NOT REMOVE)
 . tools/ak3-core.sh
 
-dump_boot # use split_boot to skip ramdisk unpack, e.g. for devices with init_boot ramdisk
+# boot install
+if [ -L "/dev/block/bootdevice/by-name/init_boot_a" -o -L "/dev/block/by-name/init_boot_a" ]; then
+	flash_mode=1
+    split_boot # for devices with init_boot ramdisk
+else
+	flash_mode=0
+	dump_boot # use split_boot to skip ramdisk unpack, e.g. for devices with init_boot ramdisk
+fi;
 
 END_DUMP=$(date +"%s")
 DIFF_DUMP=$(($END_DUMP - $START_DUMP))
@@ -984,7 +991,12 @@ else
 		# Check image before flashing
 		if [[ -f $home/Image.gz ]] || [[ -f $home/Image ]]; then
 			header_install
-			write_boot # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
+			if [[ $flash_mode == 1 ]]; then
+				flash_boot # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
+				flash_dtbo
+			else
+				write_boot # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
+			fi;
 			## end boot install
 		else
 			header_abort;
