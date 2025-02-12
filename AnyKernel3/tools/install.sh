@@ -25,13 +25,14 @@ DIFF_DUMP=$(($END_DUMP - $START_DUMP))
 
 patch_cmdline "skip_override" "";
 
+cekboard=$(getprop ro.product.board 2>/dev/null);
 cekdevice=$(getprop ro.product.device 2>/dev/null);
 cekproduct=$(getprop ro.build.product 2>/dev/null);
 cekvendordevice=$(getprop ro.product.vendor.device 2>/dev/null);
 cekvendorproduct=$(getprop ro.vendor.product.device 2>/dev/null);
 getmodel=$(getprop ro.product.model 2>/dev/null);
-for cekdevicename in $cekdevice $cekproduct $cekvendordevice $cekvendorproduct; do
-	cekdevices=$cekdevicename
+for cekdevicename in $cekboard $cekdevice $cekproduct $cekvendordevice $cekvendorproduct; do
+	cekdevices=$(echo $cekdevicename | sed 's/in//g')
 	break 1;
 done;
 
@@ -51,6 +52,42 @@ else
 ram=$read_ram
 fi
 
+kona="alioth apollo cas cmi dagu elish enuma lmi munch pipa psyche thyme umi"
+lahaina="star taoyao venus vili"
+parrot="marble"
+pineapple="peridot"
+if [[ -z $board ]]; then
+	for getboard in $kona; do
+		if [[ $cekdevices == $getboard ]]; then
+			board="kona"
+		fi;
+	done;
+fi;
+if [[ -z $board ]]; then
+	for getboard in $lahaina; do
+		if [[ $cekdevices == $getboard ]]; then
+			board="lahaina"
+		fi;
+	done;
+fi;
+if [[ -z $board ]]; then
+	for getboard in $parrot; do
+		if [[ $cekdevices == $getboard ]]; then
+			board="parrot"
+		fi;
+	done;
+fi;
+if [[ -z $board ]]; then
+	for getboard in $pineapple; do
+		if [[ $cekdevices == $getboard ]]; then
+			board="pineapple"
+		fi;
+	done;
+fi;
+if [[ -z $board ]]; then
+	board="sdm845"
+fi;
+
 # Clear
 ui_print " ";
 ui_print " ";
@@ -59,9 +96,10 @@ ui_print "# D8G Kernel"
 ui_print "# by diphons" 
 ui_print "#";
 ui_print " ";
-ui_print "• Device   : $cekdevices ";
-ui_print "• Model    : $getmodel ";
-ui_print "• Ram      : $ram ";
+ui_print "• Device  : $cekdevicename"
+ui_print "• Board   : $board ";
+ui_print "• Model   : $getmodel ";
+ui_print "• Ram     : $ram ";
 ui_print " ";
 ui_print " ";
 
@@ -240,6 +278,7 @@ header_install(){
 	ui_print "Flashing Kernel :"
 	ui_print "------------------------------------"
 	ui_print "• Device  : $cekdevicename"
+	ui_print "• Board   : $board ";
 	ui_print "• Model   : $getmodel ";
 	ui_print "• Ram     : $ram ";
 	ui_print "$install_av"
@@ -284,18 +323,18 @@ header_ocd(){
 	ui_print ""
 }
 
-if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekdevices == "PocophoneF1" ]]; then
+if [[ $board == "sdm845" ]]; then
 	dir_gpu=0
 	vhz=60
-	dt_dir=$home/kernel/sdm845
+	dt_dir=$home/kernel/$board
 	if [ -f $dt_dir ]; then
 		cd $home/kernel
-		mv -f sdm845 sdm845.gz
-		if [ -d sdm845 ]; then
-			rm -fr sdm845;
+		mv -f $board $board.gz
+		if [ -d $board ]; then
+			rm -fr $board;
 		fi;
-		$bin/busybox tar -xf sdm845.gz sdm845
-		rm -f sdm845.gz
+		$bin/busybox tar -xf $board.gz $board
+		rm -f $board.gz
 		cd $home
 	fi;
 	# display Select
@@ -696,7 +735,6 @@ if [[ $cekdevices == "beryllium" ]] || [[ $cekdevices == "PocoF1" ]] || [[ $cekd
 		header_abort;
 	fi
 else
-	cekdevices=$(echo $cekdevicename | sed 's/in//g')
 	dt_dir=$home/kernel/$cekdevices
 	if [ -f $dt_dir ]; then
 		cd $home/kernel
@@ -826,15 +864,15 @@ else
 				cp $dt_dir/dtbo.img $home/dtbo.img
 			fi
 		fi
-		if [ -f $home/kernel/kona ]; then
+		if [ -f $home/kernel/$board ]; then
 			cd $home/kernel
-			mv -f kona kona.gz
-			if [ -d kona ]; then
-				rm -fr kona;
+			mv -f $board $board.gz
+			if [ -d $board ]; then
+				rm -fr $board;
 			fi;
-			$bin/busybox tar -xf kona.gz kona
-			rm -f kona.gz
-			dtb_dir=$home/kernel/kona
+			$bin/busybox tar -xf $board.gz $board
+			rm -f $board.gz
+			dtb_dir=$home/kernel/$board
 			cd $home
 		else
 			dtb_dir=$dt_dir
