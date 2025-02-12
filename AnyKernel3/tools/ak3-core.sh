@@ -66,7 +66,7 @@ set_perm_recursive() {
 ### dump_boot functions:
 # split_boot (dump and split image only)
 split_boot() {
-  local dumpfail;
+  local splitfail;
 
   if [ ! -e "$(echo $block | cut -d\  -f1)" ]; then
     abort "Invalid partition. Aborting...";
@@ -82,7 +82,9 @@ split_boot() {
   else
     dd if=$block of=$bootimg $customdd;
   fi;
-  [ $? != 0 ] && dumpfail=1;
+  if [ $? != 0 ]; then
+    abort "Dumping image failed. Aborting...";
+  fi;
 
   mkdir -p $split_img;
   cd $split_img;
@@ -92,7 +94,7 @@ split_boot() {
       $bin/elftool unpack -i $bootimg -o elftool_out;
     fi;
     $bin/unpackelf -i $bootimg;
-    [ $? != 0 ] && dumpfail=1;
+    [ $? != 0 ] && splitfail=1;
     mv -f boot.img-kernel kernel.gz;
     mv -f boot.img-ramdisk ramdisk.cpio.gz;
     mv -f boot.img-cmdline cmdline.txt 2>/dev/null;
@@ -119,7 +121,7 @@ split_boot() {
     grep "Address:" header | cut -c15- > boot.img-addr;
     grep "Point:" header | cut -c15- > boot.img-ep;
     $bin/dumpimage -p 0 -o kernel.gz boot-trimmed.img;
-    [ $? != 0 ] && dumpfail=1;
+    [ $? != 0 ] && splitfail=1;
     case $(cat boot.img-type) in
       Multi) $bin/dumpimage -p 1 -o ramdisk.cpio.gz boot-trimmed.img;;
       RAMDisk) mv -f kernel.gz ramdisk.cpio.gz;;
@@ -127,15 +129,15 @@ split_boot() {
   elif [ -f "$bin/rkcrc" ]; then
     dd bs=4096 skip=8 iflag=skip_bytes conv=notrunc if=$bootimg of=ramdisk.cpio.gz;
   else
-    $bin/magiskboot unpack -h $bootimg;
+    (set -o pipefail; $bin/magiskboot unpack -h $bootimg 2>&1 | tee infotmp >&2);
     case $? in
-      1) dumpfail=1;;
+      1) splitfail=1;;
       2) touch chromeos;;
     esac;
   fi;
 
-  if [ $? != 0 -o "$dumpfail" ]; then
-    abort "Dumping/splitting image failed. Aborting...";
+  if [ $? != 0 -o "$splitfail" ]; then
+    abort "Splitting image failed. Aborting...";
   fi;
   cd $home;
 }
@@ -193,6 +195,10 @@ repack_ramdisk() {
   local comp packfail mtktype;
 
   cd $home;
+  if [ "$ramdisk_compression" != "auto" ] && [ "$(grep HEADER_VER $split_img/infotmp | sed -n 's;.*\[\(.*\)\];\1;p')" -gt 3 ]; then
+    ui_print " " "Warning: Only lz4-l ramdisk compression is allowed with hdr v4+ images. Resetting to auto...";
+    ramdisk_compression=auto;
+  fi;
   case $ramdisk_compression in
     auto|"") comp=$(ls $split_img/ramdisk.cpio.* 2>/dev/null | grep -v 'mtk' | rev | cut -d. -f1 | rev);;
     none|cpio) comp="";;
@@ -404,16 +410,23 @@ flash_boot() {
     fi;
     [ $? != 0 ] && signfail=1;
   fi;
-  if [ -f "$bin/boot_signer-dexed.jar" -a -d "$bin/avb" ]; then
+  if [ -d "$bin/avb" ]; then
     pk8=$(ls $bin/avb/*.pk8);
     cert=$(ls $bin/avb/*.x509.*);
     case $block in
-      *recovery*|*SOS*) avbtype=recovery;;
+      *recovery*|*RECOVERY*|*SOS*) avbtype=recovery;;
       *) avbtype=boot;;
     esac;
-    if [ -f /system/bin/dalvikvm ] && [ "$(/system/bin/dalvikvm -Xnoimage-dex2oat -cp $bin/boot_signer-dexed.jar com.android.verity.BootSignature -verify boot.img 2>&1 | grep VALID)" ]; then
-      echo "Signing with AVBv1..." >&2;
-      /system/bin/dalvikvm -Xnoimage-dex2oat -cp $bin/boot_signer-dexed.jar com.android.verity.BootSignature /$avbtype boot-new.img $pk8 $cert boot-new-signed.img;
+    if [ -f "$bin/boot_signer-dexed.jar" ]; then
+      if [ -f /system/bin/dalvikvm ] && [ "$(/system/bin/dalvikvm -Xnoimage-dex2oat -cp $bin/boot_signer-dexed.jar com.android.verity.BootSignature -verify boot.img 2>&1 | grep VALID)" ]; then
+        echo "Signing with AVBv1 /$avbtype..." >&2;
+        /system/bin/dalvikvm -Xnoimage-dex2oat -cp $bin/boot_signer-dexed.jar com.android.verity.BootSignature /$avbtype boot-new.img $pk8 $cert boot-new-signed.img;
+      fi;
+    else
+      if $bin/magiskboot verify boot.img; then
+        echo "Signing with AVBv1 /$avbtype..." >&2;
+        $bin/magiskboot sign /$avbtype boot-new.img $cert $pk8;
+      fi;
     fi;
   fi;
   if [ $? != 0 -o "$signfail" ]; then
@@ -557,6 +570,7 @@ write_boot() {
   flash_generic vendor_boot; # temporary until hdr v4 can be unpacked/repacked fully by magiskboot
   flash_generic vendor_kernel_boot; # temporary until hdr v4 can be unpacked/repacked fully by magiskboot
   flash_generic vendor_dlkm;
+  flash_generic system_dlkm;
   flash_generic dtbo;
 }
 ###
@@ -909,7 +923,7 @@ setup_ak() {
   if [ ! "$no_block_display" ]; then
     ui_print "$block";
   fi;
-  
+
   # allow multi-partition ramdisk modifying configurations (using reset_ak)
   name=$(basename $block | sed -e 's/_a$//' -e 's/_b$//');
   if [ "$block" ] && [ ! -d "$ramdisk" -a ! -d "$patch" ]; then
