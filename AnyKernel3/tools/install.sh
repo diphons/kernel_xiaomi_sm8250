@@ -38,15 +38,15 @@ done;
 
 # read ram
 read_ram=$(free | grep Mem |  awk '{print $2}')
-if [ $read_ram -lt 4000000 ]; then
+if [[ $read_ram -lt 4000000 ]]; then
 ram="4 GB"
-elif [ $read_ram -lt 6000000 ]; then
+elif [[ $read_ram -lt 6000000 ]]; then
 ram="6 GB"
-elif [ $read_ram -lt 8000000 ]; then
+elif [[ $read_ram -lt 8000000 ]]; then
 ram="8 GB"
-elif [ $read_ram -lt 12000000 ]; then
+elif [[ $read_ram -lt 12000000 ]]; then
 ram="12 GB"
-elif [ $read_ram -lt 16000000 ]; then
+elif [[ $read_ram -lt 16000000 ]]; then
 ram="16 GB"
 else
 ram=$read_ram
@@ -105,19 +105,19 @@ ui_print " ";
 
 keytest() {
   ui_print "• Press a Vol Key"
-  (/system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > /tmp/anykernel/events) || return 1
+  (/system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > $home/events) || return 1
   return 0
 }
 
 chooseport() {
   #note from chainfire @xda-developers: getevent behaves weird when piped, and busybox grep likes that even less than toolbox/toybox grep
   while (true); do
-    /system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > /tmp/anykernel/events
-    if (`cat /tmp/anykernel/events 2>/dev/null | /system/bin/grep VOLUME >/dev/null`); then
+    /system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > $home/events
+    if (`cat $home/events 2>/dev/null | /system/bin/grep VOLUME >/dev/null`); then
       break
     fi
   done
-  if (`cat /tmp/anykernel/events 2>/dev/null | /system/bin/grep VOLUMEUP >/dev/null`); then
+  if (`cat $home/events 2>/dev/null | /system/bin/grep VOLUMEUP >/dev/null`); then
     return 0
   else
     return 1
@@ -129,13 +129,13 @@ chooseportold() {
   $bin/keycheck
   $bin/keycheck
   SEL=$?
-  if [ "$1" == "UP" ]; then
+  if [[ "$1" == "UP" ]]; then
     UP=$SEL
-  elif [ "$1" == "DOWN" ]; then
+  elif [[ "$1" == "DOWN" ]]; then
     DOWN=$SEL
-  elif [ $SEL -eq $UP ]; then
+  elif [[ $SEL -eq $UP ]]; then
     return 0
-  elif [ $SEL -eq $DOWN ]; then
+  elif [[ $SEL -eq $DOWN ]]; then
     return 1
   else
     abort "• Vol key not detected!"
@@ -158,7 +158,7 @@ fi
 ui_print " ";
 ui_print " ";
 
-if [ $DFE = 1 ]; then
+if [[ $DFE == 1 ]]; then
 # Choose DFE
 ui_print " "
 ui_print "Install DFE ?"
@@ -186,7 +186,7 @@ if $FUNCTION; then
 	if $FUNCTION; then
 		ui_print "-> Install DFE Selected.."
 		install_dfe="• Dfe     : Install"
-		. /tmp/anykernel/tools/fstab.sh;
+		. $home/tools/fstab.sh;
 	else
 		ui_print "-> Skip Install DFE Selected.."
 		install_dfe="• Dfe     : Skip Install"
@@ -224,16 +224,16 @@ check_android_version(){
 	umount /vendor || true
 	mount -o rw /dev/block/bootdevice/by-name/system /system
 	mount -o rw /dev/block/bootdevice/by-name/vendor /vendor
-	if [ -f /system/build.prop ]; then
+	if [[ -f /system/build.prop ]]; then
 		patch_build=/system/build.prop
 	else
-		if [ -f /system/system/build.prop ]; then
+		if [[ -f /system/system/build.prop ]]; then
 			patch_build=/system/system/build.prop
 		else
-			if [ -f /system_root/system/build.prop ]; then
+			if [[ -f /system_root/system/build.prop ]]; then
 				patch_build=/system_root/system/build.prop
 			else
-				if [ -f /system/system_root/system/build.prop ]; then
+				if [[ -f /system/system_root/system/build.prop ]]; then
 					patch_build=/system_root/system/build.prop
 				else
 					patch_build=0
@@ -242,7 +242,7 @@ check_android_version(){
 		fi
 	fi;
 
-	if [ $patch_build = 0 ]; then
+	if [[ $patch_build == 0 ]]; then
 		install_av="• Android : Not Detected"
 	else
 		if ! grep -q 'ro.system.build.version.sdk=35' $patch_build; then
@@ -327,10 +327,10 @@ if [[ $board == "sdm845" ]]; then
 	dir_gpu=0
 	vhz=60
 	dt_dir=$home/kernel/$board
-	if [ -f $dt_dir ]; then
+	if [[ -f $dt_dir ]]; then
 		cd $home/kernel
 		mv -f $board $board.gz
-		if [ -d $board ]; then
+		if [[ -d $board ]]; then
 			rm -fr $board;
 		fi;
 		$bin/busybox tar -xf $board.gz $board
@@ -464,7 +464,7 @@ if [[ $board == "sdm845" ]]; then
 				fi
 			fi
 		fi
-		if [ $vhz = "" ]; then
+		if [[ $vhz == "" ]]; then
 			select_ocd;
 		else
 			cat $dt_dir/Image.gz $dt_dir/$dir_gpu/$vhz/*.dtb > $home/Image.gz-dtb;
@@ -472,7 +472,7 @@ if [[ $board == "sdm845" ]]; then
 	}
 
 	gpu_select1(){
-		if [ -d $dt_dir/1 ]; then
+		if [[ -d $dt_dir/1 ]]; then
 			ui_print " "
 			ui_print "Choose GPU to install.."
 			ui_print " "
@@ -498,7 +498,7 @@ if [[ $board == "sdm845" ]]; then
 	}
 
 	gpu_select2(){
-		if [ -d $dt_dir/2 ]; then
+		if [[ -d $dt_dir/2 ]]; then
 			ui_print " "
 			ui_print "Choose GPU to install.."
 			ui_print " "
@@ -524,7 +524,7 @@ if [[ $board == "sdm845" ]]; then
 	}
 
 	gpu_select3(){
-		if [ -d $dt_dir/3 ]; then
+		if [[ -d $dt_dir/3 ]]; then
 			ui_print " "
 			ui_print "Choose GPU to install.."
 			ui_print " "
@@ -550,7 +550,7 @@ if [[ $board == "sdm845" ]]; then
 	}
 
 	gpu_select4(){
-		if [ -d $dt_dir/4 ]; then
+		if [[ -d $dt_dir/4 ]]; then
 			ui_print " "
 			ui_print "Choose GPU to install.."
 			ui_print " "
@@ -576,7 +576,7 @@ if [[ $board == "sdm845" ]]; then
 	}
 
 	gpu_select5(){
-		if [ -d $dt_dir/5 ]; then
+		if [[ -d $dt_dir/5 ]]; then
 			ui_print " "
 			ui_print "Choose GPU to install.."
 			ui_print " "
@@ -602,7 +602,7 @@ if [[ $board == "sdm845" ]]; then
 	}
 
 	gpu_select6(){
-		if [ -d $dt_dir/6 ]; then
+		if [[ -d $dt_dir/6 ]]; then
 			ui_print " "
 			ui_print "Choose GPU to install.."
 			ui_print " "
@@ -719,15 +719,15 @@ if [[ $board == "sdm845" ]]; then
 			gpu_select
 		fi
 	else
-		if [ -f  $dt_dir/Image.gz-dtb ]; then
+		if [[ -f  $dt_dir/Image.gz-dtb ]]; then
 			cp $dt_dir/Image.gz-dtb $home/Image.gz-dtb
 		fi
-		if [ -f  $home/kernel/Image.gz-dtb ]; then
+		if [[ -f  $home/kernel/Image.gz-dtb ]]; then
 			cp $home/kernel/Image.gz-dtb $home/Image.gz-dtb
 		fi
 	fi
 	# Check image before flashing
-	if [ -f $home/Image.gz-dtb ]; then
+	if [[ -f $home/Image.gz-dtb ]]; then
 		header_install
 		write_boot # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
 		## end boot install
@@ -736,10 +736,10 @@ if [[ $board == "sdm845" ]]; then
 	fi
 else
 	dt_dir=$home/kernel/$cekdevices
-	if [ -f $dt_dir ]; then
+	if [[ -f $dt_dir ]]; then
 		cd $home/kernel
 		mv -f $cekdevices $cekdevices.gz
-		if [ -d $cekdevices ]; then
+		if [[ -d $cekdevices ]]; then
 			rm -fr $cekdevices;
 		fi;
 		$bin/busybox tar -xf $cekdevices.gz $cekdevices
@@ -761,7 +761,7 @@ else
 		dtbo_aosp=$dt_dir/dtbo_aosp.img
 		dtbo_aosp_90=$dt_dir/dtbo_aosp_90.img
 		select_ocd(){
-			if [ -f $dtbo_aosp_90 ]; then
+			if [[ -f $dtbo_aosp_90 ]]; then
 				ui_print " "
 				ui_print "Choose FPS to Install.."
 				ui_print " "
@@ -795,7 +795,7 @@ else
 		if [[ $cekdevices == *"dagu"* ]] || [[ $cekdevices == *"elish"* ]] || [[ $cekdevices == *"enuma"* ]] || [[ $cekdevices == *"pipa"* ]]; then
 			miui_vendor;
 		else
-			if [ -f $dtbo_aosp ]; then
+			if [[ -f $dtbo_aosp ]]; then
 				ui_print " "
 				ui_print "Choose Vendor Rom installed.."
 				ui_print " "
@@ -823,7 +823,7 @@ else
 			fi;
 		fi;
 
-		if [ $vendor_mode = 1 ]; then
+		if [[ $vendor_mode == 1 ]]; then
 			if [[ -f $dt_dir/ImageAosp.gz ]] || [[ -f $dt_dir/ImageAosp ]]; then
 				ui_print " "
 				ui_print "Choose IR SPI drivers.."
@@ -850,7 +850,7 @@ else
 				imgname=Image;
 			fi;
 			kernel_img;
-			if [ $nine_set = 1 ]; then
+			if [[ $nine_set == 1 ]]; then
 				cp $dtbo_aosp_90 $home/dtbo.img
 			else
 				cp $dtbo_aosp $home/dtbo.img
@@ -858,13 +858,13 @@ else
 		else
 			imgname=Image;
 			kernel_img;
-			if [ $nine_set = 1 ]; then
+			if [[ $nine_set == 1 ]]; then
 				cp $dt_dir/dtbo_90.img $home/dtbo.img
 			else
 				cp $dt_dir/dtbo.img $home/dtbo.img
 			fi
 		fi
-		if [ -f $home/kernel/$board ]; then
+		if [[ -f $home/kernel/$board ]]; then
 			cd $home/kernel
 			mv -f $board $board.gz
 			if [ -d $board ]; then
@@ -878,6 +878,7 @@ else
 			dtb_dir=$dt_dir
 		fi;
 		# dtb
+		dtb_path=""
 		dtb_image=$dtb_dir/dtb
 		dtb_image_oc=$dtb_dir/dtb_oc
 		dtb_image_v=$dtb_dir/dtb_v
@@ -900,7 +901,7 @@ else
 				ui_print "   No!!... Stock with Under Clock GPU"
 				ui_print " "
 				if $FUNCTION; then
-					if [ -f $dtb_image_voc ]; then
+					if [[ -f $dtb_image_voc ]]; then
 						ui_print " "
 						ui_print "Choose GPU to install.."
 						ui_print " "
@@ -914,19 +915,19 @@ else
 						if $FUNCTION; then
 							ui_print "-> Include DTB with UV OC GPU selected.."
 							install_ocd="• Gpu     : OC - UV"
-							cp $dtb_image_voc $home/dtb
+							dtb_path=$dtb_image_voc
 						else
 							ui_print "-> Include DTB with OC GPU selected.."
 							install_ocd="• Gpu     : OC"
-							cp $dtb_image_oc $home/dtb
+							dtb_path=$dtb_image_oc
 						fi
 					else
 						ui_print "-> Include DTB with OC GPU selected.."
 						install_ocd="• Gpu     : OC"
-						cp $dtb_image_oc $home/dtb
+						dtb_path=$dtb_image_oc
 					fi
 				else
-					if [ -f $dtb_image_v ]; then
+					if [[ -f $dtb_image_v ]]; then
 						ui_print " "
 						ui_print "Choose GPU to install.."
 						ui_print " "
@@ -940,20 +941,20 @@ else
 						if $FUNCTION; then
 							ui_print "-> Include DTB with UV Stock GPU selected.."
 							install_ocd="• Gpu     : Stock - UV"
-							cp $dtb_image_v $home/dtb
+							dtb_path=$dtb_image_v
 						else
 							ui_print "-> Include DTB with Stock GPU selected.."
 							install_ocd="• Gpu     : Stock"
-							cp $dtb_image $home/dtb
+							dtb_path=$dtb_image
 						fi
 					else
 						ui_print "-> Include DTB with Stock GPU selected.."
 						install_ocd="• Gpu     : Stock"
-						cp $dtb_image $home/dtb
+						dtb_path=$dtb_image
 					fi
 				fi
 			else
-				if [ -f $dtb_image_v ]; then
+				if [[ -f $dtb_image_v ]]; then
 					ui_print " "
 					ui_print "Choose GPU to install.."
 					ui_print " "
@@ -967,20 +968,20 @@ else
 					if $FUNCTION; then
 						ui_print "-> Include DTB with UV Stock GPU selected.."
 						install_ocd="• Gpu     : Stock - UV"
-						cp $dtb_image_v $home/dtb
+						dtb_path=$dtb_image_v
 					else
 						ui_print "-> Include DTB with Stock GPU selected.."
 						install_ocd="• Gpu     : Stock"
-						cp $dtb_image $home/dtb
+						dtb_path=$dtb_image
 					fi
 				else
 					ui_print "-> Include DTB with Stock GPU selected.."
 					install_ocd="• Gpu     : Stock"
-					cp $dtb_image $home/dtb
+					dtb_path=$dtb_image
 				fi
 			fi
 		else
-			if [ -f $dtb_image_v ]; then
+			if [[ -f $dtb_image_v ]]; then
 				ui_print " "
 				ui_print "Choose GPU to install.."
 				ui_print " "
@@ -994,20 +995,66 @@ else
 				if $FUNCTION; then
 					ui_print "-> Include DTB with UV Stock GPU selected.."
 					install_ocd="• Gpu     : Stock - UV"
-					cp $dtb_image_v $home/dtb
+					dtb_path=$dtb_image_v
 				else
 					ui_print "-> Include DTB with Stock GPU selected.."
 					install_ocd="• Gpu     : Stock"
-					cp $dtb_image $home/dtb
+					dtb_path=$dtb_image
 				fi
 			else
 				ui_print "-> Include DTB with Stock GPU selected.."
 				install_ocd="• Gpu     : Stock"
-				cp $dtb_image $home/dtb
+				dtb_path=$dtb_image
 			fi
 		fi
+		if [[ $board == "kona" ]] && [[ -f $dtb_path ]]; then
+			cp $dtb_path $home/dtb
+		fi;
 
 		vendor_boot_patch(){
+			vboot_dir=$home/vendor_boot
+			block_vd=/dev/block/bootdevice/by-name/vendor_boot$get_slot
+			#Vendor Boot Patch
+			if [[ ! -z $dtb_path ]] && [[ -f $dtb_path ]]; then
+				if [[ ! -d $vboot_dir ]]; then
+					mkdir -p $vboot_dir
+				fi;
+				ui_print " -> Getting dtb image"
+				dd if=$block_vd of=$vboot_dir/boot.img
+				if [[ -f $vboot_dir/boot.img ]]; then
+					cd $vboot_dir
+					ui_print " -> Unpack dtb image"
+					$bin/magiskboot unpack -h boot.img;
+					ui_print " -> Patch dtb image"
+					if [[ -f $vboot_dir/dtb ]]; then
+						rm -f $vboot_dir/dtb
+					fi;
+					mv $dtb_path $vboot_dir/dtb
+					ui_print " -> Repack dtb image"
+					$bin/magiskboot repack -n boot.img vendor_boot.img;
+					if [[ -f $vboot_dir/vendor_boot.img ]]; then
+						dd if=$vboot_dir/vendor_boot.img of=$block_vd
+						ui_print " -> Patch dtb image success"
+						ui_print " "
+					else
+						ui_print " -> Patch dtb image failed"
+						ui_print " "
+					fi;
+					cd $home
+					rm -fr $vboot_dir
+				else
+					ui_print " -> Error while getting dtb image"
+					ui_print "     Can't get slot on vendor boot"
+					ui_print " "
+				fi;
+			else
+				ui_print " -> Can't get dtb image"
+				ui_print "     Skip patch vendor boot"
+				ui_print " "
+			fi;
+		}
+
+		vendor_boot_patch_legacy(){
 			#cleanup
 			rm -f $home/dtbo.img $home/image.gz
 			# vendor_boot shell variables
@@ -1041,13 +1088,17 @@ else
 		fi
 
 		# Check vendor dtb before flashing
-		if [[ -f $home/dtb ]]; then
+		if [[ -f $dtb_path ]] || [[ -f $home/dtb ]]; then
 			ui_print " "
 			ui_print " "
 			ui_print "Vendor Boot"
 			ui_print "------------------------------------"
-			if [[ $cekdevices = "apollo" ]] || [[ $cekdevices = "cmi" ]] || [[ $cekdevices = "lmi" ]] || [[ $cekdevices = "umi" ]]; then
-				ui_print "No vendor boot. Skip"
+			if [[ $board == "kona" ]]; then
+				if [[ $cekdevices == "apollo" ]] || [[ $cekdevices == "cmi" ]] || [[ $cekdevices == "lmi" ]] || [[ $cekdevices == "umi" ]]; then
+					ui_print "No vendor boot. Skip"
+				else
+					vendor_boot_patch_legacy
+				fi;
 			else
 				vendor_boot_patch
 			fi;
