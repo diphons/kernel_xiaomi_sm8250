@@ -1422,8 +1422,10 @@ static void __queue_work(int cpu, struct workqueue_struct *wq,
 
 	/* if draining, only works from the same workqueue are allowed */
 	if (unlikely(wq->flags & __WQ_DRAINING) &&
-	    WARN_ON_ONCE(!is_chained_work(wq)))
+	    WARN_ONCE(!is_chained_work(wq), "workqueue: cannot queue %ps on wq %s\n",
+			       work->func, wq->name)) {
 		return;
+	}
 
 	if (req_cpu == WORK_CPU_UNBOUND)
 		cpu = wq_select_unbound_cpu(0);
