@@ -31,10 +31,21 @@ cekproduct=$(getprop ro.build.product 2>/dev/null);
 cekvendordevice=$(getprop ro.product.vendor.device 2>/dev/null);
 cekvendorproduct=$(getprop ro.vendor.product.device 2>/dev/null);
 getmodel=$(getprop ro.product.model 2>/dev/null);
-for cekdevicename in $cekboard $cekdevice $cekproduct $cekvendordevice $cekvendorproduct; do
-	cekdevices=$(echo $cekdevicename | sed 's/in//g')
-	break 1;
-done;
+if [[ "$(file_getprop anykernel.sh do.devicecheck)" == 1 ]]; then
+	for supportdevices in $(grep '^device.name.*=' anykernel.sh | cut -d= -f2-); do
+		for cekdevicename in $cekdevice $cekproduct $cekvendordevice $cekvendorproduct $cekboard; do
+			if [ "$cekdevicename" == "$supportdevices" ]; then
+				cekdevices=$cekdevicename
+				break 1;
+			fi;
+		done;
+	done;
+else
+	for cekdevicename in $cekdevice $cekproduct $cekvendordevice $cekvendorproduct $cekboard; do
+		cekdevices=$cekdevicename
+		break 1;
+	done;
+fi;
 
 # read ram
 read_ram=$(free | grep Mem |  awk '{print $2}')
@@ -52,9 +63,10 @@ else
 ram=$read_ram
 fi
 
+sdm845="beryllium"
 kona="alioth apollo cas cmi dagu elish enuma lmi munch pipa psyche thyme umi"
-lahaina="star taoyao venus vili"
-parrot="marble"
+lahaina="haydn lisa mona odin redwood renoir star taoyao venus vili zijin"
+taro="marble"
 pineapple="peridot"
 if [[ -z $board ]]; then
 	for getboard in $kona; do
@@ -71,9 +83,9 @@ if [[ -z $board ]]; then
 	done;
 fi;
 if [[ -z $board ]]; then
-	for getboard in $parrot; do
+	for getboard in $taro; do
 		if [[ $cekdevices == $getboard ]]; then
-			board="parrot"
+			board="taro"
 		fi;
 	done;
 fi;
@@ -85,8 +97,51 @@ if [[ -z $board ]]; then
 	done;
 fi;
 if [[ -z $board ]]; then
-	board="sdm845"
+	for getboard in $sdm845; do
+		if [[ $cekdevices == $getboard ]]; then
+			board="sdm845"
+		fi;
+	done;
 fi;
+
+select_board(){
+	ui_print " "
+	ui_print "Board is $1 ?"
+	ui_print " "
+	ui_print "   Yes!!... Select Board"
+	ui_print "   No!!... Choose More"
+	ui_print " "
+	if $FUNCTION; then
+		ui_print "-> Board $1 Selected.."
+		board=$1
+	fi;
+}
+
+countselect=1
+select_device(){
+	getdevicename=$(echo $board | awk '{print $'$countselect'}')
+	ui_print " "
+	ui_print "Device is $getdevicename ?"
+	ui_print " "
+	ui_print "   Yes!!... Select Device"
+	if [[ $countselect -lt $devicecount ]]; then
+		ui_print "   No!!... Choose More"
+	else
+		ui_print "   No!!... Abort Install"
+	fi;
+	ui_print " "
+	if $FUNCTION; then
+		ui_print "-> Device $getdevicename Selected.."
+		cekdevices=$getdevicename
+	else
+		if [[ $countselect -lt $devicecount ]]; then
+			countselect=$((countselect + 1))
+			select_device
+		else
+			header_abort
+		fi;
+	fi;
+}
 
 # Clear
 ui_print " ";
@@ -97,7 +152,9 @@ ui_print "# by diphons"
 ui_print "#";
 ui_print " ";
 ui_print "• Device  : $cekdevicename"
+if [[ ! -z $board ]]; then
 ui_print "• Board   : $board ";
+fi;
 ui_print "• Model   : $getmodel ";
 ui_print "• Ram     : $ram ";
 ui_print " ";
@@ -153,10 +210,89 @@ else
 fi
 
 # Install Kernel
+header_install(){
+	ui_print " "
+	ui_print " "
+	ui_print "Flashing Kernel :"
+	ui_print "------------------------------------"
+	ui_print "• Device  : $cekdevicename"
+	ui_print "• Board   : $board ";
+	ui_print "• Model   : $getmodel ";
+	ui_print "• Ram     : $ram ";
+	ui_print "$install_vnd"
+	ui_print "$install_ocd"
+	ui_print "$install_dhz"
+	ui_print "$install_pk"
+	ui_print "$install_dfe"
+	ui_print "$install_ir"
+	START_FLASH=$(date +"%s")
+}
+header_abort(){
+	# reset for boot patching
+	reset_ak;
+	ui_print " "
+	ui_print " "
+	ui_print "Aborting"
+	ui_print "Image not ready to be flash"
+	ui_print " "
+	break 1;
+}
+print_oc_warn(){
+	ui_print " "
+	ui_print "WARNING !!!"
+	ui_print " "
+	ui_print "   We do not recommend use overclocking,"
+	ui_print "   any damage that occurs is the user's responsibility."
+	ui_print " "
+	ui_print "   If you choose overclocking, use it expedient"
+	ui_print "   to reduce the risk of damage"
+	ui_print " "
+	ui_print "   Do you want to continue?"
+	ui_print "   Vol+ = Yes, Vol- = No"
+}
+header_ocd(){
+	ui_print " "
+	ui_print "Choose your favorite display hz?"
+	ui_print " "
+	ui_print "Jangan dipaksa, gunakan semampu device kalian"
+	ui_print " "
+	ui_print "   Vol+ = Yes, Vol- = No"
+	ui_print ""
+}
 
 # Clear
 ui_print " ";
 ui_print " ";
+
+if [[ -z $board ]]; then
+ui_print " "
+ui_print "Choose board to install"
+ui_print "   Vol+ = Yes, Vol- = No"
+select_board sdm845
+fi;
+if [[ -z $board ]]; then
+select_board kona
+fi;
+if [[ -z $board ]]; then
+select_board lahaina
+fi;
+if [[ -z $board ]]; then
+select_board taro
+fi;
+if [[ -z $board ]]; then
+select_board pineapple
+fi;
+if [[ -z $board ]]; then
+	header_abort
+fi;
+
+if [[ $cekdevices == $board ]]; then
+devicecount=$(echo $board | sed 's/ /\n/g' | wc -l)
+ui_print " "
+ui_print "Choose device to install"
+ui_print "   Vol+ = Yes, Vol- = No"
+select_device
+fi;
 
 if [[ $DFE == 1 ]]; then
 # Choose DFE
@@ -218,110 +354,6 @@ else
 	install_pk="• Selinux : Enforcing"
 	patch_cmdline androidboot.selinux androidboot.selinux=enforcing
 fi
-
-check_android_version(){
-	umount /system || true
-	umount /vendor || true
-	mount -o rw /dev/block/bootdevice/by-name/system /system
-	mount -o rw /dev/block/bootdevice/by-name/vendor /vendor
-	if [[ -f /system/build.prop ]]; then
-		patch_build=/system/build.prop
-	else
-		if [[ -f /system/system/build.prop ]]; then
-			patch_build=/system/system/build.prop
-		else
-			if [[ -f /system_root/system/build.prop ]]; then
-				patch_build=/system_root/system/build.prop
-			else
-				if [[ -f /system/system_root/system/build.prop ]]; then
-					patch_build=/system_root/system/build.prop
-				else
-					patch_build=0
-				fi
-			fi
-		fi
-	fi;
-
-	if [[ $patch_build == 0 ]]; then
-		install_av="• Android : Not Detected"
-	else
-		if ! grep -q 'ro.system.build.version.sdk=35' $patch_build; then
-			if ! grep -q 'ro.system.build.version.sdk=34' $patch_build; then
-				if ! grep -q 'ro.system.build.version.sdk=33' $patch_build; then
-					if ! grep -q 'ro.system.build.version.sdk=32' $patch_build; then
-						if ! grep -q 'ro.system.build.version.sdk=31' $patch_build; then
-							install_av="• Android : 11"
-						else
-							install_av="• Android : 12"
-						fi
-					else
-						install_av="• Android : 12.1"
-					fi
-				else
-					install_av="• Android : 13"
-				fi
-			else
-				install_av="• Android : 14"
-			fi
-		else
-			install_av="• Android : 15"
-		fi
-	fi
-	umount /system || true
-	umount /vendor || true
-}
-
-header_install(){
-	check_android_version
-	ui_print " "
-	ui_print " "
-	ui_print "Flashing Kernel :"
-	ui_print "------------------------------------"
-	ui_print "• Device  : $cekdevicename"
-	ui_print "• Board   : $board ";
-	ui_print "• Model   : $getmodel ";
-	ui_print "• Ram     : $ram ";
-	ui_print "$install_av"
-	ui_print "$install_vnd"
-	ui_print "$install_ocd"
-	ui_print "$install_dhz"
-	ui_print "$install_pk"
-	ui_print "$install_dfe"
-	ui_print "$install_ir"
-	START_FLASH=$(date +"%s")
-}
-header_abort(){
-	# reset for boot patching
-	reset_ak;
-	ui_print " "
-	ui_print " "
-	ui_print "Aborting"
-	ui_print "Image not ready to be flash"
-	ui_print " "
-	break 1;
-}
-print_oc_warn(){
-	ui_print " "
-	ui_print "WARNING !!!"
-	ui_print " "
-	ui_print "   We do not recommend use overclocking,"
-	ui_print "   any damage that occurs is the user's responsibility."
-	ui_print " "
-	ui_print "   If you choose overclocking, use it expedient"
-	ui_print "   to reduce the risk of damage"
-	ui_print " "
-	ui_print "   Do you want to continue?"
-	ui_print "   Vol+ = Yes, Vol- = No"
-}
-header_ocd(){
-	ui_print " "
-	ui_print "Choose your favorite display hz?"
-	ui_print " "
-	ui_print "Jangan dipaksa, gunakan semampu device kalian"
-	ui_print " "
-	ui_print "   Vol+ = Yes, Vol- = No"
-	ui_print ""
-}
 
 if [[ $board == "sdm845" ]]; then
 	dir_gpu=0
@@ -735,6 +767,9 @@ if [[ $board == "sdm845" ]]; then
 		header_abort;
 	fi
 else
+	if [[ $board == "kona" ]]; then
+		cekdevices=$(echo $cekdevices | sed 's/in//g')
+	fi;
 	dt_dir=$home/kernel/$cekdevices
 	if [[ -f $dt_dir ]]; then
 		cd $home/kernel
