@@ -27,6 +27,10 @@ ifeq ($(shell grep -q " current_sid(void)" $(srctree)/security/selinux/include/o
 ccflags-y += -DKSU_COMPAT_HAS_CURRENT_SID
 endif
 
+ifeq ($(shell grep -q "strncpy_from_user_nofault" $(srctree)/include/linux/uaccess.h; echo $$?),0)
+ccflags-y += -DKSU_STRNCPY_FROM_USER_NOFAULT
+endif
+
 ifndef KSU_EXPECTED_SIZE
 KSU_EXPECTED_SIZE := 0x033b
 endif
