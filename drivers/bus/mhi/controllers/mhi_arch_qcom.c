@@ -320,11 +320,11 @@ static int sdx55m_cpuid_open(struct inode *inode, struct file *file)
 	return single_open(file, secureboot_proc_show, NULL);
 }
 
-static const struct file_operations proc_sdx55m_cpuid_operations = {
-	.open		= sdx55m_cpuid_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= seq_release,
+static const struct proc_ops proc_sdx55m_cpuid_operations = {
+	.proc_open		= sdx55m_cpuid_open,
+	.proc_read		= seq_read,
+	.proc_lseek		= seq_lseek,
+	.proc_release	= seq_release,
 };
 
 static int __init proc_sdx55m_cpuid_init(void)
@@ -345,11 +345,11 @@ static int sdx55m_fuse_open(struct inode *inode, struct file *file)
 	return single_open(file, fuse_proc_show, NULL);
 }
 
-static const struct file_operations proc_sdx55m_fuse_operations = {
-	.open		= sdx55m_fuse_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= seq_release,
+static const struct proc_ops proc_sdx55m_fuse_operations = {
+	.proc_open		= sdx55m_fuse_open,
+	.proc_read		= seq_read,
+	.proc_lseek		= seq_lseek,
+	.proc_release	= seq_release,
 };
 
 static int __init proc_sdx55m_fuse_init(void)
