@@ -312,10 +312,9 @@ static ssize_t last_kmsg_read(struct file *file, char __user *buf,
 			console_buffer, console_bufsize);
 }
 
-static const struct file_operations last_kmsg_fops = {
-	.owner          = THIS_MODULE,
-	.read           = last_kmsg_read,
-	.llseek         = default_llseek,
+static const struct proc_ops last_kmsg_fops = {
+	.proc_read           = last_kmsg_read,
+	.proc_lseek         = default_llseek,
 };
 #endif
 
