@@ -541,22 +541,12 @@ static int32_t nvt_fw_version_open(struct inode *inode, struct file *file)
 	return seq_open(file, &nvt_fw_version_seq_ops);
 }
 
-#ifdef HAVE_PROC_OPS
 static const struct proc_ops nvt_fw_version_fops = {
 	.proc_open = nvt_fw_version_open,
 	.proc_read = seq_read,
 	.proc_lseek = seq_lseek,
 	.proc_release = seq_release,
 };
-#else
-static const struct file_operations nvt_fw_version_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_fw_version_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
-};
-#endif
 
 /*******************************************************
 Description:
@@ -605,22 +595,12 @@ static int32_t nvt_baseline_open(struct inode *inode, struct file *file)
 	return seq_open(file, &nvt_seq_ops);
 }
 
-#ifdef HAVE_PROC_OPS
 static const struct proc_ops nvt_baseline_fops = {
 	.proc_open = nvt_baseline_open,
 	.proc_read = seq_read,
 	.proc_lseek = seq_lseek,
 	.proc_release = seq_release,
 };
-#else
-static const struct file_operations nvt_baseline_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_baseline_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
-};
-#endif
 
 /*******************************************************
 Description:
@@ -672,22 +652,12 @@ static int32_t nvt_raw_open(struct inode *inode, struct file *file)
 	return seq_open(file, &nvt_seq_ops);
 }
 
-#ifdef HAVE_PROC_OPS
 static const struct proc_ops nvt_raw_fops = {
 	.proc_open = nvt_raw_open,
 	.proc_read = seq_read,
 	.proc_lseek = seq_lseek,
 	.proc_release = seq_release,
 };
-#else
-static const struct file_operations nvt_raw_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_raw_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
-};
-#endif
 
 /*******************************************************
 Description:
@@ -739,22 +709,12 @@ static int32_t nvt_diff_open(struct inode *inode, struct file *file)
 	return seq_open(file, &nvt_seq_ops);
 }
 
-#ifdef HAVE_PROC_OPS
 static const struct proc_ops nvt_diff_fops = {
 	.proc_open = nvt_diff_open,
 	.proc_read = seq_read,
 	.proc_lseek = seq_lseek,
 	.proc_release = seq_release,
 };
-#else
-static const struct file_operations nvt_diff_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_diff_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
-};
-#endif
 
 /*******************************************************
 Description:
@@ -820,22 +780,12 @@ static int32_t nvt_pen_diff_open(struct inode *inode, struct file *file)
 	return seq_open(file, &nvt_pen_diff_seq_ops);
 }
 
-#ifdef HAVE_PROC_OPS
 static const struct proc_ops nvt_pen_diff_fops = {
 	.proc_open = nvt_pen_diff_open,
 	.proc_read = seq_read,
 	.proc_lseek = seq_lseek,
 	.proc_release = seq_release,
 };
-#else
-static const struct file_operations nvt_pen_diff_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_pen_diff_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
-};
-#endif
 
 static int nvt_xiaomi_lockdown_info_show(struct seq_file *m, void *v)
 {
@@ -859,12 +809,11 @@ static int32_t nvt_xiaomi_lockdown_info_open(struct inode *inode, struct file *f
 	return single_open(file, nvt_xiaomi_lockdown_info_show, NULL);
 }
 
-static const struct file_operations nvt_xiaomi_lockdown_info_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_xiaomi_lockdown_info_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = single_release,
+static const struct proc_ops nvt_xiaomi_lockdown_info_fops = {
+	.proc_open = nvt_xiaomi_lockdown_info_open,
+	.proc_read = seq_read,
+	.proc_lseek = seq_lseek,
+	.proc_release = single_release,
 };
 
 /*******************************************************
