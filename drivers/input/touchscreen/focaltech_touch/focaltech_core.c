@@ -1734,8 +1734,8 @@ static ssize_t fts_lockdown_info_read(struct file *file, char __user *buf, size_
 		return cnt;
 }
 
-static const struct file_operations fts_lockdown_info_ops = {
-	.read = fts_lockdown_info_read,
+static const struct proc_ops fts_lockdown_info_ops = {
+	.proc_read = fts_lockdown_info_read,
 };
 
 static ssize_t fts_fw_version_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
@@ -1789,15 +1789,15 @@ int fts_tp_debug_open(struct inode *inode, struct file *file)
 }
 
 
-static const struct file_operations fts_tp_debug_ops = {
-	.open = fts_tp_debug_open,
-	.read = fts_tp_debug_read,
-	.write = fts_tp_debug_write,
-	.release = fts_tp_debug_release,
+static const struct proc_ops fts_tp_debug_ops = {
+	.proc_open = fts_tp_debug_open,
+	.proc_read = fts_tp_debug_read,
+	.proc_write = fts_tp_debug_write,
+	.proc_release = fts_tp_debug_release,
 };
 
-static const struct file_operations fts_fw_version_ops = {
-	.read = fts_fw_version_read,
+static const struct proc_ops fts_fw_version_ops = {
+	.proc_read = fts_fw_version_read,
 };
 
 static void tpdbg_suspend(struct fts_ts_data *ts_data, bool enable)
