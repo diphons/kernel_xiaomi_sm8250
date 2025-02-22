@@ -241,10 +241,9 @@ static ssize_t fts_debug_read(struct file *filp, char __user *buff, size_t count
 	return num_read_chars;
 }
 
-static const struct file_operations fts_proc_fops = {
-	.owner = THIS_MODULE,
-	.read = fts_debug_read,
-	.write = fts_debug_write,
+static const struct proc_ops fts_proc_fops = {
+	.proc_read = fts_debug_read,
+	.proc_write = fts_debug_write,
 };
 #else
 /* interface of write proc */
