@@ -88,13 +88,12 @@ static int fops_u64_open(struct inode *inode, struct file *filp)
 				"%llu\n");
 }
 
-static const struct file_operations fops_u64 = {
-	.owner = THIS_MODULE,
-	.open = fops_u64_open,
-	.release = simple_attr_release,
-	.read = simple_attr_read,
-	.write = simple_attr_write,
-	.llseek = generic_file_llseek,
+static const struct proc_ops fops_u64 = {
+	.proc_open = fops_u64_open,
+	.proc_release = simple_attr_release,
+	.proc_read = simple_attr_read,
+	.proc_write = simple_attr_write,
+	.proc_lseek = generic_file_llseek,
 };
 
 /* dir */
@@ -456,12 +455,11 @@ int stats_open(struct inode *inode, struct file *file)
 	return simple_open(inode, file);
 }
 
-static const struct file_operations stats_fops = {
-	.owner = THIS_MODULE,
-	.open = stats_open,
-	.read = stats_read,
-	.llseek = default_llseek,
-	.mmap = stats_map,
+static const struct proc_ops stats_fops = {
+	.proc_open = stats_open,
+	.proc_read = stats_read,
+	.proc_lseek = default_llseek,
+	.proc_mmap = stats_map,
 };
 
 static void sla_stats_data_init(struct sla_interface_stats *p)
@@ -845,13 +843,12 @@ static ssize_t config_file_write(struct file *filp, const char __user *buffer,
 	return count;
 }
 
-static const struct file_operations config_fops = {
-	.owner = THIS_MODULE,
-	.open = config_file_open,
-	.read = seq_read,
-	.write = config_file_write,
-	.llseek = seq_lseek,
-	.release = single_release,
+static const struct proc_ops config_fops = {
+	.proc_open = config_file_open,
+	.proc_read = seq_read,
+	.proc_write = config_file_write,
+	.proc_lseek = seq_lseek,
+	.proc_release = single_release,
 };
 
 static int __init sla_static_collector_init(void)
