@@ -1847,12 +1847,11 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 	return seq_open(file, &nvt_selftest_seq_ops);
 }
 
-static const struct file_operations nvt_selftest_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_selftest_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
+static const struct proc_ops nvt_selftest_fops = {
+	.proc_open = nvt_selftest_open,
+	.proc_read = seq_read,
+	.proc_lseek = seq_lseek,
+	.proc_release = seq_release,
 };
 
 #ifdef CONFIG_OF
@@ -2375,9 +2374,9 @@ out:
 }
 
 
-static const struct file_operations nvt_aftersales_test_ops = {
-	.read		= nvt_selftest_read,
-	.write		= nvt_selftest_write,
+static const struct proc_ops nvt_aftersales_test_ops = {
+	.proc_read		= nvt_selftest_read,
+	.proc_write		= nvt_selftest_write,
 };
 
 /*******************************************************
@@ -2631,12 +2630,11 @@ static int32_t nvt_test_data_open(struct inode *inode, struct file *file)
 	return seq_open(file, &t_fops);
 }
 
-static const struct file_operations nvt_test_data_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_test_data_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
+static const struct proc_ops nvt_test_data_fops = {
+	.proc_open = nvt_test_data_open,
+	.proc_read = seq_read,
+	.proc_lseek = seq_lseek,
+	.proc_release = seq_release,
 };
 
 int32_t nvt_test_data_proc_init(struct spi_device *client)
