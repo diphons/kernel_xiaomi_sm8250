@@ -1502,26 +1502,23 @@ static ssize_t suspend_resume_ipa_offload(struct file *file,
 }
 
 
-static const struct file_operations fops_ipa_stats = {
-	.read = read_ipa_stats,
-	.open = simple_open,
-	.owner = THIS_MODULE,
-	.llseek = default_llseek,
+static const struct proc_ops fops_ipa_stats = {
+	.proc_read = read_ipa_stats,
+	.proc_open = simple_open,
+	.proc_lseek = default_llseek,
 };
 
-static const struct file_operations fops_ntn_dma_stats = {
-	.read = read_ntn_dma_stats,
-	.open = simple_open,
-	.owner = THIS_MODULE,
-	.llseek = default_llseek,
+static const struct proc_ops fops_ntn_dma_stats = {
+	.proc_read = read_ntn_dma_stats,
+	.proc_open = simple_open,
+	.proc_lseek = default_llseek,
 };
 
-static const struct file_operations fops_ntn_ipa_offload_en = {
-	.read = read_ipa_offload_status,
-	.write = suspend_resume_ipa_offload,
-	.open = simple_open,
-	.owner = THIS_MODULE,
-	.llseek = default_llseek,
+static const struct proc_ops fops_ntn_ipa_offload_en = {
+	.proc_read = read_ipa_offload_status,
+	.proc_write = suspend_resume_ipa_offload,
+	.proc_open = simple_open,
+	.proc_lseek = default_llseek,
 };
 /**
  * DWC_ETH_QOS_ipa_create_debugfs() - Called from NTN driver to create debugfs node
