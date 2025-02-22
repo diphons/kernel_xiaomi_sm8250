@@ -523,11 +523,11 @@ static int sys_app_cputime_open(struct inode *inode, struct file *file)
 	return single_open(file, sys_app_cputime_show, PDE_DATA(inode));
 }
 
-static const struct file_operations sys_app_cputime_fops = {
-	.open		= sys_app_cputime_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
+static const struct proc_ops sys_app_cputime_fops = {
+	.proc_open		= sys_app_cputime_open,
+	.proc_read		= seq_read,
+	.proc_lseek		= seq_lseek,
+	.proc_release	= single_release,
 };
 
 static int uid_remove_open(struct inode *inode, struct file *file)
