@@ -237,11 +237,10 @@ static ssize_t read_phy_reg_dump(struct file *file,
 	return ret_cnt;
 }
 
-static const struct file_operations fops_phy_reg_dump = {
-	.read = read_phy_reg_dump,
-	.open = simple_open,
-	.owner = THIS_MODULE,
-	.llseek = default_llseek,
+static const struct proc_ops fops_phy_reg_dump = {
+	.proc_read = read_phy_reg_dump,
+	.proc_open = simple_open,
+	.proc_lseek = default_llseek,
 };
 
 int DWC_ETH_QOS_create_debugfs(struct DWC_ETH_QOS_prv_data *pdata)
