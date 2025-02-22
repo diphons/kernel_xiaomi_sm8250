@@ -144,12 +144,11 @@ int pps_release(struct inode *inode, struct file *file)
 }
 
 
- static const struct file_operations pps_fops = {
-	.owner = THIS_MODULE,
-	.open = pps_open,
-	.release = pps_release,
-	.read = pps_fops_read,
-	.poll = pps_fops_poll,
+ static const struct proc_ops pps_fops = {
+	.proc_open = pps_open,
+	.proc_release = pps_release,
+	.proc_read = pps_fops_read,
+	.proc_poll = pps_fops_poll,
 };
 
 int create_pps_interrupt_info_device_node(dev_t *pps_dev_t, struct cdev** pps_cdev,
