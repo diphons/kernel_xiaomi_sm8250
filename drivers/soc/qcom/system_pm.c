@@ -55,7 +55,7 @@ static bool system_sleep_allowed(void)
  */
 static int system_sleep_enter(struct cpumask *mask)
 {
-	return rpmh_flush(dev);
+	return rpmh_write_sleep_and_wake(dev);
 }
 
 /**

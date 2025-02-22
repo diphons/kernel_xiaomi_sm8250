@@ -629,10 +629,7 @@ int msm_bus_commit_data(struct list_head *clist)
 	tcs_cmd_n_shrink(n_wake);
 	tcs_cmd_n_shrink(n_sleep);
 
-	ret = rpmh_invalidate(cur_mbox);
-	if (ret)
-		MSM_BUS_ERR("%s: Error invalidating mbox: %d\n",
-						__func__, ret);
+	rpmh_invalidate(cur_mbox);
 
 	if (cur_rsc->node_info->id == MSM_BUS_RSC_DISP) {
 		ret = rpmh_write_batch(cur_mbox, cur_rsc->rscdev->req_state,
