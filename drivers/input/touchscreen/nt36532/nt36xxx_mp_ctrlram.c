@@ -2162,22 +2162,12 @@ static int32_t nvt_selftest_open(struct inode *inode, struct file *file)
 	return seq_open(file, &nvt_selftest_seq_ops);
 }
 
-#ifdef HAVE_PROC_OPS
 static const struct proc_ops nvt_selftest_fops = {
 	.proc_open = nvt_selftest_open,
 	.proc_read = seq_read,
 	.proc_lseek = seq_lseek,
 	.proc_release = seq_release,
 };
-#else
-static const struct file_operations nvt_selftest_fops = {
-	.owner = THIS_MODULE,
-	.open = nvt_selftest_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = seq_release,
-};
-#endif
 
 #ifdef CONFIG_OF
 /*******************************************************
@@ -2779,7 +2769,6 @@ static int32_t tp_selftest_close(struct inode *inode, struct file *file)
 	return 0;
 }
 
-#ifdef HAVE_PROC_OPS
 static const struct proc_ops nvt_aftersales_test_ops = {
 	.proc_open = tp_selftest_open,
 	.proc_read = tp_selftest_read,
@@ -2787,16 +2776,6 @@ static const struct proc_ops nvt_aftersales_test_ops = {
 	.proc_lseek = seq_lseek,
 	.proc_release = tp_selftest_close,
 };
-#else
-static const struct file_operations nvt_aftersales_test_ops = {
-	.owner = THIS_MODULE,
-	.open = tp_selftest_open,
-	.read = tp_selftest_read,
-	.write = tp_selftest_write,
-	.llseek = seq_lseek,
-	.release = tp_selftest_close,
-};
-#endif
 
 /*******************************************************
 Description:
