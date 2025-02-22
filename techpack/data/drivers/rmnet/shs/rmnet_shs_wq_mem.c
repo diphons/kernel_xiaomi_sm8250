@@ -473,40 +473,36 @@ static int rmnet_shs_release_netdev(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-static const struct file_operations rmnet_shs_caps_fops = {
-	.owner   = THIS_MODULE,
-	.mmap    = rmnet_shs_mmap_caps,
-	.open    = rmnet_shs_open_caps,
-	.release = rmnet_shs_release_caps,
-	.read    = rmnet_shs_read,
-	.write   = rmnet_shs_write,
+static const struct proc_ops rmnet_shs_caps_fops = {
+	.proc_mmap    = rmnet_shs_mmap_caps,
+	.proc_open    = rmnet_shs_open_caps,
+	.proc_release = rmnet_shs_release_caps,
+	.proc_read    = rmnet_shs_read,
+	.proc_write   = rmnet_shs_write,
 };
 
-static const struct file_operations rmnet_shs_g_flows_fops = {
-	.owner   = THIS_MODULE,
-	.mmap    = rmnet_shs_mmap_g_flows,
-	.open    = rmnet_shs_open_g_flows,
-	.release = rmnet_shs_release_g_flows,
-	.read    = rmnet_shs_read,
-	.write   = rmnet_shs_write,
+static const struct proc_ops rmnet_shs_g_flows_fops = {
+	.proc_mmap    = rmnet_shs_mmap_g_flows,
+	.proc_open    = rmnet_shs_open_g_flows,
+	.proc_release = rmnet_shs_release_g_flows,
+	.proc_read    = rmnet_shs_read,
+	.proc_write   = rmnet_shs_write,
 };
 
-static const struct file_operations rmnet_shs_ss_flows_fops = {
-	.owner   = THIS_MODULE,
-	.mmap    = rmnet_shs_mmap_ss_flows,
-	.open    = rmnet_shs_open_ss_flows,
-	.release = rmnet_shs_release_ss_flows,
-	.read    = rmnet_shs_read,
-	.write   = rmnet_shs_write,
+static const struct proc_ops rmnet_shs_ss_flows_fops = {
+	.proc_mmap    = rmnet_shs_mmap_ss_flows,
+	.proc_open    = rmnet_shs_open_ss_flows,
+	.proc_release = rmnet_shs_release_ss_flows,
+	.proc_read    = rmnet_shs_read,
+	.proc_write   = rmnet_shs_write,
 };
 
-static const struct file_operations rmnet_shs_netdev_fops = {
-	.owner   = THIS_MODULE,
-	.mmap    = rmnet_shs_mmap_netdev,
-	.open    = rmnet_shs_open_netdev,
-	.release = rmnet_shs_release_netdev,
-	.read    = rmnet_shs_read,
-	.write   = rmnet_shs_write,
+static const struct proc_ops rmnet_shs_netdev_fops = {
+	.proc_mmap    = rmnet_shs_mmap_netdev,
+	.proc_open    = rmnet_shs_open_netdev,
+	.proc_release = rmnet_shs_release_netdev,
+	.proc_read    = rmnet_shs_read,
+	.proc_write   = rmnet_shs_write,
 };
 
 /* Global Functions */
