@@ -1338,12 +1338,12 @@ static ssize_t swap_ctl_write(struct file *filp, const char __user *ubuf,
 	return cnt;
 }
 
-static struct file_operations swap_ctl_fops = {
-	.open = swap_ctl_open,
-	.read = seq_read,
-	.write = swap_ctl_write,
-	.llseek = seq_lseek,
-	.release = single_release,
+static struct proc_ops swap_ctl_fops = {
+	.proc_open = swap_ctl_open,
+	.proc_read = seq_read,
+	.proc_write = swap_ctl_write,
+	.proc_lseek = seq_lseek,
+	.proc_release = single_release,
 };
 
 static int fn_enable_seq_show(struct seq_file *seq, void *p)
@@ -1381,12 +1381,12 @@ static ssize_t fn_enable_write(struct file *filp, const char __user *ubuf,
 	return cnt;
 }
 
-static const struct file_operations fn_enable_fops = {
-	.open = fn_enable_open,
-	.read = seq_read,
-	.write = fn_enable_write,
-	.llseek = seq_lseek,
-	.release = single_release,
+static const struct proc_ops fn_enable_fops = {
+	.proc_open = fn_enable_open,
+	.proc_read = seq_read,
+	.proc_write = fn_enable_write,
+	.proc_lseek = seq_lseek,
+	.proc_release = single_release,
 };
 
 static ssize_t swap_limit_write(struct file *filp, const char __user *ubuf,
@@ -1410,8 +1410,8 @@ static ssize_t swap_limit_write(struct file *filp, const char __user *ubuf,
 	return cnt;
 }
 
-static struct file_operations swap_limit_fops = {
-	.write = swap_limit_write,
+static struct proc_ops swap_limit_fops = {
+	.proc_write = swap_limit_write,
 };
 
 static ssize_t dev_life_write(struct file *filp, const char __user *ubuf,
@@ -1437,8 +1437,8 @@ static ssize_t dev_life_write(struct file *filp, const char __user *ubuf,
 	return cnt;
 }
 
-static struct file_operations dev_life_fops = {
-	.write = dev_life_write,
+static struct proc_ops dev_life_fops = {
+	.proc_write = dev_life_write,
 };
 
 static int life_protect_seq_show(struct seq_file *seq, void *offset)
@@ -1452,11 +1452,11 @@ static int life_protect_open(struct inode *inode, struct file *file)
 	return single_open(file, life_protect_seq_show, NULL);
 }
 
-static struct file_operations life_protect_fops = {
-	.open = life_protect_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = single_release,
+static struct proc_ops life_protect_fops = {
+	.proc_open = life_protect_open,
+	.proc_read = seq_read,
+	.proc_lseek = seq_lseek,
+	.proc_release = single_release,
 };
 
 static int stat_info_seq_show(struct seq_file *seq, void *offset)
@@ -1502,11 +1502,11 @@ static int stat_info_open(struct inode *inode, struct file *file)
 	return single_open(file, stat_info_seq_show, NULL);
 }
 
-static struct file_operations stat_info_fops = {
-	.open = stat_info_open,
-	.read = seq_read,
-	.llseek = seq_lseek,
-	.release = single_release,
+static struct proc_ops stat_info_fops = {
+	.proc_open = stat_info_open,
+	.proc_read = seq_read,
+	.proc_lseek = seq_lseek,
+	.proc_release = single_release,
 };
 
 static inline void ns_create_proc(struct proc_dir_entry *parent) {
