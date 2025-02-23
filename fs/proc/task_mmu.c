@@ -1862,7 +1862,7 @@ static inline bool can_reclaim(short before_reclaim_adj,
 	if (running_state == false ||
 			fatal_signal_pending(task) ||
 			task->flags & PF_EXITING ||
-			!list_empty(&mm->mmap_sem.wait_list)) {
+			!list_empty(&mm->mmap_lock.wait_list)) {
 		pr_info("stop reclaim: force\n");
 
 		return false;
@@ -2040,11 +2040,11 @@ struct reclaim_param reclaim_task_nomap(struct task_struct *task,
 	mm = get_task_mm(task);
 	if (!mm)
 		goto out;
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 
 	proc_reclaim_notify((unsigned long)task_pid(task), (void *)&rp);
 
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	mmput(mm);
 out:
 	put_task_struct(task);
@@ -2071,7 +2071,7 @@ struct reclaim_param reclaim_task_anon(struct task_struct *task,
 
 	reclaim_walk.private = &rp;
 
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 	for (vma = mm->mmap; vma; vma = vma->vm_next) {
 		if (is_vm_hugetlb_page(vma))
 			continue;
@@ -2088,7 +2088,7 @@ struct reclaim_param reclaim_task_anon(struct task_struct *task,
 	}
 
 	flush_tlb_mm(mm);
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	mmput(mm);
 out:
 	put_task_struct(task);

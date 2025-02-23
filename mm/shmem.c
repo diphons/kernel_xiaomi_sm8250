@@ -2001,7 +2001,7 @@ static vm_fault_t shmem_fault(struct vm_fault *vmf)
 			if ((vmf->flags & FAULT_FLAG_ALLOW_RETRY) &&
 			   !(vmf->flags & FAULT_FLAG_RETRY_NOWAIT)) {
 				/* It's polite to up mmap_sem if we can */
-				up_read(&vma->vm_mm->mmap_sem);
+				mmap_read_unlock(vma->vm_mm);
 				ret = VM_FAULT_RETRY;
 			}
 

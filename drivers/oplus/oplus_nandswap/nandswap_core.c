@@ -573,7 +573,7 @@ retry:
 #endif
 
 
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 
 	for (vma = mm->mmap; vma; vma = vma->vm_next) {
 		if (vma->vm_flags & VM_NANDSWAP)
@@ -600,7 +600,7 @@ retry:
 	}
 
 	flush_tlb_mm(mm);
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	mmput(mm);
 	if (err) {
 		err = 0;
@@ -825,7 +825,7 @@ static ssize_t reclaim_anon(struct task_struct *task)
 	reclaim_walk.pmd_entry = ns_reclaim_pte;
 #endif
 
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 	for (vma = mm->mmap; vma; vma = vma->vm_next) {
 		if (is_vm_hugetlb_page(vma))
 			continue;
@@ -849,7 +849,7 @@ static ssize_t reclaim_anon(struct task_struct *task)
 	}
 
 	flush_tlb_mm(mm);
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 #ifdef CONFIG_NANDSWAP_DEBUG
 	a_task_anon = get_mm_counter(mm, MM_ANONPAGES);
 	a_task_swap = get_mm_counter(mm, MM_SWAPENTS);
@@ -1048,7 +1048,7 @@ static bool drop_swapcache_task(struct task_struct *task)
 	reclaim_walk.pmd_entry = drop_swapcache_pte;
 #endif
 
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 	for (vma = mm->mmap; vma; vma = vma->vm_next) {
 		if (is_vm_hugetlb_page(vma))
 			continue;
@@ -1070,7 +1070,7 @@ static bool drop_swapcache_task(struct task_struct *task)
 	}
 
 	flush_tlb_mm(mm);
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 #ifdef CONFIG_NANDSWAP_DEBUG
 	a_task_anon = get_mm_counter(mm, MM_ANONPAGES);
 	a_task_swap = get_mm_counter(mm, MM_SWAPENTS);
@@ -1218,7 +1218,7 @@ static unsigned long swap_ratio_task(struct task_struct *task, unsigned long typ
 	walk.private = &nsr;
 #endif
 
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 	for (vma = mm->mmap; vma; vma = vma->vm_next) {
 		if (is_vm_hugetlb_page(vma))
 			continue;
@@ -1236,7 +1236,7 @@ static unsigned long swap_ratio_task(struct task_struct *task, unsigned long typ
 	}
 
 	flush_tlb_mm(mm);
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	mmput(mm);
 out:
 	return nsr.nand + nsr.ram ? nsr.nand * 100 / (nsr.nand + nsr.ram) : 0;

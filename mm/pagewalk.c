@@ -303,7 +303,7 @@ int walk_page_range(unsigned long start, unsigned long end,
 	if (!walk->mm)
 		return -EINVAL;
 
-	VM_BUG_ON_MM(!mmap_assert_locked(walk.mm), walk->mm);
+	mmap_assert_locked(walk->mm);
 
 	vma = find_vma(walk->mm, start);
 	do {
@@ -346,7 +346,7 @@ int walk_page_vma(struct vm_area_struct *vma, struct mm_walk *walk)
 	if (!walk->mm)
 		return -EINVAL;
 
-	VM_BUG_ON(!mmap_assert_locked(walk.mm));
+	mmap_assert_locked(walk->mm);
 	VM_BUG_ON(!vma);
 	walk->vma = vma;
 	err = walk_page_test(vma->vm_start, vma->vm_end, walk);

@@ -42,12 +42,12 @@
 #define lockdep_acquire(l, s, t, i)		__acq(l, s, t, 0, 1, NULL, i)
 #define lockdep_acquire_nest(l, s, t, n, i)	__acq(l, s, t, 0, 1, n, i)
 #define lockdep_acquire_read(l, s, t, i)	__acq(l, s, t, 1, 1, NULL, i)
-#define lockdep_release(l, n, i)		__rel(l, n, i)
+#define lockdep_release(l, i)		__rel(l, i)
 #else
 # define lockdep_acquire(l, s, t, i)		do { } while (0)
 # define lockdep_acquire_nest(l, s, t, n, i)	do { } while (0)
 # define lockdep_acquire_read(l, s, t, i)	do { } while (0)
-# define lockdep_release(l, n, i)		do { } while (0)
+# define lockdep_release(l, i)		do { } while (0)
 #endif
 
 #ifdef CONFIG_LOCK_STAT

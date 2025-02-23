@@ -214,7 +214,7 @@ static int swapin_walk_pmd_entry(pmd_t *pmd, unsigned long start,
 		spinlock_t *ptl;
 
 #if defined(CONFIG_NANDSWAP) || defined(CONFIG_PROCESS_RECLAIM_ENHANCE)
-		if (!list_empty(&vma->vm_mm->mmap_sem.wait_list))
+		if (!list_empty(&vma->vm_mm->mmap_lock.wait_list))
 			return -1;
 #endif
 
@@ -850,7 +850,7 @@ SYSCALL_DEFINE3(madvise, unsigned long, start, size_t, len_in, int, behavior)
 
 	write = madvise_need_mmap_write(behavior);
 	if (write) {
-		if (mmap_write_lock_killable(current))
+		if (mmap_write_lock_killable(current->mm))
 			return -EINTR;
 	} else {
 		mmap_read_lock(current->mm);

@@ -236,7 +236,7 @@ static int binder_install_single_page(struct binder_alloc *alloc,
 	 * Protected with mmap_sem in write mode as multiple tasks
 	 * might race to install the same page.
 	 */
-	down_write(&alloc->vma_vm_mm->mmap_sem);
+	mmap_write_lock(alloc->vma_vm_mm);
 	if (binder_get_installed_page(lru_page))
 		goto out;
 
@@ -265,7 +265,7 @@ static int binder_install_single_page(struct binder_alloc *alloc,
 	/* Mark page installation complete and safe to use */
 	binder_set_installed_page(lru_page, page);
 out:
-	up_write(&alloc->vma_vm_mm->mmap_sem);
+	mmap_write_unlock(alloc->vma_vm_mm);
 	mmput_async(alloc->vma_vm_mm);
 	return ret;
 }
