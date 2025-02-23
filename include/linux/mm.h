@@ -1505,7 +1505,7 @@ static inline void vm_write_begin(struct vm_area_struct *vma)
          * speculative page fault handler still needs to know it was changed.
          */
         if (!RB_EMPTY_NODE(&vma->vm_rb))
-		WARN_ON_ONCE(!rwsem_is_locked(&(vma->vm_mm)->mmap_sem));
+		WARN_ON_ONCE(!rwsem_is_locked(&(vma->vm_mm)->mmap_lock));
 	/*
 	 * The reads never spins and preemption
 	 * disablement is not required.
