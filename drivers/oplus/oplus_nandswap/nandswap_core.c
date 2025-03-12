@@ -199,7 +199,7 @@ bool nandswap_enable __read_mostly = false;
 extern int swapin_walk_pmd_entry(pmd_t *pmd, unsigned long start,
 				 unsigned long end, struct mm_walk *walk);
 extern unsigned long nswap_reclaim_page_list(struct list_head *page_list,
-					     struct vm_area_struct *vma, bool scan);
+					     bool scan);
 
 static void ns_free_task(struct kref *kref)
 {
@@ -746,7 +746,7 @@ cont:
 	pte_unmap_unlock(pte - 1, ptl);
 
 	if (reclaim_type == NS_TYPE_NAND_ACT || reclaim_type == NS_TYPE_NAND_ALL)
-		reclaimed = nswap_reclaim_page_list(&page_list, vma, true);
+		reclaimed = nswap_reclaim_page_list(&page_list, true);
 
 	rp->nr_reclaimed += reclaimed;
 	rp->nr_to_reclaim -= reclaimed;
@@ -983,7 +983,7 @@ static int drop_swapcache_pte(pmd_t *pmd, unsigned long start,
 		rp->nr_scanned++;
 	}
 
-	reclaimed = nswap_reclaim_page_list(&page_list, vma, false);
+	reclaimed = nswap_reclaim_page_list(&page_list, false);
 	rp->nr_reclaimed += reclaimed;
 	rp->nr_to_reclaim -= reclaimed;
 

@@ -1556,7 +1556,7 @@ unsigned long reclaim_clean_pages_from_list(struct zone *zone,
 
 #if defined(CONFIG_NANDSWAP)
 unsigned long nswap_reclaim_page_list(struct list_head *page_list,
-					struct vm_area_struct *vma, bool scan)
+					bool scan)
 {
 	unsigned long nr_reclaimed;
 	unsigned long nr_scan = 0;
@@ -1567,7 +1567,6 @@ unsigned long nswap_reclaim_page_list(struct list_head *page_list,
 		.may_writepage = 1,
 		.may_unmap = 1,
 		.may_swap = 1,
-		.target_vma = vma,
 	};
 
 	list_for_each_entry(page, page_list, lru) {
