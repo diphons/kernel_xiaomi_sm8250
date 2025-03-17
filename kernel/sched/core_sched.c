@@ -68,7 +68,7 @@ unsigned long sched_core_update_cookie(struct task_struct *p, unsigned long cook
 	 * a cookie until after we've removed it, we must have core scheduling
 	 * enabled here.
 	 */
-	SCHED_WARN_ON((p->core_cookie || cookie) && !sched_core_enabled(rq));
+	WARN_ON_ONCE((p->core_cookie || cookie) && !sched_core_enabled(rq));
 
 	enqueued = sched_core_enqueued(p);
 	if (enqueued)
