@@ -1437,7 +1437,7 @@ alloc:
 	set_summary(&sum, dn->nid, dn->ofs_in_node, ni.version);
 	old_blkaddr = dn->data_blkaddr;
 	err = f2fs_allocate_data_block(sbi, NULL, old_blkaddr,
-				&dn->data_blkaddr, &sum, seg_type, NULL, false);
+				&dn->data_blkaddr, &sum, seg_type, NULL);
 	if (err)
 		return err;
 
