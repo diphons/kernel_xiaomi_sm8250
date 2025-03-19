@@ -109,6 +109,7 @@ struct netns_ipv4 {
 
 	int sysctl_fwmark_reflect;
 	int sysctl_tcp_fwmark_accept;
+	unsigned int sysctl_tcp_collapse_max_bytes;
 #ifdef CONFIG_NET_L3_MASTER_DEV
 	int sysctl_tcp_l3mdev_accept;
 #endif
@@ -177,6 +178,12 @@ struct netns_ipv4 {
 
 	int sysctl_udp_wmem_min;
 	int sysctl_udp_rmem_min;
+
+	u8 sysctl_tcp_plb_enabled;
+	u8 sysctl_tcp_plb_idle_rehash_rounds;
+	u8 sysctl_tcp_plb_rehash_rounds;
+	u8 sysctl_tcp_plb_suspend_rto_sec;
+	int sysctl_tcp_plb_cong_thresh;
 
 #ifdef CONFIG_OPLUS
 	int sysctl_tcp_random_timestamp;

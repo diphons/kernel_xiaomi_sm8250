@@ -2049,6 +2049,7 @@ struct net_device {
 #define GSO_MAX_SIZE		65536
 	unsigned int		gso_max_size;
 #define GSO_MAX_SEGS		65535
+#define GSO_LEGACY_MAX_SIZE	65536u
 	u16			gso_max_segs;
 
 #ifdef CONFIG_DCB

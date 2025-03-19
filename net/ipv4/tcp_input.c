@@ -3574,7 +3574,8 @@ static void tcp_replace_ts_recent(struct tcp_sock *tp, u32 seq)
 /* This routine deals with acks during a TLP episode and ends an episode by
  * resetting tlp_high_seq. Ref: TLP algorithm in draft-ietf-tcpm-rack
  */
-static void tcp_process_tlp_ack(struct sock *sk, u32 ack, int flag)
+static void tcp_process_tlp_ack(struct sock *sk, u32 ack, int flag,
+				struct rate_sample *rs)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
@@ -3591,6 +3592,7 @@ static void tcp_process_tlp_ack(struct sock *sk, u32 ack, int flag)
 		/* ACK advances: there was a loss, so reduce cwnd. Reset
 		 * tlp_high_seq in tcp_init_cwnd_reduction()
 		 */
+		tcp_ca_event(sk, CA_EVENT_TLP_RECOVERY);
 		tcp_init_cwnd_reduction(sk);
 		tcp_set_ca_state(sk, TCP_CA_CWR);
 		tcp_end_cwnd_reduction(sk);
@@ -3601,6 +3603,11 @@ static void tcp_process_tlp_ack(struct sock *sk, u32 ack, int flag)
 			     FLAG_NOT_DUP | FLAG_DATA_SACKED))) {
 		/* Pure dupack: original and TLP probe arrived; no loss */
 		tp->tlp_high_seq = 0;
+	} else {
+		/* This ACK matches a TLP retransmit. We cannot yet tell if
+		 * this ACK is for the original or the TLP retransmit.
+		 */
+		rs->is_acking_tlp_retrans_seq = 1;
 	}
 }
 
@@ -3779,7 +3786,7 @@ static int tcp_ack(struct sock *sk, const struct sk_buff *skb, int flag)
 	tcp_rack_update_reo_wnd(sk, &rs);
 
 	if (tp->tlp_high_seq)
-		tcp_process_tlp_ack(sk, ack, flag);
+		tcp_process_tlp_ack(sk, ack, flag, &rs);
 
 	if (tcp_ack_is_dubious(sk, flag)) {
 		if (!(flag & (FLAG_SND_UNA_ADVANCED | FLAG_NOT_DUP))) {
@@ -3822,7 +3829,7 @@ no_queue:
 	tcp_ack_probe(sk);
 
 	if (tp->tlp_high_seq)
-		tcp_process_tlp_ack(sk, ack, flag);
+		tcp_process_tlp_ack(sk, ack, flag, &rs);
 	return 1;
 
 invalid_ack:
@@ -5173,6 +5180,7 @@ static bool tcp_prune_ofo_queue(struct sock *sk)
 static int tcp_prune_queue(struct sock *sk)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
+	struct net *net = sock_net(sk);
 
 	SOCK_DEBUG(sk, "prune_queue: c=%x\n", tp->copied_seq);
 
@@ -5185,6 +5193,38 @@ static int tcp_prune_queue(struct sock *sk)
 
 	if (atomic_read(&sk->sk_rmem_alloc) <= sk->sk_rcvbuf)
 		return 0;
+
+	/* For context and additional information about this patch, see the
+	 * blog post at
+	 *
+	 * sysctl:  net.ipv4.tcp_collapse_max_bytes
+	 *
+	 * If tcp_collapse_max_bytes is non-zero, attempt to collapse the
+	 * queue to free up memory if the current amount of memory allocated
+	 * is less than tcp_collapse_max_bytes.  Otherwise, the packet is
+	 * dropped without attempting to collapse the queue.
+	 *
+	 * If tcp_collapse_max_bytes is zero, this feature is disabled
+	 * and the default Linux behavior is used.  The default Linux
+	 * behavior is to always perform the attempt to collapse the
+	 * queue to free up memory.
+	 *
+	 * When the receive queue is small, we want to collapse the
+	 * queue.  There are two reasons for this: (a) the latency of
+	 * performing the collapse will be small on a small queue, and
+	 * (b) we want to avoid sending a congestion signal (via a
+	 * packet drop) to the sender when the receive queue is small.
+	 *
+	 * The result is that we avoid latency spikes caused by the
+	 * time it takes to perform the collapse logic when the receive
+	 * queue is large and full, while preserving existing behavior
+	 * and performance for all other cases.
+	 */
+	if (net->ipv4.sysctl_tcp_collapse_max_bytes &&
+		(atomic_read(&sk->sk_rmem_alloc) > net->ipv4.sysctl_tcp_collapse_max_bytes)) {
+		/* We are dropping the packet */
+		goto do_not_collapse;
+	}
 
 	tcp_collapse_ofo_queue(sk);
 	if (!skb_queue_empty(&sk->sk_receive_queue))
@@ -5204,6 +5244,8 @@ static int tcp_prune_queue(struct sock *sk)
 
 	if (atomic_read(&sk->sk_rmem_alloc) <= sk->sk_rcvbuf)
 		return 0;
+
+do_not_collapse:
 
 	/* If we are really being abused, tell the caller to silently
 	 * drop receive data on the floor.  It will get retransmitted
@@ -5307,6 +5349,7 @@ static void __tcp_ack_snd_check(struct sock *sk, int ofo_possible)
 	      * we have not received enough bytes to satisfy the condition.
 	      */
 	    (tp->rcv_nxt - tp->copied_seq < sk->sk_rcvlowat ||
+		 tp->fast_ack_mode == 1 ||
 	     __tcp_select_window(sk) >= tp->rcv_wnd)) ||
 	    /* We ACK each frame or... */
 	    tcp_in_quickack_mode(sk) ||
