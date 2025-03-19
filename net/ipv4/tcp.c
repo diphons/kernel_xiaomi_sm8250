@@ -2660,6 +2660,7 @@ int tcp_disconnect(struct sock *sk, int flags)
 	tp->data_segs_in = 0;
 	tp->data_segs_out = 0;
 	tp->dsack_dups = 0;
+	tp->fast_ack_mode = 0;
 	tp->reord_seen = 0;
 
 	/* Clean up fastopen related fields */
