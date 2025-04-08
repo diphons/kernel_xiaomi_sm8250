@@ -827,7 +827,7 @@ else
 			vendor_mode=0
 			nine_set=0
 		}
-		if [[ $cekdevices == *"dagu"* ]] || [[ $cekdevices == *"elish"* ]] || [[ $cekdevices == *"enuma"* ]] || [[ $cekdevices == *"pipa"* ]]; then
+		if [[ $cekdevices == *"dagu"* ]] || [[ $cekdevices == *"elish"* ]] || [[ $cekdevices == *"enuma"* ]]; then
 			miui_vendor;
 		else
 			if [[ -f $dtbo_aosp ]]; then
