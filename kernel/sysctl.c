@@ -528,22 +528,6 @@ static struct ctl_table kern_table[] = {
 		.extra1		= &zero,
 		.extra2		= &one,
 	},
-#ifdef CONFIG_OPLUS_FEATURE_UXIO_FIRST
-	{
-			.procname	= "uxio_first_opt",
-			.data		= &sysctl_uxio_io_opt,
-			.maxlen		= sizeof(int),
-			.mode		= 0644,
-			.proc_handler	= proc_dointvec,
-	},
-	{
-			.procname	= "wbt_enable",
-			.data		= &sysctl_wbt_enable,
-			.maxlen		= sizeof(int),
-			.mode		= 0644,
-			.proc_handler	= proc_dointvec,
-	},
-#endif
 	{
 		.procname	= "sched_conservative_pl",
 		.data		= &sysctl_sched_conservative_pl,
@@ -715,6 +699,22 @@ static struct ctl_table kern_table[] = {
 		.proc_handler	= proc_dointvec_minmax,
 		.extra1		= &zero,
 		.extra2		= &one,
+	},
+#endif
+#ifdef CONFIG_OPLUS_FEATURE_UXIO_FIRST
+	{
+			.procname	= "uxio_first_opt",
+			.data		= &sysctl_uxio_io_opt,
+			.maxlen		= sizeof(int),
+			.mode		= 0644,
+			.proc_handler	= proc_dointvec,
+	},
+	{
+			.procname	= "wbt_enable",
+			.data		= &sysctl_wbt_enable,
+			.maxlen		= sizeof(int),
+			.mode		= 0644,
+			.proc_handler	= proc_dointvec,
 	},
 #endif
 #ifdef CONFIG_SCHED_DEBUG
