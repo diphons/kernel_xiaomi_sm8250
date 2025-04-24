@@ -47,8 +47,6 @@ void check_for_task_rotation(struct rq *src_rq)
 	cpumask_clear(&misfit_mask);
 
 	for_each_cpu_not(i, &min_cap_cpu_mask) {
-		if (is_reserved(i))
-			continue;
 
 		cpumask_set_cpu(i, &big_mask);
 
@@ -62,9 +60,6 @@ void check_for_task_rotation(struct rq *src_rq)
 
 	for_each_cpu(i, &min_cap_cpu_mask) {
 		struct task_struct *curr_task;
-
-		if (is_reserved(i))
-			continue;
 
 		curr_task = cpu_rq(i)->curr;
 
@@ -128,9 +123,6 @@ void check_for_task_rotation(struct rq *src_rq)
 		get_task_struct(src_rq->curr);
 		get_task_struct(dst_rq->curr);
 
-		mark_reserved(src_cpu);
-		mark_reserved(dst_cpu);
-
 		rd = &per_cpu(rotation_datas, src_cpu);
 
 		rd->src_task = src_rq->curr;
@@ -154,9 +146,6 @@ static void do_rotation_task(struct rotation_data *rd)
 
 	put_task_struct(rd->src_task);
 	put_task_struct(rd->dst_task);
-
-	clear_reserved(rd->src_cpu);
-	clear_reserved(rd->dst_cpu);
 }
 
 static int __ref try_rotation_task(void *data)

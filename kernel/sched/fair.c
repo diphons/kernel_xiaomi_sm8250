@@ -792,7 +792,7 @@ out:
 	if (jump)
 		trace_sched_debug_einfo(tsk, "jumper", "boostx",
 			tsk->human_task, sched_boost(), sched_mi_boost(),
-			sched_boost_top_app(), 0);
+			false, 0);
 
 	return jump;
 }
@@ -4372,8 +4372,6 @@ static inline bool task_demand_fits(struct task_struct *p, int cpu)
 }
 
 struct find_best_target_env {
-	bool is_rtg;
-	int placement_boost;
 	bool need_idle;
 	bool boosted;
 	int fastpath;
@@ -4393,16 +4391,12 @@ static inline void adjust_cpus_for_packing(struct task_struct *p,
 	if (*best_idle_cpu == -1 || *target_cpu == -1)
 		return;
 
-	if (task_placement_boost_enabled(p) || fbt_env->need_idle || boosted ||
-			shallowest_idle_cstate <= 0) {
+	if (fbt_env->need_idle || boosted || shallowest_idle_cstate <= 0) {
 		*target_cpu = -1;
 		return;
 	}
 
-	if (task_in_cum_window_demand(cpu_rq(*target_cpu), p))
-		tutil = 0;
-	else
-		tutil = task_util(p);
+	tutil = task_util(p);
 
 	estimated_capacity = cpu_util_cum(*target_cpu, tutil);
 	estimated_capacity = add_capacity_margin(estimated_capacity,
@@ -4416,9 +4410,6 @@ static inline void adjust_cpus_for_packing(struct task_struct *p,
 		*target_cpu = -1;
 		return;
 	}
-
-	if (fbt_env->is_rtg)
-		*best_idle_cpu = -1;
 }
 
 static inline void update_misfit_status(struct task_struct *p, struct rq *rq)
@@ -7210,8 +7201,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 		goto out;
 
 	/* fast path for prev_cpu */
-	if (((capacity_orig_of(prev_cpu) == capacity_orig_of(start_cpu)) ||
-		asym_cap_siblings(prev_cpu, start_cpu)) &&
+	if (((capacity_orig_of(prev_cpu) == capacity_orig_of(start_cpu))) &&
 		cpu_online(prev_cpu) &&
 		idle_cpu(prev_cpu)) {
 
@@ -7239,14 +7229,6 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 			if (isolated_candidate == -1)
 				isolated_candidate = i;
 
-			/*
-			 * This CPU is the target of an active migration that's
-			 * yet to complete. Avoid placing another task on it.
-			 * See check_for_migration()
-			 */
-			if (is_reserved(i))
-				continue;
-
 			if (fbt_env->skip_cpu == i)
 				continue;
 
@@ -7272,11 +7254,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 			 * task. If so, add just the boost-utilization to
 			 * the cumulative demand of the cpu.
 			 */
-			if (task_in_cum_window_demand(cpu_rq(i), p))
-				new_util_cuml = cpu_util_cum(i, 0) +
-						min_util - task_util(p);
-			else
-				new_util_cuml = cpu_util_cum(i, 0) + min_util;
+			new_util_cuml = cpu_util_cum(i, 0) + min_util;
 
 			/*
 			 * Ensure minimum capacity to grant the required boost.
@@ -7289,9 +7267,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 			 */
 			new_util = max(min_util, new_util);
 			if ((!(prefer_idle && idle_cpu(i)) &&
-			    new_util > capacity_orig) ||
-			     (is_min_capacity_cpu(i) &&
-			      !task_fits_capacity(p, capacity_orig)))
+			    new_util > capacity_orig) || !task_fits_capacity(p, capacity_orig))
 				continue;
 
 			/*
@@ -7520,11 +7496,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 		if (!prefer_idle && !prefer_high_cap &&
 			((target_cpu != -1 && (sg->group_weight > 1 ||
 			 !next_group_higher_cap)) ||
-			 best_idle_cpu != -1) &&
-			(fbt_env->placement_boost == SCHED_BOOST_NONE ||
-			!is_full_throttle_boost() ||
-			(fbt_env->placement_boost == SCHED_BOOST_ON_BIG &&
-				!next_group_higher_cap)))
+			 best_idle_cpu != -1))
 			break;
 
 		/*
@@ -7772,7 +7744,7 @@ static void select_cpu_candidates(struct sched_domain *sd, cpumask_t *cpus,
 		max_spare_cap = 0;
 
 		for_each_cpu_and(cpu, perf_domain_span(pd), sched_domain_span(sd)) {
-			if (!cpumask_test_cpu(cpu, p->cpus_ptr) || is_reserved(cpu))
+			if (!cpumask_test_cpu(cpu, p->cpus_ptr))
 				continue;
 
 			util = cpu_util_next(cpu, p, cpu);
@@ -7912,10 +7884,8 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	struct perf_domain *pd;
 	struct sched_domain *sd;
 	cpumask_t *candidates;
-	bool is_rtg, curr_is_rtg;
 	struct find_best_target_env fbt_env;
 	bool need_idle = wake_to_idle(p);
-	int placement_boost = task_boost_policy(p);
 	u64 start_t = 0;
 	int delta = 0;
 	int task_boost = per_task_boost(p);
@@ -7925,9 +7895,6 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 
 	if (start_cpu < 0)
 		goto eas_not_ready;
-
-	is_rtg = task_in_related_thread_group(p);
-	curr_is_rtg = task_in_related_thread_group(cpu_rq(cpu)->curr);
 
 	fbt_env.fastpath = 0;
 	fbt_env.need_idle = need_idle;
@@ -7939,7 +7906,7 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	candidates = this_cpu_ptr(&energy_cpus);
 	cpumask_clear(candidates);
 
-	if (sync && (need_idle || (is_rtg && curr_is_rtg)))
+	if (sync && (need_idle))
 		sync = 0;
 
 	if (sysctl_sched_sync_hint_enable && sync &&
@@ -7949,7 +7916,7 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 		goto done;
 	}
 
-	if (sched_boost_top_app() && is_top_app(p) && cpu_online(super_big_cpu) &&
+	if (is_top_app(p) && cpu_online(super_big_cpu) &&
 		!cpu_isolated(super_big_cpu) &&
 		cpumask_test_cpu(super_big_cpu, p->cpus_ptr)) {
 		best_energy_cpu = super_big_cpu;
@@ -7975,11 +7942,9 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	sync_entity_load_avg(&p->se);
 
 	if (sched_feat(FIND_BEST_TARGET)) {
-		fbt_env.is_rtg = is_rtg;
-		fbt_env.placement_boost = placement_boost;
 		fbt_env.start_cpu = start_cpu;
 		fbt_env.boosted = prefer_high_cap;
-		fbt_env.strict_max = is_rtg &&
+		fbt_env.strict_max = false &&
 			(task_boost == TASK_BOOST_STRICT_MAX);
 		find_best_target(NULL, candidates, p, &fbt_env);
 	} else {
@@ -8018,8 +7983,7 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 		goto unlock;
 	}
 
-	if (task_placement_boost_enabled(p) || fbt_env.need_idle ||
-	    prefer_high_cap || is_rtg || __cpu_overutilized(prev_cpu, delta) ||
+	if (fbt_env.need_idle || prefer_high_cap || __cpu_overutilized(prev_cpu, delta) ||
 #ifdef CONFIG_PACKAGE_RUNTIME_INFO
 	    game_vip_task(p) ||
 #endif
@@ -8068,7 +8032,7 @@ done:
 
 	trace_sched_task_util(p, cpumask_bits(candidates)[0], best_energy_cpu,
 			sync, fbt_env.need_idle, fbt_env.fastpath,
-			placement_boost, start_t, boosted, is_rtg,
+			0, start_t, boosted, false,
 			get_rtg_status(p), start_cpu);
 #ifdef CONFIG_PERF_HUMANTASK
 	p->cpux = best_energy_cpu;
@@ -9003,8 +8967,7 @@ redo:
 			break;
 		}
 
-		if (sched_boost_top_app() &&
-				super_big_cpu == env->src_cpu &&
+		if (super_big_cpu == env->src_cpu &&
 				is_top_app(p))
 			goto next;
 
@@ -9472,12 +9435,6 @@ static void update_cpu_capacity(struct sched_domain *sd, int cpu)
 
 	capacity *= arch_scale_max_freq_capacity(cpu);
 	capacity >>= SCHED_CAPACITY_SHIFT;
-
-	capacity = min(capacity, thermal_cap(cpu));
-	if (cpu_rq(cpu)->cpu_capacity_orig != capacity) {
-		cpu_rq(cpu)->cpu_capacity_orig = capacity;
-		update = true;
-	}
 
 	capacity = scale_rt_capacity(cpu, capacity);
 
@@ -9949,9 +9906,7 @@ static inline void update_sd_lb_stats(struct lb_env *env, struct sd_lb_stats *sd
 		 * no capacity to manage the current load.
 		 */
 		if ((env->sd->flags & SD_ASYM_CPUCAPACITY) &&
-			sgs->group_no_capacity &&
-			asym_cap_sibling_group_has_capacity(env->dst_cpu,
-						env->sd->imbalance_pct)) {
+			sgs->group_no_capacity) {
 			sgs->group_no_capacity = 0;
 			sgs->group_type = group_classify(sg, sgs);
 		}
@@ -10317,8 +10272,7 @@ static struct sched_group *find_busiest_group(struct lb_env *env)
 			if ((sds.busiest->group_weight > 1) &&
 				capacity_local > capacity_busiest) {
 				goto out_balanced;
-			} else if (capacity_local == capacity_busiest ||
-				   asym_cap_siblings(cpu_local, cpu_busiest)) {
+			} else if (capacity_local == capacity_busiest) {
 				if (cpu_rq(cpu_busiest)->nr_running < 2)
 					goto out_balanced;
 			}
@@ -10826,25 +10780,6 @@ no_move:
 
 			raw_spin_lock_irqsave(&busiest->lock, flags);
 
-			if (is_reserved(this_cpu) ||
-				is_reserved(cpu_of(busiest))) {
-				raw_spin_unlock_irqrestore(&busiest->lock, flags);
-				*continue_balancing = 0;
-				goto out;
-			}
-			/*
-			 * The CPUs are marked as reserved if tasks
-			 * are pushed/pulled from other CPUs. In that case,
-			 * bail out from the load balancer.
-			 */
-			if (is_reserved(this_cpu) ||
-					is_reserved(cpu_of(busiest))) {
-				raw_spin_unlock_irqrestore(&busiest->lock,
-								flags);
-				*continue_balancing = 0;
-				goto out;
-			}
-
 			/*
 			 * Don't kick the active_load_balance_cpu_stop,
 			 * if the curr task on busiest CPU can't be
@@ -10866,7 +10801,6 @@ no_move:
 				busiest->active_balance = 1;
 				busiest->push_cpu = this_cpu;
 				active_balance = 1;
-				mark_reserved(this_cpu);
 			}
 			raw_spin_unlock_irqrestore(&busiest->lock, flags);
 
@@ -11062,7 +10996,6 @@ static int active_load_balance_cpu_stop(void *data)
 out_unlock:
 	busiest_rq->active_balance = 0;
 	target_cpu = busiest_rq->push_cpu;
-	clear_reserved(target_cpu);
 	rq_unlock(busiest_rq, &rf);
 	if (p)
 		attach_one_task(target_rq, p);

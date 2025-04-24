@@ -262,9 +262,6 @@ static inline bool lpm_disallowed(s64 sleep_us, int cpu, struct lpm_cpu *pm_cpu)
 	if (cpu_isolated(cpu))
 		goto out;
 
- 	if (is_reserved(cpu))
- 		return true;
- 
 	if (sleep_disabled)
 		return true;
 
