@@ -9637,7 +9637,7 @@ next_group:
 		trace_sched_load_balance_sg_stats(sg->cpumask[0],
 				sgs->group_type, sgs->idle_cpus,
 				sgs->sum_h_nr_running, sgs->group_load,
-				sgs->group_capacity, sgs->group_util, 1,	0,
+				sgs->group_capacity, sgs->group_util,
 				sgs->group_misfit_task_load,
 				sds->busiest ? sds->busiest->cpumask[0] : 0);
 
@@ -9979,10 +9979,8 @@ force_balance:
 	/* Looks like there is an imbalance. Compute it */
 	calculate_imbalance(env, &sds);
 	trace_sched_load_balance_stats(sds.busiest->cpumask[0],
-				busiest->group_type, busiest->avg_load,
-				0,	sds.local->cpumask[0],
-				local->group_type, local->avg_load,
-				0, sds.avg_load, env->imbalance);
+				busiest->group_type, busiest->avg_load, sds.local->cpumask[0],
+				local->group_type, local->avg_load, sds.avg_load, env->imbalance);
 	return env->imbalance ? sds.busiest : NULL;
 
 out_balanced:
