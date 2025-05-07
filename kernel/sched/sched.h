@@ -2110,7 +2110,12 @@ extern void check_preempt_curr(struct rq *rq, struct task_struct *p, int flags);
 extern const_debug unsigned int sysctl_sched_nr_migrate;
 extern const_debug unsigned int sysctl_sched_migration_cost;
 
+#ifdef CONFIG_SCHED_BORE
+extern unsigned int sysctl_sched_min_base_slice;
+extern __read_mostly uint sysctl_sched_base_slice;
+#else // !CONFIG_SCHED_BORE
 extern unsigned int sysctl_sched_base_slice;
+#endif // CONFIG_SCHED_BORE
 #ifdef CONFIG_SCHED_HRTICK
 
 /*
