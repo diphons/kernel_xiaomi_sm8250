@@ -22,6 +22,10 @@
 #include "../workqueue_internal.h"
 #include "../smpboot.h"
 
+#ifdef CONFIG_SCHED_BORE
+#include <linux/sched/bore.h>
+#endif // CONFIG_SCHED_BORE
+
 #include "pelt.h"
 
 #define CREATE_TRACE_POINTS
@@ -7789,6 +7793,10 @@ void __init sched_init(void)
 {
 	int i, j;
 	unsigned long alloc_size = 0, ptr;
+
+#ifdef CONFIG_SCHED_BORE
+	sched_bore_init();
+#endif // CONFIG_SCHED_BORE
 
 	wait_bit_init();
 

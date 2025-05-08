@@ -99,6 +99,10 @@
 #include <linux/nmi.h>
 #endif
 
+#ifdef CONFIG_SCHED_BORE
+#include <linux/sched/bore.h>
+#endif // CONFIG_SCHED_BORE
+
 #if defined(CONFIG_SYSCTL)
 
 /* External variables not in a header file. */
@@ -153,6 +157,12 @@ static unsigned int __read_mostly sysctl_sched_group_downmigrate_pct = 95;
 #endif /* CONFIG_PELT_COMPATIBILITY_LAYER */
 /* this is needed for the proc_doulongvec_minmax of vm_dirty_bytes */
 static unsigned long dirty_bytes_min = 2 * PAGE_SIZE;
+
+#ifdef CONFIG_SCHED_BORE
+static int __maybe_unused sixty_four     = 64;
+static int __maybe_unused maxval_u8      = 255;
+static int __maybe_unused maxval_12_bits = 4095;
+#endif // CONFIG_SCHED_BORE
 
 /* this is needed for the proc_dointvec_minmax for [fs_]overflow UID and GID */
 static int maxolduid = 65535;
@@ -1403,6 +1413,101 @@ static struct ctl_table kern_table[] = {
 		.extra2		= &one_thousand,
 	},
 #endif
+#ifdef CONFIG_SCHED_BORE
+	{
+		.procname	= "sched_bore",
+		.data		= &sched_bore,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = sched_bore_update_handler,
+		.extra1		= &one,
+		.extra2		= &one,
+	},
+	{
+		.procname	= "sched_burst_exclude_kthreads",
+		.data		= &sched_burst_exclude_kthreads,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &one,
+	},
+	{
+		.procname	= "sched_burst_smoothness_long",
+		.data		= &sched_burst_smoothness_long,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &one,
+	},
+	{
+		.procname	= "sched_burst_smoothness_short",
+		.data		= &sched_burst_smoothness_short,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &one,
+	},
+	{
+		.procname	= "sched_burst_fork_atavistic",
+		.data		= &sched_burst_fork_atavistic,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &three,
+	},
+	{
+		.procname	= "sched_burst_parity_threshold",
+		.data		= &sched_burst_parity_threshold,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &maxval_u8,
+	},
+	{
+		.procname	= "sched_burst_penalty_offset",
+		.data		= &sched_burst_penalty_offset,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &sixty_four,
+	},
+	{
+		.procname	= "sched_burst_penalty_scale",
+		.data		= &sched_burst_penalty_scale,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &maxval_12_bits,
+	},
+	{
+		.procname	= "sched_burst_cache_stop_count",
+		.data		= &sched_burst_cache_stop_count,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec,
+	},
+	{
+		.procname	= "sched_burst_cache_lifetime",
+		.data		= &sched_burst_cache_lifetime,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec,
+	},
+	{
+		.procname	= "sched_deadline_boost_mask",
+		.data		= &sched_deadline_boost_mask,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler = proc_douintvec,
+	},
+#endif // CONFIG_SCHED_BORE
 	{
 		.procname	= "panic_on_warn",
 		.data		= &panic_on_warn,
