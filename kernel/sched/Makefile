@@ -32,5 +32,4 @@ obj-y			+= cpufreq_game.o
 endif
 obj-$(CONFIG_MEMBARRIER) += membarrier.o
 obj-$(CONFIG_CPU_ISOLATION) += isolation.o
-obj-$(CONFIG_PACKAGE_RUNTIME_INFO) += pkg_core.o pkg_interface.o migt_sched.o glk.o
 obj-$(CONFIG_PSI) += psi.o
