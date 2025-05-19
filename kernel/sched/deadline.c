@@ -1519,13 +1519,7 @@ static void update_curr_dl_se(struct rq *rq, struct sched_dl_entity *dl_se, s64 
 
 		hrtimer_try_to_cancel(&dl_se->dl_timer);
 
-		dl_se->deadline = rq_clock(rq) + dl_se->dl_deadline;
-		dl_se->runtime = dl_se->dl_runtime;
-
-		if (dl_se->dl_defer & !dl_se->dl_defer_running) {
-			dl_se->dl_throttled = 1;
-			dl_se->dl_defer_armed = 1;
-		}
+		replenish_dl_new_period(dl_se, dl_se->rq);
 
 		/*
 		 * Not being able to start the timer seems problematic. If it could not
