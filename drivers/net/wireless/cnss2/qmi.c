@@ -1052,6 +1052,12 @@ static void cnss_wait_for_wlfw_mac_ready(struct cnss_plat_data *plat_priv)
 		}
 
 		if (ret != -EAGAIN) {
+			/* Handling for ENOENT in PELT kernels */
+			if (ret == -ENOENT) {
+				cnss_pr_dbg("wlfw mac service not ready, using fallback\n");
+				msleep(200);
+				continue;
+			}
 			cnss_pr_err("failed to query wlfw mac, error: %d\n",
 				    ret);
 			break;
